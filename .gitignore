@@ -38,8 +38,5 @@ vignettes/*.pdf
 # R Environment Variables
 .Renviron
 
-# Project
-.Rproj
-
 # Data
-.csv
+*.csv
