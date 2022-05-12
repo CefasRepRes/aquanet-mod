@@ -1,25 +1,51 @@
+#### Run core simulation loop parallel ####
+
+library(here)
+
+# Setup -------------------------------------------------------------------
+
+# Clear the startup screen
 cat("\014")
-options(scipen=999)
 
-file.remove('log.txt')
+# Display without scientific notation
+options(scipen = 999)
 
+# Load functions ----------------------------------------------------------
 
-# What type of catchment level controls should be applied?
-associatedSiteControlType = 0 # Type 0 allows movements within the same catchment,
-# Type 1 allows movements within or between any of the infected catchments
-# Type 2 allows no movements by any of the sites within an infected catchment
+# TODO: replace with Becca's package
 
-# Number of cores
-noCores = 4
+source(here::here("code",
+                  "loop_functions",
+                  "simulation_code.R"))
+source(here::here("code",
+                  "loop_functions",
+                  "run_simulations.R"))
 
-# Set the seed associated with pseudo-random number generation
-seedNo = 123
+# Run model ---------------------------------------------------------------
 
-# Set the initial number of infections at the start of the simulation
-initialNoInfections = 1
-
-# Run model
-print(system.time(expr = {runSimulations(graph.contactp.objects, simulationCode, ListRunTimeParameters, graph.withinCatchmentEdges.objects, graph.catchment2Site.objects, graph.riverDistance.objects, graph.estimateSiteDistances.objects, farm_vector, associatedSiteControlType, noCores, locationSaveResults, seedNo, initialNoInfections)}))
+print(
+  system.time( # Print the system time used by the runSimulations function
+    expr = {
+      runSimulations( 
+        graph.contactp.objects, 
+        simulationCode, 
+        ListRunTimeParameters, 
+        graph.withinCatchmentEdges.objects, 
+        graph.catchment2Site.objects, 
+        graph.riverDistance.objects, 
+        graph.estimateSiteDistances.objects, 
+        farm_vector, 
+        # Options
+        associatedSiteControlType = 0, # 0 = within catchment movements,
+                                       # 1 = between and within infected catchments,
+                                       # 2 = no movement by any sites within infected catchments
+        noCores = 4, # Set to 4 (save some computing power)
+        locationSaveResults, # File path to save results
+        seedNo = 123, # Set the seed associated with pseudo-random number generation
+        initialNoInfections = 1) # One initial infection
+    }
+  )
+)
 
 # Run model, without any parallel code, which is useful for debugging
 #set.seed(seedNo)
