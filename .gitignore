@@ -40,3 +40,8 @@ vignettes/*.pdf
 
 # Data
 *.csv
+
+# Directories
+/outputs/
+/data/
+/code/aquanet_functions/
