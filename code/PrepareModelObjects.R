@@ -42,17 +42,16 @@ periodDataCollection = 365 * 4
 graph_full<-read.graph(file = fileName, format = "graphml")
 
 # Save site information to disk, including enough information to make it possible to infect specific sites within the model
-source('SimulationCode2/ListSiteDetailsWithModelID.R')
+source('code/aquanet_functions/ListSiteDetailsWithModelID.R')
 siteDetailsWithModelID = ListSiteDetailsWithModelID(graph_full, graph.contactp.objects, siteLocationsWithCatchmentDuplicatesRemoved.fileName)
 locationSiteDetailsWithModelID = "siteDetailsWithModelID.csv"
 write.csv(siteDetailsWithModelID,file= locationSiteDetailsWithModelID, row.names = FALSE)
 
 # Create a matrix which represents the site / catchment relationships
-source('SimulationCode2/CreateCatchmentLookupTables.R')
+source('code/CreateCatchmentLookupTables.R')
 
-catchmentLayer.fileName = "EA Catchments/catchmnt_50k+TrunkCodes-Filtered-Merged_region.shp"
+catchmentLayer.fileName = "data/EA_Catchments/catchmnt_50k+TrunkCodes-Filtered-Merged_region.shp"
 
-catchmentLayer.fileName = paste(LocationGISRootDirectory,catchmentLayer.fileName,sep="")
 graph.catchment2Site.objects = CreateCatchment2SiteMatrix(graph_full, catchmentLayer.fileName, locationSiteDetailsWithModelID)
 TestCatchment2SiteMatrix(graph.catchment2Site.objects)
 
@@ -60,7 +59,7 @@ TestCatchment2SiteMatrix(graph.catchment2Site.objects)
 graph.withinCatchmentEdges.objects = CreateWithinCatchmentEdgesMatrix(graph_full, graph.catchment2Site.objects, locationSiteDetailsWithModelID)
 
 # Create a matrix which represents the probability of connections being made by Live Fish Movements
-source('SimulationCode2/CreateContactPMatrix.R')
+source('code/aquanet_functions/CreateContactPMatrix.R')
 graph.contactp.objects = CreateContactPMatrix(graph_full, periodDataCollection)
 
 # Create a histogram showing the number of movements made over a specific contact period
@@ -70,11 +69,11 @@ TestContactPMatrix(graph.contactp.objects[[2]],-1)
 TestContactPMatrix(graph.contactp.objects[[3]],1)
 
 # Create a matrix which represents the probability of connections being made by Live Fish Movements without the top 5% source sites
-source('SimulationCode2/ControlTopSites.R')
+source('code/aquanet_functions/ControlTopSites.R')
 graph.contactpalt.objects = CreateAltContactPMatrix(graph_full, periodDataCollection)
 
 # List those sites which are assumed to represent farms, based on the presence of farm to farm movements
-source('SimulationCode2/ListFarmingSites.R')
+source('code/aquanet_functions/ListFarmingSites.R')
 farm_vector = CreateFarmVector(graph_full)
 TestFarmVector(farm_vector, graph.contactp.objects, Farm2FarmLFM.fileName)
 
@@ -93,5 +92,5 @@ smallfish_vector = CreateSmallFishVector(graph_full)
 mediumfish_vector = CreateMediumFishVector(graph_full)
 largefish_vector = CreateLargeFishVector(graph_full)
 
-source('SimulationCode2/EstimateSite2SiteDistinances.R')
+source('code/aquanet_functions/EstimateSite2SiteDistinances.R')
 graph.estimateSiteDistances.objects = CreateDistanceMatrix(graph_full, siteLocationsWithCatchmentDuplicatesRemoved.fileName, ListModelSetupParameters)
