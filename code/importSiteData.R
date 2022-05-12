@@ -119,7 +119,7 @@ V(combinedMovements.graph)[vertexList[,2]]$catchmentID <- E(combinedMovements.gr
 
 # Import a site's category, and merge it with information stored in the network
 #siteCategory = read.csv(file = "Check Licence Types/SummaryLicensesPerSite.csv", header = TRUE, stringsAsFactors = FALSE)
-siteCategory = read.csv(file = "Check Licence Types/SummaryLicensesPerSitewithfarm.csv", header = TRUE, stringsAsFactors = FALSE)
+siteCategory = read.csv(file = "data/Check Licence Types/SummaryLicensesPerSitewithfarm.csv", header = TRUE, stringsAsFactors = FALSE)
 uniqueCodeIDs = unique(x = c(E(combinedMovements.graph)$scrCode,E(combinedMovements.graph)$recCode))
 uniqueCodeIDs[!uniqueCodeIDs %in% siteCategory$Code]
 
