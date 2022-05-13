@@ -57,4 +57,9 @@ contact_network_filename <- here::here("outputs",
 
 source('code/CheckCatchmentSiteRelationships.R')
 source('code/importSiteData.R')
-#source('code/graphSiteLevelStats.R')
+
+# Save completed network 
+
+write.graph(combined_graph_simplified, 
+            file = contact_network_filename, 
+            format = "graphml")
