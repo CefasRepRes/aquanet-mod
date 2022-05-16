@@ -1,17 +1,17 @@
 #### Check catchment site relationships ####
 
-# Setup -------------------------------------------------------------------
+# Set up British National Grid CRS ---------------------------------------------
 
-# Define the British National Grid Referencing System, using Proj4 notation
-britishNationalGrid <- '+proj=tmerc +lat_0=49 +lon_0=-2 +k=0.9996012717 +x_0=400000 +y_0=-100000 +ellps=airy +datum=OSGB36 +units=m +no_defs'
+BNG_crs <- st_crs(27700) # Number is the EPSG for the British National Grid
 
-# Get LFM records
+# Get LFM records --------------------------------------------------------------
+
 section_30_movements <- read.csv(section_30_lfm_filename,
                                  colClasses = "character")
 farm_to_farm_movements <- read.csv(farm_to_farm_lfm_filename,
                                    colClasses = "character")
 
-# Create a data frame of all sites, including dupes -----------------------------
+# Create a data frame of all sites, including duplicates -----------------------
 
 # Site ID
 siteID <- c(section_30_movements$SourceSiteID,
@@ -56,53 +56,53 @@ sites_unique <- sites_unique %>% filter(!is.na(easting))
 
 # Assign the correct spatial projection to the table ---------------------------
 
-coordinates(sites_unique) <- c('easting','northing')
-proj4string(sites_unique) <- CRS(britishNationalGrid)
+sites_unique <- sf::st_as_sf(sites_unique,
+                             coords = c("easting", "northing"),
+                             crs = BNG_crs)
 
 # Open the polygon file defining each catchment in England and Wales -----------
 
-# Open shapefile
-catchment_outlines <- readOGR(dsn = catchment_layer_filename, 
-                              layer = "catchmnt_50k+TrunkCodes-Filtered-Merged_region")
-# Transform to BNG
-catchment_outlines_BNG <- spTransform(catchment_outlines, 
-                                      CRS(britishNationalGrid))
+# Open the catchment layer shapefile
+catchment_outlines <- sf::read_sf(dsn = catchment_layer_filename,
+                               layer = sub(pattern = "(.*)\\..*$",
+                                           replacement = "\\1",
+                                           basename(catchment_layer_filename)))
 
+# Transform to British National Grid
+catchment_outlines_BNG <- sf::st_transform(catchment_outlines, crs = BNG_crs)
 
 # Match sites to catchments -----------------------------------------------
 
-# Identify the catchment each site is located within
-sites_within_catchment_id <- gWithin(sites_unique,
-                                     catchment_outlines_BNG, 
-                                     byid = TRUE, 
-                                     returnDense = FALSE)
-# Identify sites missing catchments
-sites_within_catchment_id[sapply(sites_within_catchment_id, is.null)] <- NA
-# Unlist
-sites_within_catchment_id <- unlist(sites_within_catchment_id)
+# Join the sites to the catchment that they are located within
+sites_within_catchment_id <- sf::st_join(x = sites_unique,
+                                         y = catchment_outlines_BNG,
+                                         join = st_within,
+                                         sparse = TRUE, # Returns a sparse matrix (data frame in this case)
+                                         remove = FALSE) # Keep entries which are outside of any catchment
+
 # Get sites without a catchment
-sites_without_catchment_id <- sites_unique[is.na(sites_within_catchment_id),]
-sites_without_catchment_logical <- is.na(sites_within_catchment_id)
+sites_without_catchment_id <- dplyr::filter(sites_within_catchment_id, is.na(FEATURE))
+
 # Remove sites without a catchment
-sites_within_catchment_id <- sites_within_catchment_id[!is.na(sites_within_catchment_id)]
+sites_within_catchment_id <- dplyr::filter(sites_within_catchment_id, !is.na(FEATURE))
 
-# Create a table of site to catchment relationships ----------------------------
+# Tidy the table of site to catchment relationships ----------------------------
 
-sites_with_catchment <- cbind(sites_unique@data[!sites_without_catchment_logical,],
-                              sites_unique@coords[!sites_without_catchment_logical,],
-                              catchment_outlines_BNG@data[sites_within_catchment_id,
-                                                          c('ID','FEATURE','NAME','AREA_HA','TRUNK_CODE')])
+# Parse out the geometry (eastings and northings)
+sites_with_catchment <- sites_within_catchment_id %>% 
+  dplyr::mutate(easting = sf::st_coordinates(.)[, 1],
+                northing = sf::st_coordinates(.)[, 2])
 
-# Create a table of sites without catchments -----------------------------------
+# Return to a data frame format
+sites_with_catchment <- sf::st_set_geometry(sites_with_catchment, NULL)
 
-sites_without_catchment <- (nrow(sites_with_catchment)+1):(nrow(sites_with_catchment)+sum(sites_without_catchment_logical))
-
-# Add details
-
-if (length(sites_without_catchment) != 0) {
-  sites_without_catchment <- cbind(sites_unique@data[sites_without_catchment_logical,],
-                                   sites_unique@coords[sites_without_catchment_logical,])
-}
+# Select only those variables we are interested in
+sites_with_catchment <- dplyr::select(sites_with_catchment,
+                                      siteID, noOccurances,
+                                      ID, FEATURE,
+                                      NAME, AREA_HA,
+                                      TRUNK_CODE,
+                                      easting, northing)
 
 # Incorporate information on whether site feeds river water into its facilities ----
 
@@ -123,7 +123,6 @@ river_source_long <- data.frame(RiverSourceUsedSince2010 = unlist(river_source[,
 # Get unique values
 river_source_unique <- unique(river_source_long)
 
-
 # Save the catchment site relationships -----------------------------------
 
 # Join to river source data       
@@ -131,7 +130,9 @@ sites_with_catchment <- merge(x = sites_with_catchment,
                               y = river_source_unique,
                               by = c("siteID"),
                               all.x = TRUE)
+
 # Save the catchment site relationships
 write.csv(sites_with_catchment, file = sites_with_catchment_filename)
-# Save a list of sites which were not included within any catchment
+
+# Save a table of sites which were not included within any catchment
 write.csv(sites_without_catchment, file = sites_without_catchment_filename)
