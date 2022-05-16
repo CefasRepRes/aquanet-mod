@@ -1,11 +1,11 @@
 # Read Section30 and Farm to Farm Movements in csv format
 
-section30Movements.CSV <- read.csv(S30LFM.fileName,colClasses="character")
-farmMovements.CSV <- read.csv(Farm2FarmLFM.fileName,colClasses="character")
+section30Movements.CSV <- read.csv(section_30_lfm_filename,colClasses="character")
+farmMovements.CSV <- read.csv(farm_to_farm_lfm_filename,colClasses="character")
 
 # Import List of Site Locations, and add Catchment Details to Section 30 and Farm to Farm Movements
 
-ListSiteLocations.CSV <- read.csv(siteLocationsWithCatchmentDuplicatesRemoved.fileName,stringsAsFactors = FALSE)[,c('siteID','ID','NAME','TRUNK_CODE')]
+ListSiteLocations.CSV <- read.csv(site_locs_duplicates_removed_filename,stringsAsFactors = FALSE)[,c('siteID','ID','NAME','TRUNK_CODE')]
 
 section30Movements.CSV = merge(x = section30Movements.CSV,
                                y = ListSiteLocations.CSV,
@@ -23,11 +23,11 @@ section30Movements.CSV = merge(x = section30Movements.CSV,
                                suffixes = c('.Source','.Receiving'))
 
 farmMovements.CSV = merge(x = farmMovements.CSV,
-                               y = ListSiteLocations.CSV,
-                               all.x = TRUE,
-                               sort = TRUE,
-                               by.x = "ScrSiteID",
-                               by.y = "siteID")
+                          y = ListSiteLocations.CSV,
+                          all.x = TRUE,
+                          sort = TRUE,
+                          by.x = "ScrSiteID",
+                          by.y = "siteID")
 
 farmMovements.CSV = merge(x = farmMovements.CSV,
                           y = ListSiteLocations.CSV,
@@ -41,7 +41,7 @@ farmMovements.CSV = merge(x = farmMovements.CSV,
 
 section30Movements.CSV = subset(section30Movements.CSV, !(is.na(section30Movements.CSV$ID.Source) | is.na(section30Movements.CSV$ID.Receiving)))
 farmMovements.CSV = subset(farmMovements.CSV, !(is.na(farmMovements.CSV$ID.Source) | is.na(farmMovements.CSV$ID.Receiving)))
-                                                             
+
 # Convert date to R compatable format
 
 section30Movements.CSV$ConsentStart <- as.Date(section30Movements.CSV$ConsentStart, format = "%d/%b/%y")
@@ -119,7 +119,9 @@ V(combinedMovements.graph)[vertexList[,2]]$catchmentID <- E(combinedMovements.gr
 
 # Import a site's category, and merge it with information stored in the network
 #siteCategory = read.csv(file = "Check Licence Types/SummaryLicensesPerSite.csv", header = TRUE, stringsAsFactors = FALSE)
-siteCategory = read.csv(file = "data/Check Licence Types/SummaryLicensesPerSitewithfarm.csv", header = TRUE, stringsAsFactors = FALSE)
+siteCategory = read.csv(file = here::here("data",
+                                          "Check_License_Types",
+                                          "SummaryLicensesPerSitewithfarm.csv"), header = TRUE, stringsAsFactors = FALSE)
 uniqueCodeIDs = unique(x = c(E(combinedMovements.graph)$scrCode,E(combinedMovements.graph)$recCode))
 uniqueCodeIDs[!uniqueCodeIDs %in% siteCategory$Code]
 
