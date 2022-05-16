@@ -1,352 +1,244 @@
-#### Import site data ####
+# Read Section30 and Farm to Farm Movements in csv format
 
-# Called by Create contact network
+section30Movements.CSV <- read.csv(section_30_lfm_filename,colClasses="character")
+farmMovements.CSV <- read.csv(farm_to_farm_lfm_filename,colClasses="character")
 
-# Compile live fish movements ---------------------------------------------
+# Import List of Site Locations, and add Catchment Details to Section 30 and Farm to Farm Movements
 
-# Read Section30 and Farm to Farm Movements
+ListSiteLocations.CSV <- read.csv(site_locs_duplicates_removed_filename,stringsAsFactors = FALSE)[,c('siteID','ID','NAME','TRUNK_CODE')]
 
-section_30_movements <- read.csv(section_30_lfm_filename, 
-                             colClasses = "character")
+section30Movements.CSV = merge(x = section30Movements.CSV,
+                               y = ListSiteLocations.CSV,
+                               all.x = TRUE,
+                               sort = TRUE,
+                               by.x = "SourceSiteID",
+                               by.y = "siteID")
 
-farm_movements <- read.csv(farm_to_farm_lfm_filename, 
-                           colClasses="character")
+section30Movements.CSV = merge(x = section30Movements.CSV,
+                               y = ListSiteLocations.CSV,
+                               all.x = TRUE,
+                               sort = TRUE,
+                               by.x = "ReceivingSiteID",
+                               by.y = "siteID",
+                               suffixes = c('.Source','.Receiving'))
 
-# Import catchment details
-
-site_locations <- read.csv(site_locs_duplicates_removed_filename,
-                           stringsAsFactors = FALSE)[,c('siteID','ID','NAME','TRUNK_CODE')]
-
-# Add catchment details to section 30 movements
-  # Do twice to assign for source and recieving sites
-
-section_30_movements <- merge(x = section_30_movements,
-                          y = site_locations,
+farmMovements.CSV = merge(x = farmMovements.CSV,
+                          y = ListSiteLocations.CSV,
                           all.x = TRUE,
                           sort = TRUE,
-                          by.x = "SourceSiteID",
+                          by.x = "ScrSiteID",
                           by.y = "siteID")
 
-section_30_movements <- merge(x = section_30_movements,
-                          y = site_locations,
+farmMovements.CSV = merge(x = farmMovements.CSV,
+                          y = ListSiteLocations.CSV,
                           all.x = TRUE,
                           sort = TRUE,
-                          by.x = "ReceivingSiteID",
+                          by.x = "RecSiteID",
                           by.y = "siteID",
                           suffixes = c('.Source','.Receiving'))
 
-# Add catchment details to farm to farm movements
-   # Do twice to assign for source and receiving sites
-
-farm_movements <- merge(x = farm_movements,
-                        y = site_locations,
-                        all.x = TRUE,
-                        sort = TRUE,
-                        by.x = "ScrSiteID",
-                        by.y = "siteID")
-
-farm_movements <- merge(x = farm_movements,
-                        y = site_locations,
-                        all.x = TRUE,
-                        sort = TRUE,
-                        by.x = "RecSiteID",
-                        by.y = "siteID",
-                        suffixes = c('.Source','.Receiving'))
-
-
-# Data cleaning -----------------------------------------------------------
-
 # Remove any records that have not been matched against a catchment
-section_30_movements <- section_30_movements %>% 
-  filter(!is.na(ID.Source)) %>% 
-  filter(!is.na(ID.Receiving))
 
-farm_movements <- farm_movements %>%
-  filter(!is.na(ID.Source)) %>%
-  filter(!is.na(ID.Receiving))
+section30Movements.CSV = subset(section30Movements.CSV, !(is.na(section30Movements.CSV$ID.Source) | is.na(section30Movements.CSV$ID.Receiving)))
+farmMovements.CSV = subset(farmMovements.CSV, !(is.na(farmMovements.CSV$ID.Source) | is.na(farmMovements.CSV$ID.Receiving)))
 
-# Convert dates of section 30 movements into an R compatible format
-section_30_movements$ConsentStart <- as.Date(section_30_movements$ConsentStart, 
-                                             format = "%d/%b/%y")
-section_30_movements$ConsentStartYear <- as.character(section_30_movements$ConsentStart, 
-                                                      format = "%Y")
+# Convert date to R compatable format
 
-# Combine sources and receiving sites into matrices
+section30Movements.CSV$ConsentStart <- as.Date(section30Movements.CSV$ConsentStart, format = "%d/%b/%y")
+section30Movements.CSV$ConsentStartYear <- as.character(section30Movements.CSV$ConsentStart, format = "%Y")
 
-section_30_movements_matrix <- as.matrix(cbind(section_30_movements$SourceSiteID,
-                                     section_30_movements$ReceivingSiteID))
+# Combine the table of source and destination farms and convert the format from an array to a matrix
 
-farm_movements_matrix <- as.matrix(cbind(farm_movements$ScrSiteID,
-                                         farm_movements$RecSiteID))
+section30Movements.array = cbind(section30Movements.CSV[,c('SourceSiteID')],section30Movements.CSV[,c('ReceivingSiteID')])
+farmMovements.array = cbind(farmMovements.CSV[,c('ScrSiteID')],farmMovements.CSV[,c('RecSiteID')])
 
+section30Movements.matrix = as.matrix(section30Movements.array)
+farmMovements.matrix = as.matrix(farmMovements.array)
 
-# Generate igraphs --------------------------------------------------------
+# Generate a farmMovements and Section30Movements graph
 
-# Section 30
-section_30_graph <- igraph::graph.edgelist(section_30_movements_matrix)
+section30Movements.graph = graph.edgelist(section30Movements.matrix)
+farmMovements.graph = graph.edgelist(farmMovements.matrix)
 
-# Farms
-farm_movements_graph <- igraph::graph.edgelist(farm_movements_matrix)
+# Create a graph which is the union of the Farm to Farm and the Section 30 graph
 
-# Combined
-combined_matrix <- rbind(section_30_movements_matrix,
-                         farm_movements_matrix)
-combined_graph <- igraph::graph.edgelist(combined_matrix)
+combinedMovements.array <- rbind(section30Movements.array,farmMovements.array)
+combinedMovements.graph <- graph.edgelist(combinedMovements.array)
 
+# Add information to network edges
 
-# Add information to network edges ----------------------------------------
+# Site Details
 
-# Source person ID
-igraph::E(combined_graph)$source_person_id <- c(section_30_movements$SourcePersonID,
-                                                farm_movements$SourceFarmPersonID)
+E(combinedMovements.graph)$scrPersonID <- c(section30Movements.CSV[,c('SourcePersonID')],farmMovements.CSV[,c('SourceFarmPersonID')])
+E(combinedMovements.graph)$recPersonID <- c(section30Movements.CSV[,c('ReceivingPersonID')],farmMovements.CSV[,c('DestFarmPersonID')])
+E(combinedMovements.graph)$scrCode <- c(section30Movements.CSV[,c('SourceCode')],farmMovements.CSV[,c('Scr_Code')])
+E(combinedMovements.graph)$recCode <- c(section30Movements.CSV[,c('ReceivingCode')],farmMovements.CSV[,c('Rec_Code')])
+E(combinedMovements.graph)$scrSiteID <- c(section30Movements.CSV[,c('SourceSiteID')],farmMovements.CSV[,c('ScrSiteID')])
+E(combinedMovements.graph)$recSiteID <- c(section30Movements.CSV[,c('ReceivingSiteID')],farmMovements.CSV[,c('RecSiteID')])
+E(combinedMovements.graph)$scrName <- c(section30Movements.CSV[,c('Source')],farmMovements.CSV[,c('Scr_MainName')])
+E(combinedMovements.graph)$recName <- c(section30Movements.CSV[,c('RecWater')],farmMovements.CSV[,c('Rec_MainName')])
+E(combinedMovements.graph)$scrCatchmentID <- c(section30Movements.CSV[,c('TRUNK_CODE.Source')],farmMovements.CSV[,c('TRUNK_CODE.Source')])
+E(combinedMovements.graph)$recCatchmentID <- c(section30Movements.CSV[,c('TRUNK_CODE.Receiving')],farmMovements.CSV[,c('TRUNK_CODE.Receiving')])
+E(combinedMovements.graph)$withinCatchment <- E(combinedMovements.graph)$scrCatchmentID == E(combinedMovements.graph)$recCatchmentID
 
-# Receiving person ID
-igraph::E(combined_graph)$receive_person_id <- c(section_30_movements$ReceivingPersonID,
-                                                 farm_movements$DestFarmPersonID)
+# Year of movement and unique edge reference
 
-#Source code
-igraph::E(combined_graph)$source_code <- c(section_30_movements$SourceCode,
-                                           farm_movements$Scr_Code)
+E(combinedMovements.graph)$year <- c(section30Movements.CSV[,c('ConsentStartYear')],farmMovements.CSV[,c('ProdYear')])
+E(combinedMovements.graph)$reference <- c(section30Movements.CSV[,c('Refno')],farmMovements.CSV[,c('ProductionID')])
 
-# Receiving code
-igraph::E(combined_graph)$receive_code <- c(section_30_movements$ReceivingCode,
-                                           farm_movements$Rec_Code)
+# Calculate the number of movements such that farm2farm movements are taken direct from the database, whilst section30 movements count as one movement each
 
-# Source site id
-igraph::E(combined_graph)$source_site_id <- c(section_30_movements$SourceSiteID,
-                                              farm_movements$RecSiteID)
+E(combinedMovements.graph)$movements = as.numeric(c(rep(1,dim(section30Movements.CSV)[1]),farmMovements.CSV[,c('NumberOfMovementsSource')]))
+E(combinedMovements.graph)$movements[E(combinedMovements.graph)$movements == -1] = 1
 
-# Receiving site id
-igraph::E(combined_graph)$receive_site_id <- c(section_30_movements$ReceivingSiteID,
-                                               farm_movements$RecSiteID)
-
-# Source and receiver name
-   # TODO: see if we can remove to anonymise
-E(combined_graph)$scrName <- c(section_30_movements[,c('Source')],farm_movements[,c('Scr_MainName')])
-E(combined_graph)$recName <- c(section_30_movements[,c('RecWater')],farm_movements[,c('Rec_MainName')])
-
-# Source catchment ID
-igraph::E(combined_graph)$source_catchment_id <- c(section_30_movements$TRUNK_CODE.Source,
-                                                  farm_movements$TRUNK_CODE.Source)
-
-# Receiving catchment ID
-igraph::E(combined_graph)$receive_catchment_id <- c(section_30_movements$TRUNK_CODE.Receiving,
-                                                   farm_movements$TRUNK_CODE.Receiving)
-
-# Note where movements are within catchment
-igraph::E(combined_graph)$within_catchment <- 
-  E(combined_graph)$source_catchment_id == E(combined_graph)$receive_catchment_id
-
-# Year of movement
-igraph::E(combined_graph)$year <- c(section_30_movements$ConsentStartYear,
-                                    farm_movements$ProdYear)
-
-# Unique edge reference
-igraph::E(combined_graph)$reference <- c(section_30_movements$Refno,
-                                         farm_movements$ProductionID)
-
-# Calculate the number of movements
-   # such that farm2farm movements are taken direct from the database, 
-   # whilst section30 movements count as one movement each
-
-igraph::E(combined_graph)$movements <- as.numeric(c(rep(1,dim(section_30_movements)[1]),farm_movements[,c('NumberOfMovementsSource')]))
-igraph::E(combined_graph)$movements[E(combined_graph)$movements == -1] <- 1
-
-# Transfer the attribute information from the edges to the vertices ------------
-   # by checking edge connectivity
+# Transfer the attribute information from the edges to the vertices, by checking edge connectivity
 
 # Store information on edge connectivity
-vertex_matrix <- igraph::get.edges(graph = combined_graph, es = E(combined_graph))
-  # vertex_matrix[, 1] = source, vertex_matrix[, 2] = receivers
 
-# Transfer source ID
-igraph::V(combined_graph)[vertex_matrix[, 1]]$siteID <- E(combined_graph)$source_site_id
-# Transfer receiver ID
-igraph::V(combined_graph)[vertex_matrix[, 2]]$siteID <- E(combined_graph)$receive_site_id
+vertexList <- get.edges(graph = combinedMovements.graph, es = E(combinedMovements.graph))
 
-# Transfer source person ID
-igraph::V(combined_graph)[vertex_matrix[, 1]]$PersonID <- E(combined_graph)$source_person_id
-# Transfer receiver person ID
-igraph::V(combined_graph)[vertex_matrix[, 2]]$PersonID <- E(combined_graph)$receive_person_id
+# Transfer class information associated with edges to the appropriate vertices
 
-# Transfer source code
-igraph::V(combined_graph)[vertex_matrix[, 1]]$code = E(combined_graph)$source_code
-#Transfer receiver code
-igraph::V(combined_graph)[vertex_matrix[, 2]]$code = E(combined_graph)$receive_code
+# Details on the source and receiving water
 
-# Transfer source and receiver name
-  # TODO: See if this is really necessary
-igraph::V(combined_graph)[vertex_matrix[,1]]$siteName <- E(combined_graph)$scrName
-igraph::V(combined_graph)[vertex_matrix[,2]]$siteName <- E(combined_graph)$recName
+V(combinedMovements.graph)[vertexList[,1]]$siteID <- E(combinedMovements.graph)$scrSiteID
+V(combinedMovements.graph)[vertexList[,2]]$siteID <- E(combinedMovements.graph)$recSiteID
 
-# Transfer source catchment ID
-igraph::V(combined_graph)[vertex_matrix[, 1]]$catchment_id <- E(combined_graph)$source_catchment_id
-igraph::V(combined_graph)[vertex_matrix[, 2]]$catchment_id <- E(combined_graph)$receive_catchment_id
+V(combinedMovements.graph)[vertexList[,1]]$PersonID <- E(combinedMovements.graph)$scrPersonID
+V(combinedMovements.graph)[vertexList[,2]]$PersonID <- E(combinedMovements.graph)$recPersonID
 
-# Import sites category --------------------------------------------------------
+V(combinedMovements.graph)[vertexList[,1]]$code = E(combinedMovements.graph)$scrCode
+V(combinedMovements.graph)[vertexList[,2]]$code = E(combinedMovements.graph)$recCode
 
-# Import
-site_category <- read.csv(here::here("data",
-                                     "Check_License_Types",
-                                     "SummaryLicensesPerSitewithfarm.csv"),
-                          header = TRUE, stringsAsFactors = FALSE)
+V(combinedMovements.graph)[vertexList[,1]]$siteName <- E(combinedMovements.graph)$scrName
+V(combinedMovements.graph)[vertexList[,2]]$siteName <- E(combinedMovements.graph)$recName
 
-# Get unique site codes from graph
-unique_code_ids <- unique(x = c(igraph::E(combined_graph)$source_code,
-                                igraph::E(combined_graph)$receive_code))
+V(combinedMovements.graph)[vertexList[,1]]$catchmentID <- E(combinedMovements.graph)$scrCatchmentID
+V(combinedMovements.graph)[vertexList[,2]]$catchmentID <- E(combinedMovements.graph)$recCatchmentID
 
-# Check for any which aren't present in site category
-missing <- unique_code_ids[!unique_code_ids %in% site_category$Code]
-if(length(missing != 0)) warning("Some sites do not have a category assigned. Check SummaryLicensesPerSitewithfarm.csv")
 
-# Order a data frame of site categories  ---------------------------------------
+# Import a site's category, and merge it with information stored in the network
+#siteCategory = read.csv(file = "Check Licence Types/SummaryLicensesPerSite.csv", header = TRUE, stringsAsFactors = FALSE)
+siteCategory = read.csv(file = here::here("data",
+                                          "Check_License_Types",
+                                          "SummaryLicensesPerSitewithfarm.csv"), header = TRUE, stringsAsFactors = FALSE)
+uniqueCodeIDs = unique(x = c(E(combinedMovements.graph)$scrCode,E(combinedMovements.graph)$recCode))
+uniqueCodeIDs[!uniqueCodeIDs %in% siteCategory$Code]
 
-# Create dat frame
-site_categories_ordered <- data.frame(source_code = E(combined_graph)$source_code,
-                                      receive_code = E(combined_graph)$receive_code,
-                                      order = 1:ecount(combined_graph), # ecound = edge count
-                                      stringsAsFactors = FALSE)
 
-# Merge with source type 
-site_categories_ordered <- merge(x = site_categories_ordered,
-                                 y = site_category,
-                                 by.x = c("source_code"),
-                                 by.y = c("Code"))
+siteCategories.ordered = data.frame(scrCode = E(combinedMovements.graph)$scrCode,
+                                    recCode = E(combinedMovements.graph)$recCode,
+                                    order = 1:ecount(combinedMovements.graph),
+                                    stringsAsFactors = FALSE)
 
-# Merge with receiver type
-site_categories_ordered <- merge(x = site_categories_ordered,
-                               y = site_category,
-                               by.x = c("receive_code"),
-                               by.y = c("Code"),
-                               suffixes = c('_source','_receive'))
+siteCategories.ordered = merge(x = siteCategories.ordered,
+                               y = siteCategory,
+                               by.x = c('scrCode'),
+                               by.y = c('Code'))
 
-# Order by site categories
-site_categories_ordered <- site_categories_ordered[order(site_categories_ordered$order),]
-str(site_categories_ordered)
+siteCategories.ordered = merge(x = siteCategories.ordered,
+                               y = siteCategory,
+                               by.x = c('recCode'),
+                               by.y = c('Code'),
+                               suffixes = c('.scr','.rec'))
 
-igraph::E(combined_graph)$source_type <- site_categories_ordered$Category_source
-igraph::E(combined_graph)$receive_type <- site_categories_ordered$Category_receive
+siteCategories.ordered = siteCategories.ordered[order(siteCategories.ordered$order),]
 
-# Assign site type -------------------------------------------------------------
 
-# TODO: figure out how to do this in a more efficient manner
-  # Hold up is indexing edge attributes in a loop
+E(combinedMovements.graph)$scrType = siteCategories.ordered$Category.scr
+E(combinedMovements.graph)$recType = siteCategories.ordered$Category.rec
 
-# Create vector of all possible site types
-site_type <- data.frame(type = c("SmallHatch", "LargeHatch",
-               "SmallRestock", "MediumRestock", "LargeRestock",
-               "SmallTable", "MediumTable", "LargeTable",
-               "SmallOngrow", "MediumOngrow", "LargeOngrow",
-               "SmallFish", "MediumFish", "LargeFish"))
+######## Edges that are small hatcheries
+E(combinedMovements.graph)$smallhatch.scr = siteCategories.ordered$SmallHatch.scr
+E(combinedMovements.graph)$smalllhatch.rec = siteCategories.ordered$SmallHatch.rec
+############# Edges that are large hatcheries
+E(combinedMovements.graph)$largehatch.scr = siteCategories.ordered$LargeHatch.scr
+E(combinedMovements.graph)$largehatch.rec = siteCategories.ordered$LargeHatch.rec
+########### Edges that are small restockers
+E(combinedMovements.graph)$smallrestock.scr = siteCategories.ordered$SmallRestock.scr
+E(combinedMovements.graph)$smallrestock.rec = siteCategories.ordered$SmallRestock.rec
+########### Edges that are medium restockers
+E(combinedMovements.graph)$mediumrestock.scr = siteCategories.ordered$MediumRestock.scr
+E(combinedMovements.graph)$mediumrestock.rec = siteCategories.ordered$MediumRestock.rec
+########### Edges that are large restockers
+E(combinedMovements.graph)$largerestock.scr = siteCategories.ordered$LargeRestock.scr
+E(combinedMovements.graph)$largerestock.rec = siteCategories.ordered$LargeRestock.rec
+##### Edges that are small tables
+E(combinedMovements.graph)$smalltable.scr = siteCategories.ordered$SmallTable.scr
+E(combinedMovements.graph)$smalltable.rec = siteCategories.ordered$SmallTable.rec
+##### Edges that are medium tables
+E(combinedMovements.graph)$mediumtable.scr = siteCategories.ordered$MediumTable.scr
+E(combinedMovements.graph)$mediumtable.rec = siteCategories.ordered$MediumTable.rec
+##### Edges that are large tables
+E(combinedMovements.graph)$largetable.scr = siteCategories.ordered$LargeTable.scr
+E(combinedMovements.graph)$largetable.rec = siteCategories.ordered$LargeTable.rec
+##### Edges that are small ongrowers
+E(combinedMovements.graph)$smallongrow.scr = siteCategories.ordered$SmallOngrow.scr
+E(combinedMovements.graph)$smallongrow.rec = siteCategories.ordered$SmallOngrow.rec
+##### Edges that are medium ongrowers
+E(combinedMovements.graph)$mediumongrow.scr = siteCategories.ordered$MediumOngrow.scr
+E(combinedMovements.graph)$mediumongrow.rec = siteCategories.ordered$MediumOngrow.rec
+##### Edges that are largeongrowers
+E(combinedMovements.graph)$largeongrow.scr = siteCategories.ordered$LargeOngrow.scr
+E(combinedMovements.graph)$largeongrow.rec = siteCategories.ordered$LargeOngrow.rec
+##### Edges that are smallfishing
+E(combinedMovements.graph)$smallfish.scr = siteCategories.ordered$SmallFish.scr
+E(combinedMovements.graph)$smallfish.rec = siteCategories.ordered$SmallFish.rec
+##### Edges that are medium fishing
+E(combinedMovements.graph)$mediumfish.scr = siteCategories.ordered$MediumFish.scr
+E(combinedMovements.graph)$mediumfish.rec = siteCategories.ordered$MediumFish.rec
+##### Edges that are large fishing
+E(combinedMovements.graph)$largefish.scr = siteCategories.ordered$LargeFish.scr
+E(combinedMovements.graph)$largefish.rec = siteCategories.ordered$LargeFish.rec
 
-# Small hatcheries
-igraph::E(combined_graph)$small_hatch_source <- site_categories_ordered$SmallHatch_source
-igraph::E(combined_graph)$small_hatch_receive <- site_categories_ordered$SmallHatch_rec
 
-# Large hatcheries
-igraph::E(combined_graph)$large_hatch_source <- site_categories_ordered$LargeHatch_source
-igraph::E(combined_graph)$large_hatch_receive <- site_categories_ordered$LargeHatch_receive
+# Transfer information on the site's category from edges to vertices
+V(combinedMovements.graph)[vertexList[,1]]$type = E(combinedMovements.graph)$scrType
+V(combinedMovements.graph)[vertexList[,2]]$type = E(combinedMovements.graph)$recType
 
-# Small restockers
-igraph::E(combined_graph)$small_restock_source <- site_categories_ordered$SmallRestock_source
-igraph::E(combined_graph)$small_restock_receive <- site_categories_ordered$SmallRestock_receive
 
-# Medium restockers
-igraph::E(combined_graph)$medium_restock_source <- site_categories_ordered$MediumRestock_source
-igraph::E(combined_graph)$medium_restock_receive <- site_categories_ordered$MediumRestock_receive
-
-# Large restockers
-igraph::E(combined_graph)$large_restock_source <- site_categories_ordered$LargeRestock_source
-igraph::E(combined_graph)$large_restock_receive <- site_categories_ordered$LargeRestock_receive
-
-# Small tables
-igraph::E(combined_graph)$small_table_source <- site_categories_ordered$SmallTable_source
-igraph::E(combined_graph)$small_table_receive <- site_categories_ordered$SmallTable_receive
-
-# Medium tables
-igraph::E(combined_graph)$medium_table_source <- site_categories_ordered$MediumTable_source
-igraph::E(combined_graph)$medium_table_receive <- site_categories_ordered$MediumTable_receive
-
-# Large tables
-igraph::E(combined_graph)$large_table_source <- site_categories_ordered$LargeTable_source
-igraph::E(combined_graph)$large_table_receive <- site_categories_ordered$LargeTable_receive
-
-# Small ongrowers
-igraph::E(combined_graph)$small_ongrow_source <- site_categories_ordered$SmallOngrow_source
-igraph::E(combined_graph)$small_ongrow_receive <- site_categories_ordered$SmallOngrow_receive
-
-# Medium ongrowers
-igraph::E(combined_graph)$medium_ongrow_source <- site_categories_ordered$MediumOngrow_source
-igraph::E(combined_graph)$medium_ongrow_receive <- site_categories_ordered$MediumOngrow_receive
-
-# Large ongrowers
-igraph::E(combined_graph)$large_ongrow_source <- site_categories_ordered$LargeOngrow_source
-igraph::E(combined_graph)$large_ongrow_receive <- site_categories_ordered$LargeOngrow_receive
-
-# Small fishing
-igraph::E(combined_graph)$small_fish_source <- site_categories_ordered$SmallFish_source
-igraph::E(combined_graph)$small_fish_receive <- site_categories_ordered$SmallFish_receive
-
-# Medium fishing
-igraph::E(combined_graph)$medium_fish_source <- site_categories_ordered$MediumFish_source
-igraph::E(combined_graph)$medium_fish_receive <- site_categories_ordered$MediumFish_receive
-
-# Large fishing
-igraph::E(combined_graph)$large_fish_source <- site_categories_ordered$LargeFish_source
-igraph::E(combined_graph)$large_fish_receive <- site_categories_ordered$LargeFish_receive
-
-# Tranfer site type to vertices ------------------------------------------------
-# TODO: again, figure out a way to make this more efficient
-
-igraph::V(combined_graph)[vertex_matrix[, 1]]$type = igraph::E(combined_graph)$source_type
-igraph::V(combined_graph)[vertex_matrix[, 2]]$type = igraph::E(combined_graph)$receive_type
-
-# Small hatcheries
-igraph::V(combined_graph)[vertex_matrix[, 1]]$small_hatch = igraph::E(combined_graph)$small_hatch_source
-igraph::V(combined_graph)[vertex_matrix[, 2]]$small_hatch = igraph::E(combined_graph)$small_hatch_receive
-# Large hatcheries
-igraph::V(combined_graph)[vertex_matrix[, 1]]$large_hatch = igraph::E(combined_graph)$large_hatch_source
-igraph::V(combined_graph)[vertex_matrix[, 2]]$large_hatch = igraph::E(combined_graph)$large_hatch_receive
-
-# Small restockers
-igraph::V(combined_graph)[vertex_matrix[, 1]]$small_restock = igraph::E(combined_graph)$small_restock_source
-igraph::V(combined_graph)[vertex_matrix[, 2]]$small_restock = igraph::E(combined_graph)$small_restock_receive
-# Medium restockers
-igraph::V(combined_graph)[vertex_matrix[, 1]]$medium_restock = igraph::E(combined_graph)$medium_restock_source
-igraph::V(combined_graph)[vertex_matrix[, 2]]$medium_restock = igraph::E(combined_graph)$medium_restock_receive
-# Large restockers
-igraph::V(combined_graph)[vertex_matrix[, 1]]$large_restock = igraph::E(combined_graph)$large_restock_source
-igraph::V(combined_graph)[vertex_matrix[, 2]]$large_restock = igraph::E(combined_graph)$large_restock_receive
-
-# Small tables
-igraph::V(combined_graph)[vertex_matrix[, 1]]$small_table = igraph::E(combined_graph)$small_table_source
-igraph::V(combined_graph)[vertex_matrix[, 2]]$small_table = igraph::E(combined_graph)$small_table_receive
-# Medium tables
-igraph::V(combined_graph)[vertex_matrix[, 1]]$medium_table = igraph::E(combined_graph)$medium_table_source
-igraph::V(combined_graph)[vertex_matrix[, 2]]$medium_table = igraph::E(combined_graph)$medium_table_receive
-# Large tables
-igraph::V(combined_graph)[vertex_matrix[, 1]]$large_table = igraph::E(combined_graph)$large_table_source
-igraph::V(combined_graph)[vertex_matrix[, 2]]$large_table = igraph::E(combined_graph)$large_table_receive
-
-# Small ongrowers
-igraph::V(combined_graph)[vertex_matrix[, 1]]$small_ongrow = igraph::E(combined_graph)$small_ongrow_source
-igraph::V(combined_graph)[vertex_matrix[, 2]]$small_ongrow = igraph::E(combined_graph)$small_ongrow_receive
-# Medium ongrowers
-igraph::V(combined_graph)[vertex_matrix[, 1]]$medium_ongrow = igraph::E(combined_graph)$medium_ongrow_source
-igraph::V(combined_graph)[vertex_matrix[, 2]]$medium_ongrow = igraph::E(combined_graph)$medium_ongrow_receive
-# Large ongrowers
-igraph::V(combined_graph)[vertex_matrix[, 1]]$large_ongrow = igraph::E(combined_graph)$large_ongrow_source
-igraph::V(combined_graph)[vertex_matrix[, 2]]$large_ongrow = igraph::E(combined_graph)$large_ongrow_receive
-
-# Small fish
-igraph::V(combined_graph)[vertex_matrix[, 1]]$small_fish = igraph::E(combined_graph)$small_fish_source
-igraph::V(combined_graph)[vertex_matrix[, 2]]$small_fish = igraph::E(combined_graph)$small_fish_receive
-# Medium fish
-igraph::V(combined_graph)[vertex_matrix[, 1]]$medium_fish = igraph::E(combined_graph)$medium_fish_source
-igraph::V(combined_graph)[vertex_matrix[, 2]]$medium_fish = igraph::E(combined_graph)$medium_fish_receive
-# Large fish
-igraph::V(combined_graph)[vertex_matrix[, 1]]$large_fish = igraph::E(combined_graph)$large_fish_source
-igraph::V(combined_graph)[vertex_matrix[, 2]]$large_fish = igraph::E(combined_graph)$large_fish_receive
+####Vertices that are small hatcheries
+V(combinedMovements.graph)[vertexList[,1]]$smallhatch = E(combinedMovements.graph)$smallhatch.scr
+V(combinedMovements.graph)[vertexList[,2]]$smallhatch = E(combinedMovements.graph)$smalllhatch.rec
+### Vertices that are large hatcheries
+V(combinedMovements.graph)[vertexList[,1]]$largehatch = E(combinedMovements.graph)$largehatch.scr
+V(combinedMovements.graph)[vertexList[,2]]$largehatch = E(combinedMovements.graph)$largehatch.rec
+#### Vertices that are small restockers
+V(combinedMovements.graph)[vertexList[,1]]$smallrestock = E(combinedMovements.graph)$smallrestock.scr
+V(combinedMovements.graph)[vertexList[,2]]$smallrestock = E(combinedMovements.graph)$smallrestock.rec
+#### Vertices that are mwsium restockers
+V(combinedMovements.graph)[vertexList[,1]]$mediumrestock = E(combinedMovements.graph)$mediumrestock.scr
+V(combinedMovements.graph)[vertexList[,2]]$mediumrestock = E(combinedMovements.graph)$mediumrestock.rec
+##### Vertices that are large restockers
+V(combinedMovements.graph)[vertexList[,1]]$largerestock = E(combinedMovements.graph)$largerestock.scr
+V(combinedMovements.graph)[vertexList[,2]]$largerestock = E(combinedMovements.graph)$largerestock.rec
+####Vertices that are small tables
+V(combinedMovements.graph)[vertexList[,1]]$smalltable = E(combinedMovements.graph)$smalltable.scr
+V(combinedMovements.graph)[vertexList[,2]]$smalltable = E(combinedMovements.graph)$smalltable.rec
+####Vertices that are medium tables
+V(combinedMovements.graph)[vertexList[,1]]$mediumtable = E(combinedMovements.graph)$mediumtable.scr
+V(combinedMovements.graph)[vertexList[,2]]$mediumtable = E(combinedMovements.graph)$mediumtable.rec
+####Vertices that are large tables
+V(combinedMovements.graph)[vertexList[,1]]$largetable = E(combinedMovements.graph)$largetable.scr
+V(combinedMovements.graph)[vertexList[,2]]$largetable = E(combinedMovements.graph)$largetable.rec
+####Vertices that are small ongrowers
+V(combinedMovements.graph)[vertexList[,1]]$smallongrow = E(combinedMovements.graph)$smallongrow.scr
+V(combinedMovements.graph)[vertexList[,2]]$smallongrow = E(combinedMovements.graph)$smallongrow.rec
+####Vertices that are medium ongrowers
+V(combinedMovements.graph)[vertexList[,1]]$mediumongrow = E(combinedMovements.graph)$mediumongrow.scr
+V(combinedMovements.graph)[vertexList[,2]]$mediumongrow = E(combinedMovements.graph)$mediumongrow.rec
+####Vertices that are large ongrowers
+V(combinedMovements.graph)[vertexList[,1]]$largeongrow = E(combinedMovements.graph)$largeongrow.scr
+V(combinedMovements.graph)[vertexList[,2]]$largeongrow = E(combinedMovements.graph)$largeongrow.rec
+#####Vertices that are small fish
+V(combinedMovements.graph)[vertexList[,1]]$smallfish = E(combinedMovements.graph)$smallfish.scr
+V(combinedMovements.graph)[vertexList[,2]]$smallfish = E(combinedMovements.graph)$smallfish.rec
+####Vertices that are medium fish
+V(combinedMovements.graph)[vertexList[,1]]$mediumfish = E(combinedMovements.graph)$mediumfish.scr
+V(combinedMovements.graph)[vertexList[,2]]$mediumfish = E(combinedMovements.graph)$mediumfish.rec
+#####Vertices that are large fish
+V(combinedMovements.graph)[vertexList[,1]]$largefish = E(combinedMovements.graph)$largefish.scr
+V(combinedMovements.graph)[vertexList[,2]]$largefish = E(combinedMovements.graph)$largefish.rec
 
 
 # Sometimes the same site has multiple records in the person table
@@ -354,84 +246,64 @@ igraph::V(combined_graph)[vertex_matrix[, 2]]$large_fish = igraph::E(combined_gr
 # This should ensure that sites are classified based on an associated person record from farm to farm, rather than S30, movement records
 # It is assumed that any cases where person records refer to the same site are due to issues with the less well curated S30 database (though I did check, for this specific dataset)
 # It is also assumed that S30 records refer to sites with a lower risk profile (which, again, I did check, for this specific dataset)
+E(combinedMovements.graph)$scrType = V(combinedMovements.graph)[vertexList[,1]]$type
+E(combinedMovements.graph)$recType = V(combinedMovements.graph)[vertexList[,2]]$type
 
-# The below code seems circular, so have commented out for now - Sarah
-# E(combined_graph)$scrType = V(combined_graph)[vertexList[,1]]$type
-# E(combined_graph)$recType = V(combined_graph)[vertexList[,2]]$type
-# 
-# #########
-# E(combined_graph)$smallhatch.scr = V(combined_graph)[vertexList[,1]]$smallhatch
-# E(combined_graph)$smallhatch.rec = V(combined_graph)[vertexList[,2]]$smallhatch
-# 
-# E(combined_graph)$largehatch.scr = V(combined_graph)[vertexList[,1]]$largehatch
-# E(combined_graph)$largehatch.rec = V(combined_graph)[vertexList[,2]]$largehatch
-# 
-# E(combined_graph)$smallrestock.scr = V(combined_graph)[vertexList[,1]]$smallrestock
-# E(combined_graph)$smallrestock.rec = V(combined_graph)[vertexList[,2]]$smallrestock
-# 
-# E(combined_graph)$mediumrestock.scr = V(combined_graph)[vertexList[,1]]$mediumrestock
-# E(combined_graph)$mediumrestock.rec = V(combined_graph)[vertexList[,2]]$mediumrestock
-# 
-# E(combined_graph)$largerestock.scr = V(combined_graph)[vertexList[,1]]$largerestock
-# E(combined_graph)$largerestock.rec = V(combined_graph)[vertexList[,2]]$largerestock
-# 
-# E(combined_graph)$smalltable.scr = V(combined_graph)[vertexList[,1]]$smalltable
-# E(combined_graph)$smalltable.rec = V(combined_graph)[vertexList[,2]]$smalltable
-# 
-# E(combined_graph)$mediumtable.scr = V(combined_graph)[vertexList[,1]]$mediumtable
-# E(combined_graph)$mediumtable.rec = V(combined_graph)[vertexList[,2]]$mediumtable
-# 
-# E(combined_graph)$largetable.scr = V(combined_graph)[vertexList[,1]]$largetable
-# E(combined_graph)$largetable.rec = V(combined_graph)[vertexList[,2]]$largetable
-# 
-# E(combined_graph)$smallongrow.scr = V(combined_graph)[vertexList[,1]]$smallongrow
-# E(combined_graph)$smallongrow.rec = V(combined_graph)[vertexList[,2]]$smallongrow
-# 
-# E(combined_graph)$mediumongrow.scr = V(combined_graph)[vertexList[,1]]$mediumongrow
-# E(combined_graph)$mediumongrow.rec = V(combined_graph)[vertexList[,2]]$mediumongrow
-# 
-# E(combined_graph)$largeongrow.scr = V(combined_graph)[vertexList[,1]]$largeongrow
-# E(combined_graph)$largeongrow.rec = V(combined_graph)[vertexList[,2]]$largeongrow
-# 
-# E(combined_graph)$smallfish.scr = V(combined_graph)[vertexList[,1]]$smallfish
-# E(combined_graph)$smallfish.rec = V(combined_graph)[vertexList[,2]]$smallfish
-# 
-# E(combined_graph)$mediumfish.scr = V(combined_graph)[vertexList[,1]]$mediumfish
-# E(combined_graph)$mediumfish.rec = V(combined_graph)[vertexList[,2]]$mediumfish
-# 
-# E(combined_graph)$largefish.scr = V(combined_graph)[vertexList[,1]]$largefish
-# E(combined_graph)$largefish.rec = V(combined_graph)[vertexList[,2]]$largefish
+#########
+E(combinedMovements.graph)$smallhatch.scr = V(combinedMovements.graph)[vertexList[,1]]$smallhatch
+E(combinedMovements.graph)$smallhatch.rec = V(combinedMovements.graph)[vertexList[,2]]$smallhatch
 
-# Remove any foreign sites -----------------------------------------------------
+E(combinedMovements.graph)$largehatch.scr = V(combinedMovements.graph)[vertexList[,1]]$largehatch
+E(combinedMovements.graph)$largehatch.rec = V(combinedMovements.graph)[vertexList[,2]]$largehatch
 
-foreign_sites <- igraph::V(combined_graph)[V(combined_graph)$type == "Foreign"]
-if(length(foreign_sites) != 0) warning("Some foreign sites are present within the data")
+E(combinedMovements.graph)$smallrestock.scr = V(combinedMovements.graph)[vertexList[,1]]$smallrestock
+E(combinedMovements.graph)$smallrestock.rec = V(combinedMovements.graph)[vertexList[,2]]$smallrestock
 
-combined_graph <- igraph::delete.vertices(graph = combined_graph, 
-                                          v = foreign_sites)
+E(combinedMovements.graph)$mediumrestock.scr = V(combinedMovements.graph)[vertexList[,1]]$mediumrestock
+E(combinedMovements.graph)$mediumrestock.rec = V(combinedMovements.graph)[vertexList[,2]]$mediumrestock
+
+E(combinedMovements.graph)$largerestock.scr = V(combinedMovements.graph)[vertexList[,1]]$largerestock
+E(combinedMovements.graph)$largerestock.rec = V(combinedMovements.graph)[vertexList[,2]]$largerestock
+
+E(combinedMovements.graph)$smalltable.scr = V(combinedMovements.graph)[vertexList[,1]]$smalltable
+E(combinedMovements.graph)$smalltable.rec = V(combinedMovements.graph)[vertexList[,2]]$smalltable
+
+E(combinedMovements.graph)$mediumtable.scr = V(combinedMovements.graph)[vertexList[,1]]$mediumtable
+E(combinedMovements.graph)$mediumtable.rec = V(combinedMovements.graph)[vertexList[,2]]$mediumtable
+
+E(combinedMovements.graph)$largetable.scr = V(combinedMovements.graph)[vertexList[,1]]$largetable
+E(combinedMovements.graph)$largetable.rec = V(combinedMovements.graph)[vertexList[,2]]$largetable
+
+E(combinedMovements.graph)$smallongrow.scr = V(combinedMovements.graph)[vertexList[,1]]$smallongrow
+E(combinedMovements.graph)$smallongrow.rec = V(combinedMovements.graph)[vertexList[,2]]$smallongrow
+
+E(combinedMovements.graph)$mediumongrow.scr = V(combinedMovements.graph)[vertexList[,1]]$mediumongrow
+E(combinedMovements.graph)$mediumongrow.rec = V(combinedMovements.graph)[vertexList[,2]]$mediumongrow
+
+E(combinedMovements.graph)$largeongrow.scr = V(combinedMovements.graph)[vertexList[,1]]$largeongrow
+E(combinedMovements.graph)$largeongrow.rec = V(combinedMovements.graph)[vertexList[,2]]$largeongrow
+
+E(combinedMovements.graph)$smallfish.scr = V(combinedMovements.graph)[vertexList[,1]]$smallfish
+E(combinedMovements.graph)$smallfish.rec = V(combinedMovements.graph)[vertexList[,2]]$smallfish
+
+E(combinedMovements.graph)$mediumfish.scr = V(combinedMovements.graph)[vertexList[,1]]$mediumfish
+E(combinedMovements.graph)$mediumfish.rec = V(combinedMovements.graph)[vertexList[,2]]$mediumfish
+
+E(combinedMovements.graph)$largefish.scr = V(combinedMovements.graph)[vertexList[,1]]$largefish
+E(combinedMovements.graph)$largefish.rec = V(combinedMovements.graph)[vertexList[,2]]$largefish
+
+# Remove any foreign sites which have not already been removed, due to lack of location data
+# or falling outside of one of the UK river catchments
+
+foreign.vertices = V(combinedMovements.graph)[V(combinedMovements.graph)$type == "Foreign"]
+
+combinedMovements.graph = delete.vertices(graph = combinedMovements.graph, v = foreign.vertices)
+
 
 # Remove the self loops and multiple edges from the 2010 to 2012 graph
-combined_graph_simplified <- igraph::simplify(combined_graph, 
-                                              remove.multiple = TRUE, # Remove multiple edges
-                                              remove.loops = TRUE, # Remove loop edges
-                                              edge.attr.comb = list(
-                                                within_catchment = "first",
-                                                catchment_id = "first",
-                                                source_catchment_id = "first",
-                                                receive_catchment_id = "first",
-                                                source_site_id = "first",
-                                                receive_site_id = "first",
-                                                scrName = "first",
-                                                recName = "first", 
-                                                year = "first",
-                                                reference = "concat",
-                                                type = "first",
-                                                movements = "sum",
-                                                "ignore"))
+combinedMovements.graph2 <- simplify(combinedMovements.graph, remove.multiple=TRUE, remove.loops=TRUE,edge.attr.comb=list(withinCatchment="first",catchmentID="first",scrCatchmentID="first",recCatchmentID="first",scrSiteID="first",recSiteID="first",scrName="first",recName="first", year="first",reference="concat",type="first",movements="sum","ignore"))
 
-# Remove any vertices with a node degree of zero (i.e. they are unconnected) ----
-
-node_degree <- degree(combined_graph_simplified)
-node_degree_zero <- node_degree[node_degree == 0]
-combined_graph_simplified <- delete_vertices(graph = combined_graph_simplified,
-                                             v = names(node_degree_zero))
+# Remove any vertices with a node degree of zero (i.e. they are unconnected)
+node.degree = degree(combinedMovements.graph2)
+zero.degree.nodes = node.degree[node.degree == 0]
+combinedMovements.graph2 = delete_vertices(graph = combinedMovements.graph2, v = names(zero.degree.nodes))
