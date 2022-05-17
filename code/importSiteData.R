@@ -98,13 +98,6 @@ combined_movement_ids <- as.matrix(combined_movement_ids)
 # Create igraph
 combined_movements_graph <- igraph::graph.edgelist(combined_movement_ids)
 
-# # Remove 
-# 
-# section30Movements.CSV <- section_30_movements
-# farmMovements.CSV <- farm_movements
-# 
-# combinedMovements.graph <- combined_movements_graph
-
 # Add information to network edges ---------------------------------------------
 
 # Site Details
@@ -143,29 +136,41 @@ igraph::E(combined_movements_graph)$movements <- as.numeric(c(rep(1, dim(section
                                                               farm_movements[,c('NumberOfMovementsSource')]))
 igraph::E(combined_movements_graph)$movements[E(combined_movements_graph)$movements == -1] <- 1
 
-
-combinedMovements.graph <- combined_movements_graph
-# Transfer the attribute information from the edges to the vertices, by checking edge connectivity ----
+# Transfer attributes from edge to vertices ------------------------------------
 
 # Store information on edge connectivity
 
-vertexList <- get.edges(graph = combinedMovements.graph, es = E(combinedMovements.graph))
+vertex_matrix <- igraph::get.edges(graph = combined_movements_graph, 
+                                   es = E(combined_movements_graph))
 
-# Transfer class information associated with edges to the appropriate vertices ----
-# TODO: streamline and add package
-# Details on the source and receiving water
+# TODO: streamline
 
-V(combinedMovements.graph)[vertexList[,1]]$siteID <- E(combinedMovements.graph)$scrSiteID
-V(combinedMovements.graph)[vertexList[,2]]$siteID <- E(combinedMovements.graph)$recSiteID
+# Source ID
+igraph::V(combined_movements_graph)[vertex_matrix[, 1]]$siteID <- 
+  igraph::E(combined_movements_graph)$scrSiteID
+igraph::V(combined_movements_graph)[vertex_matrix[, 2]]$siteID <- 
+  igraph::E(combined_movements_graph)$recSiteID
 
-V(combinedMovements.graph)[vertexList[,1]]$PersonID <- E(combinedMovements.graph)$scrPersonID
-V(combinedMovements.graph)[vertexList[,2]]$PersonID <- E(combinedMovements.graph)$recPersonID
+# Person ID
+igraph::V(combined_movements_graph)[vertex_matrix[, 1]]$PersonID <- 
+  E(combined_movements_graph)$scrPersonID
+igraph::V(combined_movements_graph)[vertex_matrix[, 2]]$PersonID <- 
+  igraph::E(combined_movements_graph)$recPersonID
 
-V(combinedMovements.graph)[vertexList[,1]]$code <- E(combinedMovements.graph)$scrCode
-V(combinedMovements.graph)[vertexList[,2]]$code <- E(combinedMovements.graph)$recCode
+# Code
+igraph::V(combined_movements_graph)[vertex_matrix[, 1]]$code <- 
+  E(combined_movements_graph)$scrCode
+igraph::V(combined_movements_graph)[vertex_matrix[, 2]]$code <- 
+  igraph::E(combined_movements_graph)$recCode
 
-V(combinedMovements.graph)[vertexList[,1]]$catchmentID <- E(combinedMovements.graph)$scrCatchmentID
-V(combinedMovements.graph)[vertexList[,2]]$catchmentID <- E(combinedMovements.graph)$recCatchmentID
+# Catchment ID
+igraph::V(combined_movements_graph)[vertex_matrix[, 1]]$catchmentID <- 
+  igraph::E(combined_movements_graph)$scrCatchmentID
+igraph::V(combined_movements_graph)[vertex_matrix[, 2]]$catchmentID <-
+  igraph::E(combined_movements_graph)$recCatchmentID
+
+combinedMovements.graph <- combined_movements_graph
+vertexList <- vertex_matrix
 
 # Add site category ------------------------------------------------------------
 
