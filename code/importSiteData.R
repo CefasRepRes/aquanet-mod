@@ -349,32 +349,36 @@ foreign_sites <- igraph::V(combined_movements_graph)[igraph::V(combined_movement
 
 combined_movements_graph <- igraph::delete.vertices(graph = combined_movements_graph, 
                                                     v = foreign_sites)
-
-combinedMovements.graph <- combined_movements_graph
+if(length(foreign_sites) != 0) message(paste("Removed", length(foreign_sites),
+                                             "foreign sites from contact network"))
 
 # Tidy igraph ------------------------------------------------------------------
 
 # Remove the self loops and multiple edges from the 2010 to 2012 graph
-combinedMovements.graph2 <- simplify(combinedMovements.graph, 
-                                     remove.multiple=TRUE, 
-                                     remove.loops=TRUE,
-                                     edge.attr.comb=list(withinCatchment="first",
-                                                         catchmentID="first",
-                                                         scrCatchmentID="first",
-                                                         recCatchmentID="first",
-                                                         scrSiteID="first",
-                                                         recSiteID="first",
-                                                         scrName="first",
-                                                         recName="first", 
-                                                         year="first",
-                                                         reference="concat",
-                                                         type="first",
-                                                         movements="sum",
-                                                         "ignore"))
+combined_movements_simplified <- simplify(combined_movements_graph, 
+                                          remove.multiple = TRUE, 
+                                          remove.loops = TRUE,
+                                          edge.attr.comb = list(withinCatchment = "first",
+                                                                catchmentID = "first",
+                                                                scrCatchmentID = "first",
+                                                                recCatchmentID = "first",
+                                                                scrSiteID = "first",
+                                                                recSiteID = "first",
+                                                                year = "first",
+                                                                reference = "concat",
+                                                                type = "first",
+                                                                movements = "sum",
+                                                                "ignore"))
 
-# Remove any vertices with a node degree of zero (i.e. they are unconnected)
-node.degree <- degree(combinedMovements.graph2)
-zero.degree.nodes <- node.degree[node.degree == 0]
-combinedMovements.graph2 <- delete_vertices(graph = combinedMovements.graph2, 
-                                            v = names(zero.degree.nodes))
+# Remove any vertices with a node degree of zero (i.e. unconnected vertices)
+
+node_degree <- igraph::degree(combined_movements_simplified)
+unconnected_nodes <- node_degree[node_degree == 0]
+
+# Add message about unconnected nodes
+if(length(unconnected_nodes) != 0) message(paste("Removed", length(unconnected_nodes),
+                                                 "unconnected sites from contact network"))
+
+combined_movements_simplified <- igraph::delete_vertices(graph = combined_movements_simplified, 
+                                                         v = names(unconnected_nodes))
 
