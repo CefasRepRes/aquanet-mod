@@ -135,4 +135,4 @@ sites_with_catchment <- merge(x = sites_with_catchment,
 write.csv(sites_with_catchment, file = sites_with_catchment_filename)
 
 # Save a table of sites which were not included within any catchment
-write.csv(sites_without_catchment, file = sites_without_catchment_filename)
+write.csv(sites_without_catchment_id, file = sites_without_catchment_filename)
