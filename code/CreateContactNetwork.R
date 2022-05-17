@@ -1,16 +1,11 @@
 #### Create contact network ####
 
-
 # Load required packges ---------------------------------------------------
 
 library(igraph) # Package for creating the contact network
-library(rgdal) # Package for loading geographic datasets 
-               # TODO: update to sf/stars/terra
-library(sp) # Package for plotting geographical points
-library(rgeos) # Package for checking spatial relationships
+library(sf) # Package for working with spatial data
 library(here) # Package for getting filenames
 library(dplyr) # Package for manipulating tables
-              # TODO: see if this can be removed
 
 # Get file locations ------------------------------------------------------
 
@@ -55,11 +50,11 @@ contact_network_filename <- here::here("outputs",
 
 # Run sub-scripts ---------------------------------------------------------
 
-source('code/CheckCatchmentSiteRelationships.R')
+#source('code/CheckCatchmentSiteRelationships.R') # Don't need to run this if you have no duplicates file already
 source('code/importSiteData.R')
 
 # Save completed network 
 
-write.graph(combined_graph_simplified, 
+write.graph(combined_movements_simplified, 
             file = contact_network_filename, 
             format = "graphml")

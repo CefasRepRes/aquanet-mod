@@ -18,7 +18,8 @@ It is based on the original script called `graphSiteLevelStats.R`.
 # Original contact network
 
 ```{r}
-og_network <- igraph::read.graph(file = here::here("combined_graph2.xml"), format = "graphml")
+og_network <- igraph::read.graph(file = here::here("combined_graph2.xml"), 
+                                 format = "graphml")
 ```
 
 ## Basic statistics
@@ -31,4 +32,25 @@ basic_table <- data.frame(nodes = vcount(og_network),
                           assortativity = assortativity.degree(og_network))
 
 knitr::kable(basic_table)
+```
+
+# New contact network
+
+```{r}
+new_network <- igraph::read.graph(file = here::here("outputs",
+                                      "test",
+                                      "combined_movements_simplified_graph.xml"),
+                                  format = "graphml")
+```
+
+## Basic statistics
+
+```{r}
+basic_table_new <- data.frame(nodes = vcount(new_network),
+                          edges = ecount(new_network),
+                          directed = is.directed(new_network),
+                          transitivity = transitivity(new_network),
+                          assortativity = assortativity.degree(new_network))
+
+knitr::kable(basic_table_new)
 ```
