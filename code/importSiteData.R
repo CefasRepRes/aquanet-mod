@@ -169,145 +169,188 @@ igraph::V(combined_movements_graph)[vertex_matrix[, 1]]$catchmentID <-
 igraph::V(combined_movements_graph)[vertex_matrix[, 2]]$catchmentID <-
   igraph::E(combined_movements_graph)$recCatchmentID
 
-combinedMovements.graph <- combined_movements_graph
-vertexList <- vertex_matrix
+#combinedMovements.graph <- combined_movements_graph
+#vertexList <- vertex_matrix
 
 # Add site category ------------------------------------------------------------
 
 # Load
-siteCategory <- read.csv(file = here::here("data",
-                                          "Check_License_Types",
-                                          "SummaryLicensesPerSitewithfarm.csv"), header = TRUE, stringsAsFactors = FALSE)
+site_category <- read.csv(file = here::here("data",
+                                            "Check_License_Types",
+                                            "SummaryLicensesPerSitewithfarm.csv"), 
+                          header = TRUE, stringsAsFactors = FALSE)
 
-# Merge with igraph
-uniqueCodeIDs <- unique(x = c(E(combinedMovements.graph)$scrCode,
-                              E(combinedMovements.graph)$recCode))
-uniqueCodeIDs[!uniqueCodeIDs %in% siteCategory$Code]
+# Check if there are any sites without a category assigned 
+unique_code_ids <- unique(x = c(igraph::E(combined_movements_graph)$scrCode,
+                              igraph::E(combined_movements_graph)$recCode))
 
-siteCategories.ordered <- data.frame(scrCode = E(combinedMovements.graph)$scrCode,
-                                    recCode = E(combinedMovements.graph)$recCode,
-                                    order = 1:ecount(combinedMovements.graph),
-                                    stringsAsFactors = FALSE)
+sites_no_category <- unique_code_ids[!unique_code_ids %in% site_category$Code]
 
-siteCategories.ordered <- merge(x = siteCategories.ordered,
-                               y = siteCategory,
-                               by.x = c('scrCode'),
-                               by.y = c('Code'))
+if(length(sites_no_category) != 0) warning(paste(
+  length(sites_no_category), "sites do not have a category assigned"))
 
-siteCategories.ordered <- merge(x = siteCategories.ordered,
-                               y = siteCategory,
-                               by.x = c('recCode'),
-                               by.y = c('Code'),
-                               suffixes = c('.scr','.rec'))
+# Create a data frame of site categories
 
-siteCategories.ordered <- siteCategories.ordered[order(siteCategories.ordered$order),]
+site_categories_ordered <- data.frame(scrCode = igraph::E(combined_movements_graph)$scrCode,
+                                      recCode = igraph::E(combined_movements_graph)$recCode,
+                                      order = 1:igraph::ecount(combined_movements_graph),
+                                      stringsAsFactors = FALSE)
 
-# Add site type to igraph edge
+# Merge with site categories
+   # Do twice for source and receiving
+site_categories_ordered <- merge(x = site_categories_ordered,
+                                 y = site_category,
+                                 by.x = c('scrCode'),
+                                 by.y = c('Code'))
 
-E(combinedMovements.graph)$scrType <- siteCategories.ordered$Category.scr
-E(combinedMovements.graph)$recType <- siteCategories.ordered$Category.rec
+site_categories_ordered <- merge(x = site_categories_ordered,
+                                 y = site_category,
+                                 by.x = c('recCode'),
+                                 by.y = c('Code'),
+                                 suffixes = c('.scr','.rec'))
 
-# Add true/false site type to edges of igraph
-# TODO: add package and streamline
-######## Edges that are small hatcheries
-E(combinedMovements.graph)$smallhatch.scr <- siteCategories.ordered$SmallHatch.scr
-E(combinedMovements.graph)$smalllhatch.rec <-siteCategories.ordered$SmallHatch.rec
-############# Edges that are large hatcheries
-E(combinedMovements.graph)$largehatch.scr <- siteCategories.ordered$LargeHatch.scr
-E(combinedMovements.graph)$largehatch.rec <- siteCategories.ordered$LargeHatch.rec
-########### Edges that are small restockers
-E(combinedMovements.graph)$smallrestock.scr <- siteCategories.ordered$SmallRestock.scr
-E(combinedMovements.graph)$smallrestock.rec <- siteCategories.ordered$SmallRestock.rec
-########### Edges that are medium restockers
-E(combinedMovements.graph)$mediumrestock.scr <- siteCategories.ordered$MediumRestock.scr
-E(combinedMovements.graph)$mediumrestock.rec <- siteCategories.ordered$MediumRestock.rec
-########### Edges that are large restockers
-E(combinedMovements.graph)$largerestock.scr <- siteCategories.ordered$LargeRestock.scr
-E(combinedMovements.graph)$largerestock.rec <- siteCategories.ordered$LargeRestock.rec
-##### Edges that are small tables
-E(combinedMovements.graph)$smalltable.scr <- siteCategories.ordered$SmallTable.scr
-E(combinedMovements.graph)$smalltable.rec <- siteCategories.ordered$SmallTable.rec
-##### Edges that are medium tables
-E(combinedMovements.graph)$mediumtable.scr <- siteCategories.ordered$MediumTable.scr
-E(combinedMovements.graph)$mediumtable.rec <- siteCategories.ordered$MediumTable.rec
-##### Edges that are large tables
-E(combinedMovements.graph)$largetable.scr <- siteCategories.ordered$LargeTable.scr
-E(combinedMovements.graph)$largetable.rec <- siteCategories.ordered$LargeTable.rec
-##### Edges that are small ongrowers
-E(combinedMovements.graph)$smallongrow.scr <- siteCategories.ordered$SmallOngrow.scr
-E(combinedMovements.graph)$smallongrow.rec <- siteCategories.ordered$SmallOngrow.rec
-##### Edges that are medium ongrowers
-E(combinedMovements.graph)$mediumongrow.scr <- siteCategories.ordered$MediumOngrow.scr
-E(combinedMovements.graph)$mediumongrow.rec <- siteCategories.ordered$MediumOngrow.rec
-##### Edges that are largeongrowers
-E(combinedMovements.graph)$largeongrow.scr <- siteCategories.ordered$LargeOngrow.scr
-E(combinedMovements.graph)$largeongrow.rec <- siteCategories.ordered$LargeOngrow.rec
-##### Edges that are smallfishing
-E(combinedMovements.graph)$smallfish.scr <- siteCategories.ordered$SmallFish.scr
-E(combinedMovements.graph)$smallfish.rec <- siteCategories.ordered$SmallFish.rec
-##### Edges that are medium fishing
-E(combinedMovements.graph)$mediumfish.scr <- siteCategories.ordered$MediumFish.scr
-E(combinedMovements.graph)$mediumfish.rec <- siteCategories.ordered$MediumFish.rec
-##### Edges that are large fishing
-E(combinedMovements.graph)$largefish.scr <- siteCategories.ordered$LargeFish.scr
-E(combinedMovements.graph)$largefish.rec <- siteCategories.ordered$LargeFish.rec
+site_categories_ordered <- site_categories_ordered[order(site_categories_ordered$order),]
+
+# Add site type to igraph edge -------------------------------------------------
+
+# Add as categorical
+igraph::E(combined_movements_graph)$scrType <- site_categories_ordered$Category.scr
+igraph::E(combined_movements_graph)$recType <- site_categories_ordered$Category.rec
+
+# Add site type as logical to edges of igraph
+# TODO: streamline
+
+# Small hatchery
+igraph::E(combined_movements_graph)$smallhatch.scr <- site_categories_ordered$SmallHatch.scr
+igraph::E(combined_movements_graph)$smalllhatch.rec <-site_categories_ordered$SmallHatch.rec
+
+# Large hatchery
+igraph::E(combined_movements_graph)$largehatch.scr <- site_categories_ordered$LargeHatch.scr
+igraph::E(combined_movements_graph)$largehatch.rec <- site_categories_ordered$LargeHatch.rec
+
+# Small restocker
+igraph::E(combined_movements_graph)$smallrestock.scr <- site_categories_ordered$SmallRestock.scr
+igraph::E(combined_movements_graph)$smallrestock.rec <- site_categories_ordered$SmallRestock.rec
+
+# Medium restocker
+igraph::E(combined_movements_graph)$mediumrestock.scr <- site_categories_ordered$MediumRestock.scr
+igraph::E(combined_movements_graph)$mediumrestock.rec <- site_categories_ordered$MediumRestock.rec
+
+# Large restocker
+igraph::E(combined_movements_graph)$largerestock.scr <- site_categories_ordered$LargeRestock.scr
+igraph::E(combined_movements_graph)$largerestock.rec <- site_categories_ordered$LargeRestock.rec
+
+# Small table
+igraph::E(combined_movements_graph)$smalltable.scr <- site_categories_ordered$SmallTable.scr
+igraph::E(combined_movements_graph)$smalltable.rec <- site_categories_ordered$SmallTable.rec
+
+# Medium table
+igraph::E(combined_movements_graph)$mediumtable.scr <- site_categories_ordered$MediumTable.scr
+igraph::E(combined_movements_graph)$mediumtable.rec <- site_categories_ordered$MediumTable.rec
+
+# Large table
+igraph::E(combined_movements_graph)$largetable.scr <- site_categories_ordered$LargeTable.scr
+igraph::E(combined_movements_graph)$largetable.rec <- site_categories_ordered$LargeTable.rec
+
+# Small ongrowers
+igraph::E(combined_movements_graph)$smallongrow.scr <- site_categories_ordered$SmallOngrow.scr
+igraph::E(combined_movements_graph)$smallongrow.rec <- site_categories_ordered$SmallOngrow.rec
+
+#  Medium ongrowers
+igraph::E(combined_movements_graph)$mediumongrow.scr <- site_categories_ordered$MediumOngrow.scr
+igraph::E(combined_movements_graph)$mediumongrow.rec <- site_categories_ordered$MediumOngrow.rec
+
+# Large ongrowers
+igraph::E(combined_movements_graph)$largeongrow.scr <- site_categories_ordered$LargeOngrow.scr
+igraph::E(combined_movements_graph)$largeongrow.rec <- site_categories_ordered$LargeOngrow.rec
+
+# Small fishing
+igraph::E(combined_movements_graph)$smallfish.scr <- site_categories_ordered$SmallFish.scr
+igraph::E(combined_movements_graph)$smallfish.rec <- site_categories_ordered$SmallFish.rec
+
+# Medium fishing
+igraph::E(combined_movements_graph)$mediumfish.scr <- site_categories_ordered$MediumFish.scr
+igraph::E(combined_movements_graph)$mediumfish.rec <- site_categories_ordered$MediumFish.rec
+
+# Large fishing
+igraph::E(combined_movements_graph)$largefish.scr <- site_categories_ordered$LargeFish.scr
+igraph::E(combined_movements_graph)$largefish.rec <- site_categories_ordered$LargeFish.rec
 
 
 # Transfer information on the site's category from edges to vertices -----------
-V(combinedMovements.graph)[vertexList[,1]]$type <- E(combinedMovements.graph)$scrType
-V(combinedMovements.graph)[vertexList[,2]]$type <- E(combinedMovements.graph)$recType
 
+# As categorical
 
-####Vertices that are small hatcheries
-V(combinedMovements.graph)[vertexList[,1]]$smallhatch <- E(combinedMovements.graph)$smallhatch.scr
-V(combinedMovements.graph)[vertexList[,2]]$smallhatch <- E(combinedMovements.graph)$smalllhatch.rec
-### Vertices that are large hatcheries
-V(combinedMovements.graph)[vertexList[,1]]$largehatch <- E(combinedMovements.graph)$largehatch.scr
-V(combinedMovements.graph)[vertexList[,2]]$largehatch <- E(combinedMovements.graph)$largehatch.rec
-#### Vertices that are small restockers
-V(combinedMovements.graph)[vertexList[,1]]$smallrestock <- E(combinedMovements.graph)$smallrestock.scr
-V(combinedMovements.graph)[vertexList[,2]]$smallrestock <- E(combinedMovements.graph)$smallrestock.rec
-#### Vertices that are mwsium restockers
-V(combinedMovements.graph)[vertexList[,1]]$mediumrestock <- E(combinedMovements.graph)$mediumrestock.scr
-V(combinedMovements.graph)[vertexList[,2]]$mediumrestock <- E(combinedMovements.graph)$mediumrestock.rec
-##### Vertices that are large restockers
-V(combinedMovements.graph)[vertexList[,1]]$largerestock <- E(combinedMovements.graph)$largerestock.scr
-V(combinedMovements.graph)[vertexList[,2]]$largerestock <- E(combinedMovements.graph)$largerestock.rec
-####Vertices that are small tables
-V(combinedMovements.graph)[vertexList[,1]]$smalltable <- E(combinedMovements.graph)$smalltable.scr
-V(combinedMovements.graph)[vertexList[,2]]$smalltable <- E(combinedMovements.graph)$smalltable.rec
-####Vertices that are medium tables
-V(combinedMovements.graph)[vertexList[,1]]$mediumtable <- E(combinedMovements.graph)$mediumtable.scr
-V(combinedMovements.graph)[vertexList[,2]]$mediumtable <- E(combinedMovements.graph)$mediumtable.rec
-####Vertices that are large tables
-V(combinedMovements.graph)[vertexList[,1]]$largetable <- E(combinedMovements.graph)$largetable.scr
-V(combinedMovements.graph)[vertexList[,2]]$largetable <- E(combinedMovements.graph)$largetable.rec
-####Vertices that are small ongrowers
-V(combinedMovements.graph)[vertexList[,1]]$smallongrow <- E(combinedMovements.graph)$smallongrow.scr
-V(combinedMovements.graph)[vertexList[,2]]$smallongrow <- E(combinedMovements.graph)$smallongrow.rec
-####Vertices that are medium ongrowers
-V(combinedMovements.graph)[vertexList[,1]]$mediumongrow <- E(combinedMovements.graph)$mediumongrow.scr
-V(combinedMovements.graph)[vertexList[,2]]$mediumongrow <- E(combinedMovements.graph)$mediumongrow.rec
-####Vertices that are large ongrowers
-V(combinedMovements.graph)[vertexList[,1]]$largeongrow <- E(combinedMovements.graph)$largeongrow.scr
-V(combinedMovements.graph)[vertexList[,2]]$largeongrow <- E(combinedMovements.graph)$largeongrow.rec
-#####Vertices that are small fish
-V(combinedMovements.graph)[vertexList[,1]]$smallfish <- E(combinedMovements.graph)$smallfish.scr
-V(combinedMovements.graph)[vertexList[,2]]$smallfish <- E(combinedMovements.graph)$smallfish.rec
-####Vertices that are medium fish
-V(combinedMovements.graph)[vertexList[,1]]$mediumfish <- E(combinedMovements.graph)$mediumfish.scr
-V(combinedMovements.graph)[vertexList[,2]]$mediumfish <- E(combinedMovements.graph)$mediumfish.rec
-#####Vertices that are large fish
-V(combinedMovements.graph)[vertexList[,1]]$largefish <- E(combinedMovements.graph)$largefish.scr
-V(combinedMovements.graph)[vertexList[,2]]$largefish <- E(combinedMovements.graph)$largefish.rec
+igraph::V(combined_movements_graph)[vertex_matrix[,1]]$type <- igraph::E(combined_movements_graph)$scrType
+igraph::V(combined_movements_graph)[vertex_matrix[,2]]$type <- igraph::E(combined_movements_graph)$recType
 
-# Remove any foreign sites which have not already been removed, due to lack of location data ----
-# or falling outside of one of the UK river catchments
+# As logical
 
-foreign.vertices <- V(combinedMovements.graph)[V(combinedMovements.graph)$type == "Foreign"]
+# Small hatchery
+igraph::V(combined_movements_graph)[vertex_matrix[, 1]]$smallhatch <- igraph::E(combined_movements_graph)$smallhatch.scr
+igraph::V(combined_movements_graph)[vertex_matrix[, 2]]$smallhatch <- igraph::E(combined_movements_graph)$smalllhatch.rec
 
-combinedMovements.graph <- delete.vertices(graph = combinedMovements.graph, 
-                                           v = foreign.vertices)
+# Large hatchery
+igraph::V(combined_movements_graph)[vertex_matrix[, 1]]$largehatch <- igraph::E(combined_movements_graph)$largehatch.scr
+igraph::V(combined_movements_graph)[vertex_matrix[, 2]]$largehatch <- igraph::E(combined_movements_graph)$largehatch.rec
+
+# Small restockers
+igraph::V(combined_movements_graph)[vertex_matrix[, 1]]$smallrestock <- igraph::E(combined_movements_graph)$smallrestock.scr
+igraph::V(combined_movements_graph)[vertex_matrix[, 2]]$smallrestock <- igraph::E(combined_movements_graph)$smallrestock.rec
+
+# Medium restockers
+igraph::V(combined_movements_graph)[vertex_matrix[, 1]]$mediumrestock <- igraph::E(combined_movements_graph)$mediumrestock.scr
+igraph::V(combined_movements_graph)[vertex_matrix[, 2]]$mediumrestock <- igraph::E(combined_movements_graph)$mediumrestock.rec
+
+# Large restockers
+igraph::V(combined_movements_graph)[vertex_matrix[, 1]]$largerestock <- igraph::E(combined_movements_graph)$largerestock.scr
+igraph::V(combined_movements_graph)[vertex_matrix[, 2]]$largerestock <- igraph::E(combined_movements_graph)$largerestock.rec
+
+# Small table
+igraph::V(combined_movements_graph)[vertex_matrix[, 1]]$smalltable <- igraph::E(combined_movements_graph)$smalltable.scr
+igraph::V(combined_movements_graph)[vertex_matrix[, 2]]$smalltable <- igraph::E(combined_movements_graph)$smalltable.rec
+
+# Medium table
+igraph::V(combined_movements_graph)[vertex_matrix[, 1]]$mediumtable <- igraph::E(combined_movements_graph)$mediumtable.scr
+igraph::V(combined_movements_graph)[vertex_matrix[, 2]]$mediumtable <- igraph::E(combined_movements_graph)$mediumtable.rec
+
+# Large table
+igraph::V(combined_movements_graph)[vertex_matrix[, 1]]$largetable <- igraph::E(combined_movements_graph)$largetable.scr
+igraph::V(combined_movements_graph)[vertex_matrix[, 2]]$largetable <- igraph::E(combined_movements_graph)$largetable.rec
+
+# Small ongrowers
+
+igraph::V(combined_movements_graph)[vertex_matrix[,1]]$smallongrow <- igraph::E(combined_movements_graph)$smallongrow.scr
+igraph::V(combined_movements_graph)[vertex_matrix[,2]]$smallongrow <- igraph::E(combined_movements_graph)$smallongrow.rec
+
+# Medium ongrowers
+igraph::V(combined_movements_graph)[vertex_matrix[, 1]]$mediumongrow <- igraph::E(combined_movements_graph)$mediumongrow.scr
+igraph::V(combined_movements_graph)[vertex_matrix[, 2]]$mediumongrow <- igraph::E(combined_movements_graph)$mediumongrow.rec
+
+# Large ongrowers
+igraph::V(combined_movements_graph)[vertex_matrix[, 1]]$largeongrow <- igraph::E(combined_movements_graph)$largeongrow.scr
+igraph::V(combined_movements_graph)[vertex_matrix[, 2]]$largeongrow <- igraph::E(combined_movements_graph)$largeongrow.rec
+
+# Small fish
+igraph::V(combined_movements_graph)[vertex_matrix[, 1]]$smallfish <- igraph::E(combined_movements_graph)$smallfish.scr
+igraph::V(combined_movements_graph)[vertex_matrix[, 2]]$smallfish <- igraph::E(combined_movements_graph)$smallfish.rec
+
+# Medium fish
+igraph::V(combined_movements_graph)[vertex_matrix[, 1]]$mediumfish <- igraph::E(combined_movements_graph)$mediumfish.scr
+igraph::V(combined_movements_graph)[vertex_matrix[, 2]]$mediumfish <- igraph::E(combined_movements_graph)$mediumfish.rec
+
+# Large fish
+igraph::V(combined_movements_graph)[vertex_matrix[, 1]]$largefish <- igraph::E(combined_movements_graph)$largefish.scr
+igraph::V(combined_movements_graph)[vertex_matrix[, 2]]$largefish <- igraph::E(combined_movements_graph)$largefish.rec
+
+# Remove any foreign sites -----------------------------------------------------
+
+foreign_sites <- igraph::V(combined_movements_graph)[igraph::V(combined_movements_graph)$type == "Foreign"]
+
+combined_movements_graph <- igraph::delete.vertices(graph = combined_movements_graph, 
+                                                    v = foreign_sites)
+
+combinedMovements.graph <- combined_movements_graph
 
 # Tidy igraph ------------------------------------------------------------------
 
