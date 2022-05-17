@@ -2,77 +2,85 @@
 
 # Load data --------------------------------------------------------------------
 
-# Live fish movements
-section30Movements.CSV <- read.csv(section_30_lfm_filename,colClasses="character")
-farmMovements.CSV <- read.csv(farm_to_farm_lfm_filename,colClasses="character")
-
-# Import List of Site Locations, and add Catchment Details to Section 30 and Farm to Farm Movements
+# Live fish movements (LFMs)
+section_30_movements <- read.csv(section_30_lfm_filename,
+                                 colClasses = "character")
+farm_movements <- read.csv(farm_to_farm_lfm_filename,
+                           colClasses = "character")
 
 # Import site locations
-ListSiteLocations.CSV <- read.csv(site_locs_duplicates_removed_filename,
-                                  stringsAsFactors = FALSE)[,c('siteID','ID','NAME','TRUNK_CODE')]
+site_locs_dupes_removed <- read.csv(site_locs_duplicates_removed_filename,
+                                    stringsAsFactors = FALSE)[,c('siteID','ID','NAME','TRUNK_CODE')]
 
-# Merge with live fish movements
-   # Do twice for section 30 and farm to get source and receiving site
-section30Movements.CSV <- merge(x = section30Movements.CSV,
-                               y = ListSiteLocations.CSV,
-                               all.x = TRUE,
-                               sort = TRUE,
-                               by.x = "SourceSiteID",
-                               by.y = "siteID")
+# Merge LFMs and site locations
 
-section30Movements.CSV <- merge(x = section30Movements.CSV,
-                               y = ListSiteLocations.CSV,
-                               all.x = TRUE,
-                               sort = TRUE,
-                               by.x = "ReceivingSiteID",
-                               by.y = "siteID",
-                               suffixes = c('.Source','.Receiving'))
+# Section 30 movements - source
+section_30_movements <- merge(x = section_30_movements,
+                              y = site_locs_dupes_removed,
+                              all.x = TRUE,
+                              sort = TRUE,
+                              by.x = "SourceSiteID",
+                              by.y = "siteID")
 
-farmMovements.CSV <- merge(x = farmMovements.CSV,
-                          y = ListSiteLocations.CSV,
-                          all.x = TRUE,
-                          sort = TRUE,
-                          by.x = "ScrSiteID",
-                          by.y = "siteID")
+# Section 30 movements - receiving
+section_30_movements <- merge(x = section_30_movements,
+                              y = site_locs_dupes_removed,
+                              all.x = TRUE,
+                              sort = TRUE,
+                              by.x = "ReceivingSiteID",
+                              by.y = "siteID",
+                              suffixes = c('.Source','.Receiving'))
 
-farmMovements.CSV <- merge(x = farmMovements.CSV,
-                          y = ListSiteLocations.CSV,
-                          all.x = TRUE,
-                          sort = TRUE,
-                          by.x = "RecSiteID",
-                          by.y = "siteID",
-                          suffixes = c('.Source','.Receiving'))
+# Farm to farm movements - source
+farm_movements <- merge(x = farm_movements,
+                        y = site_locs_dupes_removed,
+                        all.x = TRUE,
+                        sort = TRUE,
+                        by.x = "ScrSiteID",
+                        by.y = "siteID")
+
+# Farm to farm movements - receiving
+farm_movements <- merge(x = farm_movements,
+                        y = site_locs_dupes_removed,
+                        all.x = TRUE,
+                        sort = TRUE,
+                        by.x = "RecSiteID",
+                        by.y = "siteID",
+                        suffixes = c('.Source','.Receiving'))
 
 # Remove any records that have not been matched against a catchment
 
-section30Movements.CSV <- subset(section30Movements.CSV, !(is.na(section30Movements.CSV$ID.Source) | is.na(section30Movements.CSV$ID.Receiving)))
-farmMovements.CSV <- subset(farmMovements.CSV, !(is.na(farmMovements.CSV$ID.Source) | is.na(farmMovements.CSV$ID.Receiving)))
+section_30_movements <- section_30_movements %>%
+  dplyr::filter(!is.na(ID.Source)) %>%
+  dplyr::filter(!is.na(ID.Receiving))
 
-# Convert date to R compatible format
+farm_movements <- farm_movements %>%
+  dplyr::filter(!is.na(ID.Source)) %>%
+  dplyr::filter(!is.na(ID.Receiving))
 
-section30Movements.CSV$ConsentStart <- as.Date(section30Movements.CSV$ConsentStart, format = "%d/%b/%y")
-section30Movements.CSV$ConsentStartYear <- as.character(section30Movements.CSV$ConsentStart, format = "%Y")
+# Convert date to R compatible format for section 30 records
 
-# Combine the table of source and destination farms and convert the format from an array to a matrix
+section_30_movements$ConsentStart <- as.Date(section_30_movements$ConsentStart, 
+                                             format = "%d/%m/%Y")
+section_30_movements$ConsentStartYear <- as.character(section_30_movements$ConsentStart, 
+                                                      format = "%Y")
 
-section30Movements.array <- cbind(section30Movements.CSV[,c('SourceSiteID')],section30Movements.CSV[,c('ReceivingSiteID')])
-farmMovements.array <- cbind(farmMovements.CSV[,c('ScrSiteID')],farmMovements.CSV[,c('RecSiteID')])
+# Combine the table of source and destination farms
 
-# TODO: Already a matrix so remove this bit
-# section30Movements.matrix <- as.matrix(section30Movements.array)
-# farmMovements.matrix <- as.matrix(farmMovements.array)
+section_30_movements_matrix <- cbind(section_30_movements[,c('SourceSiteID')],
+                                     section_30_movements[,c('ReceivingSiteID')])
+farm_movements_matrix <- cbind(farm_movements[,c('ScrSiteID')],
+                               farm_movements[,c('RecSiteID')])
 
-# Generate igraph --------------------------------------------------------------
+# Remove later
 
-# Generate a farmMovements and Section30Movements graph
-# TODO: remove if not needed
-#section30Movements.graph = graph.edgelist(section30Movements.matrix)
-#farmMovements.graph = graph.edgelist(farmMovements.matrix)
+section30Movements.CSV <- section_30_movements
+farmMovements.CSV <- farm_movements
 
-# Create a graph which is the union of the Farm to Farm and the Section 30 movements
+# Generate igraph of all LFMs --------------------------------------------------
 
-combinedMovements.array <- rbind(section30Movements.array,farmMovements.array)
+combinedMovements.array <- rbind(section_30_movements_matrix,
+                                 farm_movements_matrix)
 combinedMovements.graph <- graph.edgelist(combinedMovements.array)
 
 # Add information to network edges ---------------------------------------------
