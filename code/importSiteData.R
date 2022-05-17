@@ -65,51 +65,86 @@ section_30_movements$ConsentStart <- as.Date(section_30_movements$ConsentStart,
 section_30_movements$ConsentStartYear <- as.character(section_30_movements$ConsentStart, 
                                                       format = "%Y")
 
-# Combine the table of source and destination farms
+# Combine section 30 and farm LFMs into a single data frame --------------------
 
-section_30_movements_matrix <- cbind(section_30_movements[,c('SourceSiteID')],
-                                     section_30_movements[,c('ReceivingSiteID')])
-farm_movements_matrix <- cbind(farm_movements[,c('ScrSiteID')],
-                               farm_movements[,c('RecSiteID')])
-
-# Remove later
-
-section30Movements.CSV <- section_30_movements
-farmMovements.CSV <- farm_movements
+combined_movements <- data.frame(scrSiteID = c(section_30_movements$SourceSiteID,
+                                               farm_movements$ScrSiteID),
+                                 recSiteID = c(section_30_movements$ReceivingSiteID,
+                                               farm_movements$RecSiteID),
+                                 scrPersonID = c(section_30_movements$SourcePersonID,
+                                                 farm_movements$ScrPersonID),
+                                 recPersonID = c(section_30_movements$ReceivingPersonID,
+                                                 farm_movements$DestFarmPersonID),
+                                 scrCode = c(section_30_movements$SourceCode,
+                                             farm_movements$Scr_Code),
+                                 recCode = c(section_30_movements$ReceivingCode,
+                                             farm_movements$Rec_Code),
+                                 scrCatchmentID = c(section_30_movements$TRUNK_CODE.Source,
+                                                    farm_movements$TRUNK_CODE.Source),
+                                 recCatchmentID = c(section_30_movements$TRUNK_CODE.Receiving,
+                                                    farm_movements$TRUNK_CODE.Receiving),
+                                 year = c(section_30_movements$ConsentStartYear,
+                                          farm_movements$ProdYear),
+                                 reference = c(section_30_movements$Refno,
+                                               farm_movements$ProductionID))
 
 # Generate igraph of all LFMs --------------------------------------------------
 
-combinedMovements.array <- rbind(section_30_movements_matrix,
-                                 farm_movements_matrix)
-combinedMovements.graph <- graph.edgelist(combinedMovements.array)
+# Combine section 30 and farm LFMs
+combined_movement_ids <- combined_movements %>% dplyr::select(scrSiteID,
+                                                              recSiteID)
+combined_movement_ids <- as.matrix(combined_movement_ids)
+
+# Create igraph
+combined_movements_graph <- igraph::graph.edgelist(combined_movement_ids)
+
+# # Remove 
+# 
+# section30Movements.CSV <- section_30_movements
+# farmMovements.CSV <- farm_movements
+# 
+# combinedMovements.graph <- combined_movements_graph
 
 # Add information to network edges ---------------------------------------------
 
 # Site Details
-   # TODO: specify package
-   # TODO: figure out a way to streamline this
-E(combinedMovements.graph)$scrPersonID <- c(section30Movements.CSV[,c('SourcePersonID')],farmMovements.CSV[,c('SourceFarmPersonID')])
-E(combinedMovements.graph)$recPersonID <- c(section30Movements.CSV[,c('ReceivingPersonID')],farmMovements.CSV[,c('DestFarmPersonID')])
-E(combinedMovements.graph)$scrCode <- c(section30Movements.CSV[,c('SourceCode')],farmMovements.CSV[,c('Scr_Code')])
-E(combinedMovements.graph)$recCode <- c(section30Movements.CSV[,c('ReceivingCode')],farmMovements.CSV[,c('Rec_Code')])
-E(combinedMovements.graph)$scrSiteID <- c(section30Movements.CSV[,c('SourceSiteID')],farmMovements.CSV[,c('ScrSiteID')])
-E(combinedMovements.graph)$recSiteID <- c(section30Movements.CSV[,c('ReceivingSiteID')],farmMovements.CSV[,c('RecSiteID')])
-E(combinedMovements.graph)$scrName <- c(section30Movements.CSV[,c('Source')],farmMovements.CSV[,c('Scr_MainName')])
-E(combinedMovements.graph)$recName <- c(section30Movements.CSV[,c('RecWater')],farmMovements.CSV[,c('Rec_MainName')])
-E(combinedMovements.graph)$scrCatchmentID <- c(section30Movements.CSV[,c('TRUNK_CODE.Source')],farmMovements.CSV[,c('TRUNK_CODE.Source')])
-E(combinedMovements.graph)$recCatchmentID <- c(section30Movements.CSV[,c('TRUNK_CODE.Receiving')],farmMovements.CSV[,c('TRUNK_CODE.Receiving')])
-E(combinedMovements.graph)$withinCatchment <- E(combinedMovements.graph)$scrCatchmentID == E(combinedMovements.graph)$recCatchmentID
+   # TODO: figure out a way to streamline this - loops in igraph are hard
 
-# Year of movement and unique edge reference
+# Person ID
+igraph::E(combined_movements_graph)$scrPersonID <- combined_movements$scrPersonID
+igraph::E(combined_movements_graph)$recPersonID <- combined_movements$recPersonID
 
-E(combinedMovements.graph)$year <- c(section30Movements.CSV[,c('ConsentStartYear')],farmMovements.CSV[,c('ProdYear')])
-E(combinedMovements.graph)$reference <- c(section30Movements.CSV[,c('Refno')],farmMovements.CSV[,c('ProductionID')])
+# Code
+igraph::E(combined_movements_graph)$scrCode <- combined_movements$scrCode
+igraph::E(combined_movements_graph)$recCode <- combined_movements$recCode
 
-# Calculate the number of movements such that farm2farm movements are taken direct from the database, whilst section30 movements count as one movement each
+# Site ID
+igraph::E(combined_movements_graph)$scrSiteID <- combined_movements$scrSiteID
+igraph::E(combined_movements_graph)$recSiteID <- combined_movements$recSiteID
 
-E(combinedMovements.graph)$movements <- as.numeric(c(rep(1,dim(section30Movements.CSV)[1]),farmMovements.CSV[,c('NumberOfMovementsSource')]))
-E(combinedMovements.graph)$movements[E(combinedMovements.graph)$movements == -1] <- 1
+# Catchment ID
+igraph::E(combined_movements_graph)$scrCatchmentID <- combined_movements$scrCatchmentID
+igraph::E(combined_movements_graph)$recCatchmentID <- combined_movements$recCatchmentID
 
+# Within catchment movements (logical)
+igraph::E(combined_movements_graph)$withinCatchment <- 
+  igraph::E(combined_movements_graph)$scrCatchmentID == igraph::E(combined_movements_graph)$recCatchmentID
+
+# Year of movement
+igraph::E(combined_movements_graph)$year <- combined_movements$year
+
+# Unique reference
+igraph::E(combined_movements_graph)$reference <- combined_movements$reference
+
+# Number of movements
+   # Farm to farm = take from database
+   # Section 30 = always counts as one
+igraph::E(combined_movements_graph)$movements <- as.numeric(c(rep(1, dim(section_30_movements)[1]),
+                                                              farm_movements[,c('NumberOfMovementsSource')]))
+igraph::E(combined_movements_graph)$movements[E(combined_movements_graph)$movements == -1] <- 1
+
+
+combinedMovements.graph <- combined_movements_graph
 # Transfer the attribute information from the edges to the vertices, by checking edge connectivity ----
 
 # Store information on edge connectivity
@@ -128,9 +163,6 @@ V(combinedMovements.graph)[vertexList[,2]]$PersonID <- E(combinedMovements.graph
 
 V(combinedMovements.graph)[vertexList[,1]]$code <- E(combinedMovements.graph)$scrCode
 V(combinedMovements.graph)[vertexList[,2]]$code <- E(combinedMovements.graph)$recCode
-
-V(combinedMovements.graph)[vertexList[,1]]$siteName <- E(combinedMovements.graph)$scrName
-V(combinedMovements.graph)[vertexList[,2]]$siteName <- E(combinedMovements.graph)$recName
 
 V(combinedMovements.graph)[vertexList[,1]]$catchmentID <- E(combinedMovements.graph)$scrCatchmentID
 V(combinedMovements.graph)[vertexList[,2]]$catchmentID <- E(combinedMovements.graph)$recCatchmentID
@@ -297,3 +329,4 @@ node.degree <- degree(combinedMovements.graph2)
 zero.degree.nodes <- node.degree[node.degree == 0]
 combinedMovements.graph2 <- delete_vertices(graph = combinedMovements.graph2, 
                                             v = names(zero.degree.nodes))
+
