@@ -256,60 +256,6 @@ V(combinedMovements.graph)[vertexList[,2]]$mediumfish <- E(combinedMovements.gra
 V(combinedMovements.graph)[vertexList[,1]]$largefish <- E(combinedMovements.graph)$largefish.scr
 V(combinedMovements.graph)[vertexList[,2]]$largefish <- E(combinedMovements.graph)$largefish.rec
 
-
-# Transfer site type vertices back to edges ------------------------------------
-# TODO: check because this seems circular
-# Sometimes the same site has multiple records in the person table
-# If so, use the last movement record which mentions a given site
-# This should ensure that sites are classified based on an associated person record from farm to farm, rather than S30, movement records
-# It is assumed that any cases where person records refer to the same site are due to issues with the less well curated S30 database (though I did check, for this specific dataset)
-# It is also assumed that S30 records refer to sites with a lower risk profile (which, again, I did check, for this specific dataset)
-E(combinedMovements.graph)$scrType <- V(combinedMovements.graph)[vertexList[,1]]$type
-E(combinedMovements.graph)$recType <- V(combinedMovements.graph)[vertexList[,2]]$type
-
-#########
-E(combinedMovements.graph)$smallhatch.scr <- V(combinedMovements.graph)[vertexList[,1]]$smallhatch
-E(combinedMovements.graph)$smallhatch.rec <- V(combinedMovements.graph)[vertexList[,2]]$smallhatch
-
-E(combinedMovements.graph)$largehatch.scr <- V(combinedMovements.graph)[vertexList[,1]]$largehatch
-E(combinedMovements.graph)$largehatch.rec <- V(combinedMovements.graph)[vertexList[,2]]$largehatch
-
-E(combinedMovements.graph)$smallrestock.scr <- V(combinedMovements.graph)[vertexList[,1]]$smallrestock
-E(combinedMovements.graph)$smallrestock.rec <- V(combinedMovements.graph)[vertexList[,2]]$smallrestock
-
-E(combinedMovements.graph)$mediumrestock.scr <- V(combinedMovements.graph)[vertexList[,1]]$mediumrestock
-E(combinedMovements.graph)$mediumrestock.rec <- V(combinedMovements.graph)[vertexList[,2]]$mediumrestock
-
-E(combinedMovements.graph)$largerestock.scr <- V(combinedMovements.graph)[vertexList[,1]]$largerestock
-E(combinedMovements.graph)$largerestock.rec <- V(combinedMovements.graph)[vertexList[,2]]$largerestock
-
-E(combinedMovements.graph)$smalltable.scr <- V(combinedMovements.graph)[vertexList[,1]]$smalltable
-E(combinedMovements.graph)$smalltable.rec <- V(combinedMovements.graph)[vertexList[,2]]$smalltable
-
-E(combinedMovements.graph)$mediumtable.scr <- V(combinedMovements.graph)[vertexList[,1]]$mediumtable
-E(combinedMovements.graph)$mediumtable.rec <- V(combinedMovements.graph)[vertexList[,2]]$mediumtable
-
-E(combinedMovements.graph)$largetable.scr <- V(combinedMovements.graph)[vertexList[,1]]$largetable
-E(combinedMovements.graph)$largetable.rec <- V(combinedMovements.graph)[vertexList[,2]]$largetable
-
-E(combinedMovements.graph)$smallongrow.scr <- V(combinedMovements.graph)[vertexList[,1]]$smallongrow
-E(combinedMovements.graph)$smallongrow.rec <- V(combinedMovements.graph)[vertexList[,2]]$smallongrow
-
-E(combinedMovements.graph)$mediumongrow.scr <- V(combinedMovements.graph)[vertexList[,1]]$mediumongrow
-E(combinedMovements.graph)$mediumongrow.rec <- V(combinedMovements.graph)[vertexList[,2]]$mediumongrow
-
-E(combinedMovements.graph)$largeongrow.scr <- V(combinedMovements.graph)[vertexList[,1]]$largeongrow
-E(combinedMovements.graph)$largeongrow.rec <- V(combinedMovements.graph)[vertexList[,2]]$largeongrow
-
-E(combinedMovements.graph)$smallfish.scr <- V(combinedMovements.graph)[vertexList[,1]]$smallfish
-E(combinedMovements.graph)$smallfish.rec <- V(combinedMovements.graph)[vertexList[,2]]$smallfish
-
-E(combinedMovements.graph)$mediumfish.scr <- V(combinedMovements.graph)[vertexList[,1]]$mediumfish
-E(combinedMovements.graph)$mediumfish.rec <- V(combinedMovements.graph)[vertexList[,2]]$mediumfish
-
-E(combinedMovements.graph)$largefish.scr <- V(combinedMovements.graph)[vertexList[,1]]$largefish
-E(combinedMovements.graph)$largefish.rec <- V(combinedMovements.graph)[vertexList[,2]]$largefish
-
 # Remove any foreign sites which have not already been removed, due to lack of location data ----
 # or falling outside of one of the UK river catchments
 
