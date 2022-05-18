@@ -161,6 +161,6 @@ if(nrow(uncategorised_sites) > 0) warning(paste("There are", nrow(uncategorised_
 
 # Get site to site distances ---------------------------------------------------
 
-graph_estimate_site_distances <- aquanet::createDistanceMatrix(graph_full, 
-                                                               site_locs_duplicates_removed_filename,
-                                                               crs_epsg = BNG_crs)
+site_distances_matrix <- aquanet::createDistanceMatrix(graph_full, 
+                                                       site_locs_duplicates_removed_filename,
+                                                       crs_epsg = BNG_crs)
