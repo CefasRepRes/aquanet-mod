@@ -2,7 +2,7 @@
 
 # Set up British National Grid CRS ---------------------------------------------
 
-BNG_crs <- st_crs(27700) # Number is the EPSG for the British National Grid
+BNG_crs <- sf::st_crs(27700) # Number is the EPSG for the British National Grid
 
 # Get LFM records --------------------------------------------------------------
 
