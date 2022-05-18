@@ -49,3 +49,6 @@ vignettes/*.pdf
 
 # HTML files
 *.html
+
+# Text files
+*.txt
