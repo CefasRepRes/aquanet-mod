@@ -16,116 +16,103 @@ detach("package:plyr", unload = TRUE) # TODO: stop using plyr if possible
 # Set display options
 options(width = 1000)
 
-# Set location to save results
+# Set ocation to save results
   # This should be transportable if using the R project
-locationSaveResults.Partial <- here::here("outputs")
+outputs_filepath <- here::here("outputs")
 
 # Set species
 Species <- "Salmon - V3" # This is the name of the folder under 'SQL Files'
                          # TODO: work out if the V3 is necessary
 
 # Set parameter file location
-LocationParameterFile <- here::here("data", 
-                                    "parameterisation",
-                                    "SimulationParameters_SimpleCase.csv")
+parameter_filepath <- here::here("data", 
+                                 "parameterisation",
+                                 "SimulationParameters_SimpleCase.csv")
 # This is the name of the parameter file
 
 # Set the location of the GIS root directory
-LocationGISRootDirectory <- here::here("data",
-                                       "EA_Catchments")
+gis_filepath <- here::here("data",
+                           "EA_Catchments")
 
-
-# Check the correct number of parameters have been supplied ---------------
-
-# TODO: this seems very circular. Remove.
+# Load in parameters -----------------------------------------------------------
 
 # Load parameter file
-ParameterFile <- read.csv(file = LocationParameterFile, 
-                          header = TRUE) # TODO: streamline?
+parameter_file <- read.csv(file = parameter_filepath, 
+                           header = TRUE) 
+
+# Set scenario name
+
+scenario_name <- "long_test"
 
 # Put scenario name into rowname
-   # TODO: figure out a better way of naming the folders according to which scenario is run
-rownames(ParameterFile) <- ParameterFile$Range
-ParameterFile$Range <- NULL
+rownames(parameter_file) <- scenario_name
+parameter_file$Range <- NULL
 
 # Get model setup parameters
-modelSetupParameters <- c("River.Downstream.Current_speed",
-                          "River.Downstream_Transmission_Const",
-                          "River.UpDownstream.Current_speed",
-                          "River.UpDownstream_Transmission_Const")
+river_transmission_parameters <- c("River.Downstream.Current_speed",
+                                   "River.Downstream_Transmission_Const",
+                                   "River.UpDownstream.Current_speed",
+                                   "River.UpDownstream_Transmission_Const")
 
-# Remove model setup parameters from list of runtime parameters
-   # TODO: arrange so this doesn't have to be done
-runTimeParameters <- colnames(ParameterFile)[!colnames(ParameterFile) %in% modelSetupParameters]
-
-# Check what setup parameters have been supplied 
-modelSetupParametersSupplied <- colnames(ParameterFile)[colnames(ParameterFile) %in% modelSetupParameters]
+# Get names of variable parameters
+run_time_parameters <- colnames(parameter_file)
 
 # Check all required setup parameters have been supplied
-if (length(modelSetupParameters) != length(modelSetupParametersSupplied)) {
-  print("Not all of the required parameters have been supplied.")
+if (length(run_time_parameters) < 12) {
+   print("Not all of the required parameters have been supplied.")
+} else { 
+   if (length(run_time_parameters) > 12)
+      print("An excess of parameters have been supplied.")
 }
-
-
-# Get a list of parameters ------------------------------------------------
-
-# TODO:  this does nothing. Remove.
-
-listParameters <- list(ParameterFile, 
-                       runTimeParameters, 
-                       modelSetupParameters, 
-                       locationSaveResults.Partial)
-
-ParameterFile <- listParameters[[1]]
-runTimeParameters <- listParameters[[2]]
-modelSetupParameters <- listParameters[[3]]
-locationSaveResults.Partial <- listParameters[[4]]
-
-range <- row.names(ParameterFile)[1]
-Median <- row.names(ParameterFile)[1]
-
-
-# Run the model -----------------------------------------------------------
 
 # Clear the startup screen
 cat("\014")
 
-# Get a list of runtime and setup parameters
-   # TODO: update names as these are data frames
-ListRunTimeParameters <- as.vector(ParameterFile[c(Median), runTimeParameters])
-ListModelSetupParameters <- as.vector(ParameterFile[c(Median), modelSetupParameters])
-
-# Print scenario name
-print(c(range))
-
 # Print parameters
-print(str(as.list(ListRunTimeParameters)))
-print(str(as.list(ListModelSetupParameters)))
+print(str(as.list(run_time_parameters)))
+print(str(as.list(river_transmission_parameters)))
 
-# Create directories to save results
-   # TODO: change range to scenario name
-locationSaveResults <- paste(locationSaveResults.Partial, range, sep = "/") # Create file path
-dir.create(file.path(locationSaveResults), showWarnings = FALSE) # Create results folder
-dir.create(file.path(locationSaveResults, "Summary"), showWarnings = FALSE) # Create summary folder
-dir.create(file.path(locationSaveResults, "FullDetails"), showWarnings = FALSE) # Create full details folder
-dir.create(file.path(locationSaveResults, "Code"), showWarnings = FALSE) # Create code folder
+# Get parameters as list of numbers
 
-# Save code and data for reproducibility
-list.coding.files = list.files(file.path("code"))
-file.copy(file.path("code", list.coding.files), 
-          file.path(locationSaveResults, "Code"),
+run_time_parameters_list <- unname(parameter_file)
+
+# Create directories to save results -------------------------------------------
+
+# Get the filepath
+save_results_filepath <- paste(outputs_filepath, scenario_name, sep = "/")
+
+# Overall results file
+dir.create(file.path(save_results_filepath), showWarnings = FALSE)
+
+# Batch results folder
+dir.create(file.path(save_results_filepath, "batch_results"), showWarnings = FALSE)
+
+# Full details folder
+   # TODO: check if this is actually needed
+dir.create(file.path(save_results_filepath, "full_details"), showWarnings = FALSE)
+
+# Code folder
+dir.create(file.path(save_results_filepath, "code"), showWarnings = FALSE)
+
+# Save code and data for reproducibility ---------------------------------------
+
+# Get list of coding files
+coding_files <- list.files(file.path("code"))
+
+# Copy code to new coding folder
+file.copy(file.path("code", coding_files), 
+          file.path(save_results_filepath, "code"),
           overwrite = TRUE)
-file.copy(LocationParameterFile, 
-          file.path(locationSaveResults, "Code"),
+file.copy(parameter_filepath, 
+          file.path(save_results_filepath, "code"),
           overwrite = TRUE)
 
 # Print where results are saved
-print(locationSaveResults)
-
+message(paste("Results are saved in:", save_results_filepath))
 
 # Load and run components of AquaNet model --------------------------------
 
 source('code/CreateContactNetwork.R')
-source('code/PrepareModelObjects.R', local = TRUE)
+source('code/PrepareModelObjects.R')
 source('code/CreateRiverContactMatrices.R', local = TRUE)
 source('code/RunCoreSimulationLoop-Parallel.R', local = TRUE)
