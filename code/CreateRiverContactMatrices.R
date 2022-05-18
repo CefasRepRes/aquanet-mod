@@ -1,13 +1,25 @@
-#load("PreparedObjects.RData")
-source('code/aquanet_functions/CreateRiverContactMatrix.R')
+#### Create river contact matrices ####
 
-riverDownstream.fileName = paste0("data/CalcRiverDistance/",Species,"/RoutesDownstreamTable.csv")
-graph.riverDownstream.objects = CreateRiverDistanceMatrix(riverDownstream.fileName, graph.contactp.objects, ListModelSetupParameters, 1)
+# Load packages ----------------------------------------------------------------
 
-TestRiverDistanceMatrix(graph.riverDownstream.objects)
-graph.riverDistance.objects = list(graph.riverDownstream.objects, NULL)
+library(aquanet)
+
+# Get downstream transmission probability matrix -------------------------------
+
+river_downstream_filename <- here::here("data",
+                                        "CalcRiverDistance",
+                                        Species,
+                                        "RoutesDownstreamTable.csv")
+
+river_downstream_transmission_matrix <- aquanet::createRiverDistanceProbabilityMatrix(river_downstream_filename,
+                                                                                     contact_probability_matrix)
 
 
-source('code/aquanet_functions/EstimateSite2SiteDistinances.R')
-fomite.objects = CreateDistanceMatrix(graph_full, siteLocationsWithCatchmentDuplicatesRemoved.fileName, ListModelSetupParameters)
-list.fomite.objects = list(fomite.objects)
+river_downstream_transmission_objects <- list(river_downstream_transmission_matrix, 
+                                              NULL)
+
+# Get fomite transmission probability matrix -----------------------------------
+
+fomite_transmission_matrix <- site_distances_matrix
+
+fomite_transmission_objects <- list(fomite_transmission_matrix)
