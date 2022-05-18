@@ -1,31 +1,46 @@
-# Clear the workspace of any pre-existing objects
-# Clear the console, since it gets a bit slow, if the buffer is too full
-listObjectsNotToClear = c('LocationGISRootDirectory','Farm2FarmLFM.fileName','LocationParameterFile', 'ParameterFile', 'runTimeParameters', 'modelSetupParameters', 'runTimeParametersSupplied', 'locationSaveResults.Partial', 'parameterIndex', 'rangeIndex', 'parameter', 'range', 'ListRunTimeParameters', 'ListModelSetupParameters', 'locationSaveResults','siteLocationsWithCatchmentDuplicatesRemoved.fileName','Species')
-listObjectsWorkspace = ls()
-listObjectsToClear = listObjectsWorkspace[!listObjectsWorkspace %in% listObjectsNotToClear]
+#### Prepare model objects ####
 
-rm(list = listObjectsToClear)
+# Called by RunModelCommdandLine
 
-# Package for creating the contact network
-library(igraph)
+# Clear the workspace and console
+   # Do this to prevent R getting too slow
 
-# Package for loading geographic datasets
-library(rgdal)
+objects_to_keep <- c("gis_filepath",
+                     "farm_to_farm_lmf_filename",
+                     "parameter_filepath", 
+                     "parameter_file",
+                     "run_time_parameters",
+                     "run_time_parameters_list",
+                     "river_transmission_parameters", 
+                     "outputs_filepath", 
+                     "parameterIndex", 
+                     "save_results_filepath",
+                     "site_locs_duplicates_removed_filename",
+                     "Species", 
+                     "scenario_name")
+objects_in_workspace <- ls()
+objects_to_clear <- objects_in_workspace[!objects_in_workspace %in% objects_to_keep]
 
-# Package for plotting geographical points
-library(sp)
+rm(list = objects_to_clear)
 
-# Package for plotting graphs
-library(ggplot2)
+# Load packages
 
-# Package for creating and dealing with sparse matrices
-library(Matrix)
+library(aquanet) # Aquanet package
+library(igraph) # Package for creating the contact network
+library(rgdal) # Package for loading geographic datasets
+               # TODO: update to sf
+library(sp) # Package for plotting geographical points
+            # TODO: update to SF
+library(ggplot2) # Package for plotting graphs
+                 # TODO: check if this is actually used
+library(Matrix) # Package for creating and dealing with sparse matrices
 
 # Packages for running simulations in parallel
 library(doParallel)
 library(doRNG)
 
 # Packages for manipulating tables
+   # TODO: check if all these are needed
 library(plyr)
 library(dplyr)
 library(reshape2)
@@ -34,63 +49,113 @@ library(data.table)
 # Package for regular expressions / pattern matching
 library(stringr)
 
-# Location where the contact network was saved, as well as the number of days over which data was collected
-fileName = "combinedMovements.graph2.xml"
-periodDataCollection = 365 * 4
+# Set CRS
 
-# Import the contact network, in a format specific to the igraph package, and which includes site details
-graph_full<-read.graph(file = fileName, format = "graphml")
+BNG_crs <- sf::st_crs(27700)
 
-# Save site information to disk, including enough information to make it possible to infect specific sites within the model
+# Load contact network ---------------------------------------------------------
+
+# Location where the contact network was saved
+   # TODO: put in commmand line?
+contact_network_filename <- here::here("outputs",
+                                       scenario_name,
+                                       "combined_movements_simplified_graph.xml")
+# Get data collection period
+data_collection_period <- 365 * 4 # 2011-2014 = 4 years
+   # TODO: put into command line
+
+# Load contact network
+graph_full <- read.graph(file = contact_network_filename, format = "graphml")
+
+# Save site information --------------------------------------------------------
+# Including enough information to make it possible to infect specific sites within the model
+
+# Load ListSiteDetailsWithModelID.R
+   # TODO: update with Becca's package
 source('code/aquanet_functions/ListSiteDetailsWithModelID.R')
-siteDetailsWithModelID = ListSiteDetailsWithModelID(graph_full, graph.contactp.objects, siteLocationsWithCatchmentDuplicatesRemoved.fileName)
-locationSiteDetailsWithModelID = "siteDetailsWithModelID.csv"
-write.csv(siteDetailsWithModelID,file= locationSiteDetailsWithModelID, row.names = FALSE)
 
-# Create a matrix which represents the site / catchment relationships
-source('code/CreateCatchmentLookupTables.R')
+site_details_with_model_id <- ListSiteDetailsWithModelID(graph_full, 
+                                                         site_locs_duplicates_removed_filename)
 
-catchmentLayer.fileName = "data/EA_Catchments/catchmnt_50k+TrunkCodes-Filtered-Merged_region.shp"
+file_path_sites_with_model_id <- here::here("outputs",
+                                            paste0(scenario_name, "/"))
+write.csv(site_details_with_model_id,
+          file = here::here("outputs",
+                            scenario_name,
+                            "site_details_with_model_id.csv"), 
+          row.names = FALSE)
 
-graph.catchment2Site.objects = CreateCatchment2SiteMatrix(graph_full, catchmentLayer.fileName, locationSiteDetailsWithModelID)
-TestCatchment2SiteMatrix(graph.catchment2Site.objects)
+# Get site - catchment relationships -------------------------------------------
 
-# Get a list of movements which occur within catchments
-graph.withinCatchmentEdges.objects = CreateWithinCatchmentEdgesMatrix(graph_full, graph.catchment2Site.objects, locationSiteDetailsWithModelID)
+# Get file patch of catchment shapefile
+file_path_catchments <- here::here("data",
+                                   "EA_Catchments",
+                                   "catchmnt_50k+TrunkCodes-Filtered-Merged_region.shp")
 
-# Create a matrix which represents the probability of connections being made by Live Fish Movements
-source('code/aquanet_functions/CreateContactPMatrix.R')
-graph.contactp.objects = CreateContactPMatrix(graph_full, periodDataCollection)
+# Get catchment to site matrix
+catchment_site_matrix <- aquanet::createCatchmentToSiteMatrix(graph = graph_full,
+                                                              filename_catchment_layer = file_path_catchments,
+                                                              crs_epsg = BNG_crs)
 
-# Create a histogram showing the number of movements made over a specific contact period
-TestContactPMatrix(graph.contactp.objects[[2]],-1)
+# Extract within-catchment movements -------------------------------------------
 
-# Create a histogram showing the estimated probability of contacts being made per a day
-TestContactPMatrix(graph.contactp.objects[[3]],1)
+within_catchment_movements <- aquanet::createWithinCatchmentEdgesMatrix(graph_full)
 
-# Create a matrix which represents the probability of connections being made by Live Fish Movements without the top 5% source sites
-source('code/aquanet_functions/ControlTopSites.R')
-graph.contactpalt.objects = CreateAltContactPMatrix(graph_full, periodDataCollection)
+# Create contact matrix --------------------------------------------------------
+   # Gives the probability of a contact being made via live fish movement (LFM)
 
-# List those sites which are assumed to represent farms, based on the presence of farm to farm movements
-source('code/aquanet_functions/ListFarmingSites.R')
-farm_vector = CreateFarmVector(graph_full)
-TestFarmVector(farm_vector, graph.contactp.objects, Farm2FarmLFM.fileName)
+contact_probability_matrix <- 
+   aquanet::createContactProbabilityMatrix(graph_full,
+                                           data_collection_period)
 
-smallhatch_vector = CreateSmallHatchVector(graph_full)
-largehatch_vector = CreateLargeHatchVector(graph_full)
-smallrestock_vector = CreateSmallRestockVector(graph_full)
-mediumrestock_vector = CreateMediumRestockVector(graph_full)
-largerestock_vector = CreateLargeRestockVector(graph_full)
-smalltable_vector = CreateSmallTableVector(graph_full)
-mediumtable_vector = CreateMediumTableVector(graph_full)
-largetable_vector = CreateLargeTableVector(graph_full)
-smallongrow_vector = CreateSmallOngrowVector(graph_full)
-mediumongrow_vector = CreateMediumOngrowVector(graph_full)
-largeongrow_vector = CreateLargeOngrowVector(graph_full)
-smallfish_vector = CreateSmallFishVector(graph_full)
-mediumfish_vector = CreateMediumFishVector(graph_full)
-largefish_vector = CreateLargeFishVector(graph_full)
+# As above, but remove the top 5% of sites (in terms of number of LFMs)
+   # This is required to run some control scenarios and/or to evaluate the impacts of these sites on transmission
+contact_probability_matrix_top_sites_removed <- 
+   aquanet::createContactProbabilityMatrixTopSitesRemoved(graph_full, 
+                                                          data_collection_period)
 
-source('code/aquanet_functions/EstimateSite2SiteDistinances.R')
-graph.estimateSiteDistances.objects = CreateDistanceMatrix(graph_full, siteLocationsWithCatchmentDuplicatesRemoved.fileName, ListModelSetupParameters)
+# Get site categories ----------------------------------------------------------
+   # TODO: use to incorporate economic data
+   # TODO: figure out how to carry this forward to get useful economic outputs
+   # Returns 1 for sites being that category, and 0 for site not being that category
+
+source('code/aquanet_functions/CreateSiteTypeVector.R')
+
+# Create list of all possible site types
+type_list <- c("smallhatch", "largehatch",
+               "smallrestock", "mediumrestock", "largerestock",
+               "smalltable", "mediumtable", "largetable",
+               "smallongrow", "mediumongrow", "largeongrow",
+               "smallfish", "mediumfish", "largefish")
+
+# Save site ID
+type_vector <- vertex_attr(graph_full, "siteID")
+type_vector <- as.numeric(type_vector)
+
+# Get site type vectors
+for(i in 1:length(type_list)){
+   t_vector <- createSiteTypeVector(graph_full,
+                        type_list[i])
+   type_vector <- rbind(type_vector, t_vector)
+}
+
+# Format type vector
+type_vector <- t(type_vector)
+colnames(type_vector) <- c("site_code", type_list)
+
+# Add farm vector
+farm_vector <- aquanet::createFarmVector(graph_full)
+type_vector <- cbind(type_vector, farm_vector)
+
+# Check for uncategorised sites
+row_sums <- rowSums(type_vector[, 2:16])
+type_vector <- cbind(type_vector, row_sums)
+
+uncategorised_sites <- dplyr::filter(as.data.frame(type_vector), row_sums == 0)
+if(nrow(uncategorised_sites) > 0) warning(paste("There are", nrow(uncategorised_sites), "with no site type designated"))
+
+# Get site to site distances ---------------------------------------------------
+
+site_distances_matrix <- aquanet::createDistanceMatrix(graph_full, 
+                                                       site_locs_duplicates_removed_filename,
+                                                       crs_epsg = BNG_crs)
