@@ -54,6 +54,10 @@ library(data.table)
 # Package for regular expressions / pattern matching
 library(stringr)
 
+# Set CRS
+
+BNG_crs <- sf::st_crs(27700)
+
 # Load contact network ---------------------------------------------------------
 
 # Location where the contact network was saved
@@ -95,7 +99,8 @@ file_path_catchments <- here::here("data",
 
 # Get catchment to site matrix
 catchment_site_matrix <- aquanet::createCatchmentToSiteMatrix(graph = graph_full,
-                                                              filename_catchment_layer = file_path_catchments)
+                                                              filename_catchment_layer = file_path_catchments,
+                                                              crs_epsg = BNG_crs)
 
 # Extract within-catchment movements -------------------------------------------
 
@@ -155,8 +160,6 @@ uncategorised_sites <- dplyr::filter(as.data.frame(type_vector), row_sums == 0)
 if(nrow(uncategorised_sites) > 0) warning(paste("There are", nrow(uncategorised_sites), "with no site type designated"))
 
 # Get site to site distances ---------------------------------------------------
-
-BNG_crs <- sf::st_crs(27700)
 
 graph_estimate_site_distances <- aquanet::createDistanceMatrix(graph_full, 
                                                                site_locs_duplicates_removed_filename,
