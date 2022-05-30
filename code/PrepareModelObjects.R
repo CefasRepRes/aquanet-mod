@@ -28,11 +28,7 @@ rm(list = objects_to_clear)
 library(aquanet) # Aquanet package
 library(igraph) # Package for creating the contact network
 library(rgdal) # Package for loading geographic datasets
-               # TODO: update to sf
-library(sp) # Package for plotting geographical points
-            # TODO: update to SF
-library(ggplot2) # Package for plotting graphs
-                 # TODO: check if this is actually used
+library(sf) # Spatial package
 library(Matrix) # Package for creating and dealing with sparse matrices
 
 # Packages for running simulations in parallel
