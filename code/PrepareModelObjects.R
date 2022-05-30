@@ -17,7 +17,8 @@ objects_to_keep <- c("gis_filepath",
                      "save_results_filepath",
                      "site_locs_duplicates_removed_filename",
                      "Species", 
-                     "scenario_name")
+                     "scenario_name",
+                     "data_collection_period")
 objects_in_workspace <- ls()
 objects_to_clear <- objects_in_workspace[!objects_in_workspace %in% objects_to_keep]
 
@@ -27,12 +28,7 @@ rm(list = objects_to_clear)
 
 library(aquanet) # Aquanet package
 library(igraph) # Package for creating the contact network
-library(rgdal) # Package for loading geographic datasets
-               # TODO: update to sf
-library(sp) # Package for plotting geographical points
-            # TODO: update to SF
-library(ggplot2) # Package for plotting graphs
-                 # TODO: check if this is actually used
+library(sf) # Spatial package
 library(Matrix) # Package for creating and dealing with sparse matrices
 
 # Packages for running simulations in parallel
@@ -60,9 +56,6 @@ BNG_crs <- sf::st_crs(27700)
 contact_network_filename <- here::here("outputs",
                                        scenario_name,
                                        "combined_movements_simplified_graph.xml")
-# Get data collection period
-data_collection_period <- 365 * 4 # 2011-2014 = 4 years
-   # TODO: put into command line
 
 # Load contact network
 graph_full <- read.graph(file = contact_network_filename, format = "graphml")
@@ -112,7 +105,8 @@ contact_probability_matrix <-
    # This is required to run some control scenarios and/or to evaluate the impacts of these sites on transmission
 contact_probability_matrix_top_sites_removed <- 
    aquanet::createContactProbabilityMatrixTopSitesRemoved(graph_full, 
-                                                          data_collection_period)
+                                                          data_collection_period,
+                                                          percentile = 0.95)
 
 # Get site categories ----------------------------------------------------------
    # TODO: use to incorporate economic data
