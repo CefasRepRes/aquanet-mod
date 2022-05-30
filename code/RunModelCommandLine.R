@@ -42,7 +42,7 @@ parameter_file <- read.csv(file = parameter_filepath,
 
 # Set scenario name
 
-scenario_name <- "long_test"
+scenario_name <- "full_test"
 
 # Put scenario name into rowname
 rownames(parameter_file) <- scenario_name
@@ -75,6 +75,10 @@ print(str(as.list(river_transmission_parameters)))
 # Get parameters as list of numbers
 
 run_time_parameters_list <- unname(parameter_file)
+
+# Load in period of data collection --------------------------------------------
+
+data_collection_period <- 365 * 4 # 2011-2014 = 4 years
 
 # Create directories to save results -------------------------------------------
 
