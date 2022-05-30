@@ -46,6 +46,7 @@ vignettes/*.pdf
 /outputs/
 /data/
 /code/aquanet_functions/
+/reports/
 
 # HTML files
 *.html
