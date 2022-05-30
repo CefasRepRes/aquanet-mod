@@ -588,8 +588,7 @@ simulationCode = function(graph.contactp.objects, runs, tmax, batchNo, ListRunTi
     }
     
     # Update controls on those sites which have passed a given no. days without infection
-    ## min.trans = ListRunTimeParameters[[7]]
-    min.trans = 720
+    min.trans = ListRunTimeParameters[[7]]
     controlled.sites.c2.logical = as.logical(control_matrix[, 2]*!state_vector) 
     allow.inward.movements = (time_vector > min.trans) & controlled.sites.c2.logical
     allow.inward.movements.no = sum(allow.inward.movements)
@@ -600,7 +599,7 @@ simulationCode = function(graph.contactp.objects, runs, tmax, batchNo, ListRunTi
     } 
     
     # Update controls on those sites which have passed a given no. days without infection
-    min.trans = 360 + ListRunTimeParameters[[8]]
+    min.trans = ListRunTimeParameters[[8]]
     controlled.sites.c3.logical = as.logical(control_matrix[, 3])
     allow.all.movements = (time_vector > min.trans) & controlled.sites.c3.logical
     allow.all.movements.no = sum(allow.all.movements)
@@ -778,7 +777,7 @@ simulationCode = function(graph.contactp.objects, runs, tmax, batchNo, ListRunTi
       
       noOperations = noOperations + 1
       no.controlled.catchments = withinCatchmentMovements.objects[[7]]
-      set(x = summaryStates.table, j = as.character(noOperations), value = c(batchNo,k, t, tdiff, simNo, rate.type, no.controlled.catchments, sum(farmcumulativeState_vector), farmcombinedstates.total))
+      set(x = summaryStates.table, j = as.character(noOperations), value = c(batchNo,k, t, tdiff, simNo, rate.type, no.controlled.catchments, sum(cumulativeState_vector), farmcombinedstates.total))
       
       if (noOperations %% commitInterval == (commitInterval - 1)) {
         summaryStates.table[,as.character((ncol(summaryStates.table) + 1):(ncol(summaryStates.table) + 1 + commitInterval)):=empty.vector.byState]
@@ -836,7 +835,7 @@ simulationCode = function(graph.contactp.objects, runs, tmax, batchNo, ListRunTi
     }
     
     
-  }
+    }
   
   # Print diagnositic information, and format results as appriopriate
   print(c("No Iterations", noSteps))
@@ -846,7 +845,8 @@ simulationCode = function(graph.contactp.objects, runs, tmax, batchNo, ListRunTi
   #numberFullSaves = numberFullSaves + 1
   #commitResults(allStates.table, allStates.table.t, numberFullSaves)
   
-  save(summaryStates.table, file = paste(locationSaveResults,"/Summary/batchNo-",batchNo,".RData",sep=""),compress=FALSE)
+  save(summaryStates.table, file = paste(locationSaveResults,"/batch_results/batchNo-",batchNo,".RData",sep=""),compress=FALSE)
   
   return(batchNo)
+  
 }

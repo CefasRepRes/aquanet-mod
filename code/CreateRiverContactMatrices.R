@@ -11,8 +11,12 @@ river_downstream_filename <- here::here("data",
                                         Species,
                                         "RoutesDownstreamTable.csv")
 
-river_downstream_transmission_matrix <- aquanet::createRiverDistanceProbabilityMatrix(river_downstream_filename,
-                                                                                     contact_probability_matrix)
+river_downstream_transmission_matrix <- 
+  aquanet::createRiverDistanceProbabilityMatrix(
+    filepath_river_distances = river_downstream_filename,
+    out_createContactProbabilityMatrix = contact_probability_matrix,
+    max_dist = 40,
+    p1km = 0.0005)
 
 
 river_downstream_transmission_objects <- list(river_downstream_transmission_matrix, 
