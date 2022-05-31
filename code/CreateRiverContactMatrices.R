@@ -1,9 +1,5 @@
 #### Create river contact matrices ####
 
-# Load packages ----------------------------------------------------------------
-
-library(aquanet)
-
 # Get downstream transmission probability matrix -------------------------------
 
 river_downstream_filename <- here::here("data",

@@ -24,27 +24,6 @@ objects_to_clear <- objects_in_workspace[!objects_in_workspace %in% objects_to_k
 
 rm(list = objects_to_clear)
 
-# Load packages
-
-library(aquanet) # Aquanet package
-library(igraph) # Package for creating the contact network
-library(sf) # Spatial package
-library(Matrix) # Package for creating and dealing with sparse matrices
-
-# Packages for running simulations in parallel
-library(doParallel)
-library(doRNG)
-
-# Packages for manipulating tables
-   # TODO: check if all these are needed
-library(plyr)
-library(dplyr)
-library(reshape2)
-library(data.table)
-
-# Package for regular expressions / pattern matching
-library(stringr)
-
 # Set CRS
 
 BNG_crs <- sf::st_crs(27700)

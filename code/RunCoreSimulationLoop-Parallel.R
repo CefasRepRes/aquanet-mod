@@ -41,7 +41,7 @@ print(
                                        # 2 = no movement by any sites within infected catchments
         noCores = 4, # Set to 4 (save some computing power)
         locationSaveResults = save_results_filepath, # File path to save results
-        seedNo = 123, # Set the seed associated with pseudo-random number generation
+        seedNo = 125, # Set the seed associated with pseudo-random number generation
         initialNoInfections = 1) # One initial infection
     }
   )
