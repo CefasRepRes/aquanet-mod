@@ -1,17 +1,32 @@
 #### Run model command line ####
 
-library(here) # Makes writing file paths much easier
+# Load necessary packages ------------------------------------------------------
 
-# Setup -------------------------------------------------------------------
+library(aquanet) # Aquanet package
+library(here) # Makes writing file paths much easier
+library(igraph) # Package for creating the contact network
+library(sf) # Package for working with spatial data
+library(dplyr) # Package for manipulating tables
+library(Matrix) # Package for creating and dealing with sparse matrices
+# Packages for running simulations in parallel
+library(doParallel)
+library(doRNG)
+# Package for regular expressions / pattern matching
+library(stringr)
+# Packages for manipulating tables
+# TODO: check if all these are needed
+library(plyr)
+library(dplyr)
+library(reshape2)
+library(data.table)
+
+# Setup ------------------------------------------------------------------------
 
 # Clear the startup screen
 cat('\014')
 
 # Clear objects from the workspace
-rm(list = ls()) # TODO: work out if this is needed and remove if possible
-
-# Detach plyr
-detach("package:plyr", unload = TRUE) # TODO: stop using plyr if possible
+rm(list = ls())
 
 # Set display options
 options(width = 1000)
@@ -42,7 +57,7 @@ parameter_file <- read.csv(file = parameter_filepath,
 
 # Set scenario name
 
-scenario_name <- "full_test"
+scenario_name <- "test"
 
 # Put scenario name into rowname
 rownames(parameter_file) <- scenario_name
@@ -90,10 +105,6 @@ dir.create(file.path(save_results_filepath), showWarnings = FALSE)
 
 # Batch results folder
 dir.create(file.path(save_results_filepath, "batch_results"), showWarnings = FALSE)
-
-# Full details folder
-   # TODO: check if this is actually needed
-dir.create(file.path(save_results_filepath, "full_details"), showWarnings = FALSE)
 
 # Code folder
 dir.create(file.path(save_results_filepath, "code"), showWarnings = FALSE)

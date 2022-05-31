@@ -1,12 +1,5 @@
 #### Create contact network ####
 
-# Load required packges ---------------------------------------------------
-
-library(igraph) # Package for creating the contact network
-library(sf) # Package for working with spatial data
-library(here) # Package for getting filenames
-library(dplyr) # Package for manipulating tables
-
 # Get file locations ------------------------------------------------------
 
 # Location of the Section 30 Records
