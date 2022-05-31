@@ -1,25 +1,5 @@
 #### Run model command line ####
 
-# Load necessary packages ------------------------------------------------------
-
-library(aquanet) # Aquanet package
-library(here) # Makes writing file paths much easier
-library(igraph) # Package for creating the contact network
-library(sf) # Package for working with spatial data
-library(dplyr) # Package for manipulating tables
-library(Matrix) # Package for creating and dealing with sparse matrices
-# Packages for running simulations in parallel
-library(doParallel)
-library(doRNG)
-# Package for regular expressions / pattern matching
-library(stringr)
-# Packages for manipulating tables
-# TODO: check if all these are needed
-library(plyr)
-library(dplyr)
-library(reshape2)
-library(data.table)
-
 # Setup ------------------------------------------------------------------------
 
 # Clear the startup screen
@@ -31,33 +11,40 @@ rm(list = ls())
 # Set display options
 options(width = 1000)
 
-# Set ocation to save results
-  # This should be transportable if using the R project
-outputs_filepath <- here::here("outputs")
+# Load necessary packages ------------------------------------------------------
 
-# Set species
-Species <- "Salmon - V3" # This is the name of the folder under 'SQL Files'
-                         # TODO: work out if the V3 is necessary
+library(aquanet) # Functions for aquanet model
+library(igraph) # Contact network
+library(sf) # Working with spatial data
+library(here) # Makes writing file paths much easier
+library(Matrix) # Creating and dealing with sparse matrices
 
-# Set parameter file location
-parameter_filepath <- here::here("data", 
-                                 "parameterisation",
-                                 "SimulationParameters_SimpleCase.csv")
-# This is the name of the parameter file
+# Packages for running simulations in parallel
+library(doParallel)
+library(doRNG)
 
-# Set the location of the GIS root directory
-gis_filepath <- here::here("data",
-                           "EA_Catchments")
-
-# Load in parameters -----------------------------------------------------------
-
-# Load parameter file
-parameter_file <- read.csv(file = parameter_filepath, 
-                           header = TRUE) 
+# Manipulating tables
+library(data.table)
+library(dplyr)
 
 # Set scenario name
 
 scenario_name <- "test"
+
+# Set file paths
+
+source(here::here("code",
+                  "SetFilePaths.R"))
+
+
+# Load in parameters -----------------------------------------------------------
+
+# Load
+parameter_file <- read.csv(file = parameter_filepath, 
+                           header = TRUE)
+
+
+
 
 # Put scenario name into rowname
 rownames(parameter_file) <- scenario_name

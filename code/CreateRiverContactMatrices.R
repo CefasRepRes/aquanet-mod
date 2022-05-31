@@ -2,10 +2,7 @@
 
 # Get downstream transmission probability matrix -------------------------------
 
-river_downstream_filename <- here::here("data",
-                                        "CalcRiverDistance",
-                                        Species,
-                                        "RoutesDownstreamTable.csv")
+
 
 river_downstream_transmission_matrix <- 
   aquanet::createRiverDistanceProbabilityMatrix(

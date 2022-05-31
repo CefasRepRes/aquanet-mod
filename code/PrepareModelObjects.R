@@ -18,7 +18,9 @@ objects_to_keep <- c("gis_filepath",
                      "site_locs_duplicates_removed_filename",
                      "Species", 
                      "scenario_name",
-                     "data_collection_period")
+                     "data_collection_period",
+                     "contact_network_filename",
+                     "river_downstream_filename")
 objects_in_workspace <- ls()
 objects_to_clear <- objects_in_workspace[!objects_in_workspace %in% objects_to_keep]
 
@@ -32,9 +34,7 @@ BNG_crs <- sf::st_crs(27700)
 
 # Location where the contact network was saved
    # TODO: put in commmand line?
-contact_network_filename <- here::here("outputs",
-                                       scenario_name,
-                                       "combined_movements_simplified_graph.xml")
+
 
 # Load contact network
 graph_full <- read.graph(file = contact_network_filename, format = "graphml")
