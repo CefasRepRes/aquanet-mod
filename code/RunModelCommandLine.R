@@ -114,7 +114,8 @@ message(paste("Results are saved in:", save_results_filepath))
 
 # Load and run components of AquaNet model --------------------------------
 
-source('code/CreateContactNetwork.R')
+#source('code/CheckCatchmentSiteRelationships.R') # Don't need to run this if you have no duplicates file already
+source('code/importSiteData.R')
 source('code/PrepareModelObjects.R')
 source('code/CreateRiverContactMatrices.R', local = TRUE)
 source('code/RunCoreSimulationLoop-Parallel.R', local = TRUE)
