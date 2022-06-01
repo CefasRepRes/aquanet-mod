@@ -16,11 +16,16 @@ objects_to_keep <- c("gis_filepath",
                      "parameterIndex", 
                      "save_results_filepath",
                      "site_locs_duplicates_removed_filename",
-                     "Species", 
                      "scenario_name",
                      "data_collection_period",
                      "contact_network_filename",
-                     "river_downstream_filename")
+                     "river_downstream_filename",
+                     "tmax",
+                     "noSims",
+                     "noCores",
+                     "catchment_movement_controls",
+                     "seedNo",
+                     "initial_no_infections")
 objects_in_workspace <- ls()
 objects_to_clear <- objects_in_workspace[!objects_in_workspace %in% objects_to_keep]
 

@@ -27,34 +27,62 @@ library(doRNG)
 library(data.table)
 library(dplyr)
 
-# Set scenario name
+# User settings ----------------------------------------------------------------
 
+# IMPORTANT: if you change these settings, save the command line before running.
+#            This will ensure the correct code is copied across with the results.
+
+# Scenario name 
+  # This is the name that will appear as your output directory. Make it descriptive
 scenario_name <- "test"
 
-# Set file paths
+# Data collection period
+  # This is the period of time (in days) over which your LFM data was collected
+data_collection_period <- 365 * 4 # 2011-2014 = 4 years
 
-source(here::here("code",
-                  "SetFilePaths.R"))
+# tmax
+  # Maximum time (in days) for which each simulation can run
+tmax <- 360 * 10
 
+# Initial number of infections
+# The default is one
+# Adding more would simulate an outbreak resulting from multiple introductions
+initial_no_infections <- 1
+
+# Catchment movement control options
+# Set to 0, 1 or 2
+# 0 = within catchment movements allowed
+# 1 = between and within infected catchments allow
+# 2 = no movement allowed by any sites within infected catchments
+catchment_movement_controls <- 0 
+
+# Number of simulations to be run
+  # Suggest 4 for a test, and 3000 for a full run
+noSims <- 4
+
+# Number of cores to be assigned
+  # We recommend using half the number of cores available on your device
+noCores <- detectCores() / 2
+
+# Seed number
+  # Set the seed associated with pseudo-random number generation
+  # This will ensure your results are repeatable across runs
+  # Only change you want to compare repeatability when using different seeds
+seedNo <- 123 
 
 # Load in parameters -----------------------------------------------------------
 
-# Load
+# Set file paths
+source(here::here("code",
+                  "SetFilePaths.R"))
+
+# Load parameter file
 parameter_file <- read.csv(file = parameter_filepath, 
                            header = TRUE)
-
-
-
 
 # Put scenario name into rowname
 rownames(parameter_file) <- scenario_name
 parameter_file$Range <- NULL
-
-# Get model setup parameters
-river_transmission_parameters <- c("River.Downstream.Current_speed",
-                                   "River.Downstream_Transmission_Const",
-                                   "River.UpDownstream.Current_speed",
-                                   "River.UpDownstream_Transmission_Const")
 
 # Get names of variable parameters
 run_time_parameters <- colnames(parameter_file)
@@ -67,20 +95,12 @@ if (length(run_time_parameters) < 12) {
       print("An excess of parameters have been supplied.")
 }
 
-# Clear the startup screen
-cat("\014")
-
 # Print parameters
 print(str(as.list(run_time_parameters)))
-print(str(as.list(river_transmission_parameters)))
 
 # Get parameters as list of numbers
 
 run_time_parameters_list <- unname(parameter_file)
-
-# Load in period of data collection --------------------------------------------
-
-data_collection_period <- 365 * 4 # 2011-2014 = 4 years
 
 # Create directories to save results -------------------------------------------
 
@@ -115,7 +135,7 @@ message(paste("Results are saved in:", save_results_filepath))
 # Load and run components of AquaNet model --------------------------------
 
 #source('code/CheckCatchmentSiteRelationships.R') # Don't need to run this if you have no duplicates file already
-source('code/importSiteData.R')
+source('code/CreateContactNetwork.R')
 source('code/PrepareModelObjects.R')
 source('code/CreateRiverContactMatrices.R', local = TRUE)
 source('code/RunCoreSimulationLoop-Parallel.R', local = TRUE)
