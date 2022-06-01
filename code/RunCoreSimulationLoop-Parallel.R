@@ -1,7 +1,5 @@
 #### Run core simulation loop parallel ####
 
-library(here)
-
 # Setup -------------------------------------------------------------------
 
 # Clear the startup screen
@@ -35,22 +33,19 @@ print(
         graph.riverDistance.objects = river_downstream_transmission_objects, 
         graph.estimateSiteDistances.objects = site_distances_matrix, 
         farm_vector = farm_vector, 
-        # Options
-        associatedSiteControlType = 0, # 0 = within catchment movements,
-                                       # 1 = between and within infected catchments,
-                                       # 2 = no movement by any sites within infected catchments
-        noCores = 4, # Set to 4 (save some computing power)
-        locationSaveResults = save_results_filepath, # File path to save results
-        seedNo = 125, # Set the seed associated with pseudo-random number generation
-        initialNoInfections = 1) # One initial infection
+        noCores = noCores,
+        associatedSiteControlType = catchment_movement_controls,
+        locationSaveResults = save_results_filepath,
+        seedNo = seedNo,
+        initialNoInfections = initial_no_infections)
     }
   )
 )
 
-# # Testing ----------------------------------------------------------------------
-# 
-# # # Set things to their original names
-# 
+# # # Testing ----------------------------------------------------------------------
+# # 
+# # # # Set things to their original names
+# # 
 # graph.contactp.objects <- contact_probability_matrix
 # 
 # 
@@ -60,7 +55,7 @@ print(
 # system.time(expr =
 #               {simulationCode(graph.contactp.objects = contact_probability_matrix,
 #                               runs = 4,
-#                               tmax = 3600,
+#                               tmax = tmax,
 #                               batchNo = 1,
 #                               ListRunTimeParameters = run_time_parameters_list,
 #                               graph.withinCatchmentEdges.objects = within_catchment_movements,

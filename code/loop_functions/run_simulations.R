@@ -14,15 +14,10 @@ runSimulations = function(graph.contactp.objects, simulationCode, ListRunTimePar
   
   contactp.length = graph.contactp.objects[[1]]
   
-  tmax = 3600
+  noSimsPerJob = ceiling(noSims/noCores)
   
-  noSims = 3000
-  noJobs = noCores
-  #noSimsPerJob = ceiling(noSims/ noJobs)
-  noSimsPerJob = 1
-  
-  # Check number of cores available
-  detectCores()
+  runs <- noSimsPerJob # Reassign to something more sensible for the loop
+  tmax <- tmax # This is dumb as all heck but it makes the code work. Otherwise R says it cant find it.
   
   # Assign 12 cores to the cluster, and save all the output to a log file
   Cluster = makeCluster(noCores, outfile = "log.txt")
@@ -30,14 +25,14 @@ runSimulations = function(graph.contactp.objects, simulationCode, ListRunTimePar
   # Register cluster
   registerDoParallel(Cluster)
   
-  overallNoInterations = noSimsPerJob * noJobs
+  overallNoInterations = noSimsPerJob * noCores
   
-  print(c(noJobs, noSimsPerJob, overallNoInterations))
+  print(c(noSims, noSimsPerJob, overallNoInterations))
   
   set.seed(seedNo)
-  allruns = foreach(batchNo=1:noJobs, .combine=c) %dorng% simulationCode(graph.contactp.objects, noSimsPerJob, tmax,batchNo, ListRunTimeParameters, graph.withinCatchmentEdges.objects, graph.catchment2Site.objects, graph.riverDistance.objects, graph.estimateSiteDistances.objects, farm_vector, associatedSiteControlType, locationSaveResults, initialNoInfections)
+  allruns = foreach(batchNo=1:noCores, .combine=c) %dorng% simulationCode(graph.contactp.objects, runs, tmax, batchNo, ListRunTimeParameters, graph.withinCatchmentEdges.objects, graph.catchment2Site.objects, graph.riverDistance.objects, graph.estimateSiteDistances.objects, farm_vector, associatedSiteControlType, locationSaveResults, initialNoInfections)
   
   stopCluster(cl = Cluster)
   
-  return(list(noJobs, allruns))
+  return(list(noSims, allruns))
 }
