@@ -130,7 +130,7 @@ row_sums <- rowSums(type_vector[, 2:16])
 type_vector <- cbind(type_vector, row_sums)
 
 uncategorised_sites <- dplyr::filter(as.data.frame(type_vector), row_sums == 0)
-if(nrow(uncategorised_sites) > 0) warning(paste("There are", nrow(uncategorised_sites), "with no site type designated"))
+if(nrow(uncategorised_sites) > 0) message(paste("There are", nrow(uncategorised_sites), "sites with no type designated"))
 
 # Get site to site distances ---------------------------------------------------
 
