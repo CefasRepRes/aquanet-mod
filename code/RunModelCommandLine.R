@@ -67,14 +67,14 @@ noCores <- detectCores() / 2
 # Seed number
   # Set the seed associated with pseudo-random number generation
   # This will ensure your results are repeatable across runs
-  # Only change you want to compare repeatability when using different seeds
+  # Only change if you want to compare repeatability when using different seeds
 seedNo <- 123 
 
 # Load in parameters -----------------------------------------------------------
 
 # Set file paths
 source(here::here("code",
-                  "SetFilePaths.R"))
+                  "01_SetFilePaths.R"))
 
 # Load parameter file
 parameter_file <- read.csv(file = parameter_filepath, 
@@ -134,8 +134,8 @@ message(paste("Results are saved in:", save_results_filepath))
 
 # Load and run components of AquaNet model --------------------------------
 
-#source('code/CheckCatchmentSiteRelationships.R') # Don't need to run this if you have no duplicates file already
-source('code/CreateContactNetwork.R')
-source('code/PrepareModelObjects.R')
-source('code/CreateRiverContactMatrices.R', local = TRUE)
-source('code/RunCoreSimulationLoop-Parallel.R', local = TRUE)
+#source('code/02_CheckCatchmentSiteRelationships.R') # Don't need to run this if you have no duplicates file already
+source('code/03_CreateContactNetwork.R')
+source('code/04_PrepareModelObjects.R')
+source('code/05_CreateRiverContactMatrices.R', local = TRUE)
+source('code/06_RunCoreSimulationLoop-Parallel.R', local = TRUE)
