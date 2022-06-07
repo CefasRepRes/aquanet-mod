@@ -6,7 +6,7 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = FALSE)
 library(here)
 library(igraph)
 library(knitr)
@@ -18,8 +18,7 @@ It is based on the original script called `graphSiteLevelStats.R`.
 # Original contact network
 
 ```{r}
-og_network <- igraph::read.graph(file = here::here("combined_graph2.xml"), 
-                                 format = "graphml")
+og_network <- igraph::read.graph(file = "Y:/FC1215_Defra_R_and_D_AAD/Working_Area/Theme 4 biosecurity/James Network Model/Main Branch/combinedMovements.graph2.xml",format = "graphml")
 ```
 
 ## Basic statistics
