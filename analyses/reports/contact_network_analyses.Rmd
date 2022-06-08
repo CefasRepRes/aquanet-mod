@@ -10,6 +10,10 @@ knitr::opts_chunk$set(echo = FALSE)
 library(here)
 library(igraph)
 library(knitr)
+
+source(here::here("analyses",
+                "code",
+                "fun_imports_exports.R"))
 ```
 
 This RMD allows for analyses on the contact network igraphs.
@@ -21,8 +25,6 @@ It is based on the original script called `graphSiteLevelStats.R`.
 og_network <- igraph::read.graph(file = "Y:/FC1215_Defra_R_and_D_AAD/Working_Area/Theme 4 biosecurity/James Network Model/Main Branch/combinedMovements.graph2.xml",format = "graphml")
 ```
 
-## Basic statistics
-
 ```{r}
 basic_table <- data.frame(nodes = vcount(og_network),
                           edges = ecount(og_network),
@@ -31,6 +33,12 @@ basic_table <- data.frame(nodes = vcount(og_network),
                           assortativity = assortativity.degree(og_network))
 
 knitr::kable(basic_table)
+
+imports_og <- imports.exports(og_network, "imports")
+knitr::kable(imports_og)
+
+exports_og <- imports.exports(og_network, "exports")
+knitr::kable(exports_og)
 ```
 
 # New contact network
@@ -42,8 +50,6 @@ new_network <- igraph::read.graph(file = here::here("outputs",
                                   format = "graphml")
 ```
 
-## Basic statistics
-
 ```{r}
 basic_table_new <- data.frame(nodes = vcount(new_network),
                           edges = ecount(new_network),
@@ -52,4 +58,10 @@ basic_table_new <- data.frame(nodes = vcount(new_network),
                           assortativity = assortativity.degree(new_network))
 
 knitr::kable(basic_table_new)
+
+imports_new <- imports.exports(new_network, "imports")
+knitr::kable(imports_new)
+
+exports_new <- imports.exports(new_network, "exports")
+knitr::kable(exports_new)
 ```
