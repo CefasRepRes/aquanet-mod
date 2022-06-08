@@ -11,12 +11,15 @@ library(here)
 library(igraph)
 library(knitr)
 
+# Imports exports
 source(here::here("analyses",
                 "code",
                 "fun_imports_exports.R"))
+# Vertex functions
 source(here::here("analyses",
                 "code",
                 "fun_vertex.R"))
+# Edge functions
 source(here::here("analyses",
                 "code",
                 "fun_edge.R"))
@@ -25,58 +28,96 @@ source(here::here("analyses",
 This RMD allows for analyses on the contact network igraphs.
 It is based on the original script called `graphSiteLevelStats.R`.
 
-# Original contact network
+```{r load-contact-networks}
 
-```{r}
+# OG network
 og_network <- igraph::read.graph(file = "Y:/FC1215_Defra_R_and_D_AAD/Working_Area/Theme 4 biosecurity/James Network Model/Main Branch/combinedMovements.graph2.xml",format = "graphml")
-```
 
-```{r}
-basic_table <- data.frame(nodes = vcount(og_network),
-                          edges = ecount(og_network),
-                          directed = is.directed(og_network),
-                          transitivity = transitivity(og_network),
-                          assortativity = assortativity.degree(og_network))
-
-knitr::kable(basic_table)
-
-imports_og <- imports.exports(og_network, "imports")
-knitr::kable(imports_og)
-
-exports_og <- imports.exports(og_network, "exports")
-knitr::kable(exports_og)
-```
-
-# New contact network
-
-```{r}
+# New network
 new_network <- igraph::read.graph(file = here::here("outputs",
                                       "test",
                                       "combined_movements_simplified_graph.xml"),
                                   format = "graphml")
 ```
 
+### Basic statistics
+
 ```{r}
-basic_table_new <- data.frame(nodes = vcount(new_network),
-                          edges = ecount(new_network),
-                          directed = is.directed(new_network),
-                          transitivity = transitivity(new_network),
-                          assortativity = assortativity.degree(new_network))
+basic_og <- data.frame(network = "original_network",
+                       nodes = vcount(og_network),
+                       edges = ecount(og_network),
+                       directed = is.directed(og_network),
+                       transitivity = transitivity(og_network),
+                       assortativity = assortativity.degree(og_network))
 
-knitr::kable(basic_table_new)
+basic_new <- data.frame(network = "new_network",
+                        nodes = vcount(new_network),
+                        edges = ecount(new_network),
+                        directed = is.directed(new_network),
+                        transitivity = transitivity(new_network),
+                        assortativity = assortativity.degree(new_network))
 
+basic_table <- rbind(basic_og,
+                     basic_new)
+
+knitr::kable(basic_table)
+```
+
+### Imports and exports
+
+#### Imports
+
+```{r imports}
+
+imports_og <- imports.exports(og_network, "imports")
 imports_new <- imports.exports(new_network, "imports")
-knitr::kable(imports_new)
 
+imports_table <- rbind(imports_og, 
+                       imports_new)
+rownames(imports_table) <- c("original_network", "new_network")
+knitr::kable(imports_table)
+```
+
+#### Exports
+
+```{r exports}
+
+exports_og <- imports.exports(og_network, "exports")
 exports_new <- imports.exports(new_network, "exports")
-knitr::kable(exports_new)
 
+exports_table <- rbind(exports_og, 
+                       exports_new)
+rownames(exports_table) <- c("original_network", "new_network")
+knitr::kable(exports_table)
+```
+### Vertices
+
+#### Betweenness
+```{r vertex-between}
+
+between_og <- vertex.betweenness(og_network)
 between_new <- vertex.betweenness(new_network)
-knitr::kable(between_new)
+between_vertex_table <- rbind(between_og, between_new)
+rownames(between_vertex_table) <- c("original_network", "new_network")
+knitr::kable(between_vertex_table)
+```
 
-close_new <- vertex.closeness(new_network)
-knitr::kable(close_new)
+#### Closeness
+```{r vertex-closeness}
+closen_og <- vertex.closeness(og_network)
+closen_new <- vertex.closeness(new_network)
+closen_vertex_table <- rbind(closen_og, closen_new)
+rownames(closen_vertex_table) <- c("original_network", "new_network")
+knitr::kable(closen_vertex_table)
+```
 
-between_edge_new <- edge.betweenness.summary(new_network)
-knitr::kable(between_edge_new)
+### Edges
+
+```{r edge-between}
+
+between_og <- edge.betweenness.summary(og_network)
+between_new <- edge.betweenness.summary(new_network)
+between_edge_table <- rbind(between_og, between_new)
+rownames(between_edge_table) <- c("original_network", "new_network")
+knitr::kable(between_edge_table)
 ```

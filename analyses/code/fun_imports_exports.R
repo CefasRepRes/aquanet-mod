@@ -15,9 +15,6 @@ imports.exports <- function(contact_network, imports_exports){
                              max_movement = max(trade),
                              quant_95 = quantile(trade, 0.95),
                              site_with_most_trade = names(most_trade))
-  trade_hist <- hist(trade,
-       main = paste("Histogram of", imports_exports),
-       xlab = paste("Number of fish", imports_exports))
   return(movements)
 }
 
