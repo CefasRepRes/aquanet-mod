@@ -14,6 +14,12 @@ library(knitr)
 source(here::here("analyses",
                 "code",
                 "fun_imports_exports.R"))
+source(here::here("analyses",
+                "code",
+                "fun_vertex.R"))
+source(here::here("analyses",
+                "code",
+                "fun_edge.R"))
 ```
 
 This RMD allows for analyses on the contact network igraphs.
@@ -64,4 +70,13 @@ knitr::kable(imports_new)
 
 exports_new <- imports.exports(new_network, "exports")
 knitr::kable(exports_new)
+
+between_new <- vertex.betweenness(new_network)
+knitr::kable(between_new)
+
+close_new <- vertex.closeness(new_network)
+knitr::kable(close_new)
+
+between_edge_new <- edge.betweenness.summary(new_network)
+knitr::kable(between_edge_new)
 ```
