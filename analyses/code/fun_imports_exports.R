@@ -1,3 +1,5 @@
+#### Imports-exports function ####
+
 imports.exports <- function(contact_network, imports_exports){
   if(imports_exports == "imports"){
     trade <- igraph::degree(contact_network,
