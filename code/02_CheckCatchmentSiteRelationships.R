@@ -131,8 +131,50 @@ sites_with_catchment <- merge(x = sites_with_catchment,
                               by = c("siteID"),
                               all.x = TRUE)
 
+# Deal with duplicates ---------------------------------------------------------
+
+# Extract duplicated sites - used T and F to get both occurrences of duplication
+duplicates <- rbind(filter(sites_with_catchment, duplicated(siteID, fromLast = T)),
+                    filter(sites_with_catchment, duplicated(siteID, fromLast = F)))
+
+# Get list of duplicated ids
+dupe_site_id <- unique(duplicates$siteID)
+
+# Loop over, removing duplicates
+    
+organised_dupes <- data.frame()
+for(i in 1:length(dupe_site_id)){
+  pair <- dplyr::filter(duplicates, siteID == duplicates$siteID[i])
+  
+  # If in the same catchment, give easting/northing preference to 
+  # the site with the highest number of occurrences
+  if(pair$NAME[1] == pair$NAME[2] && pair$noOccurances[1] >= pair$noOccurances[2]){
+    pair_merged <- pair[1, ]
+    pair_merged$noOccurances <- pair$noOccurances[1] + pair$noOccurances[2]
+  } else if(pair$NAME[1] == pair$NAME[2] && pair$noOccurances[2] > pair$noOccurances[1]){
+    pair_merged <- pair[2, ]
+    pair_merged$noOccurances <- pair$noOccurances[1] + pair$noOccurances[2]
+  } else {
+    
+    # If the catchments don't match, prompt the user to enter the correct catchment name
+        # TODO: maybe configure this so it gives the user options
+    catchment <- readline(prompt = paste("Enter correct river catchment name for site", 
+                                         duplicates$siteID[i], 
+                                         ": "))
+    pair_merged <- dplyr::filter(pair, NAME == catchment)
+  }
+  organised_dupes <- rbind(organised_dupes, pair_merged)
+}
+
+# Combine with non-duplicate sites
+sites_unique <- rbind(dplyr::filter(sites_with_catchment, !(siteID %in% dupe_site_id)),
+                      organised_dupes)
+
 # Save the catchment site relationships
 write.csv(sites_with_catchment, file = sites_with_catchment_filename)
+
+# Save the catchment site relationships with duplicates removed
+write.csv(sites_unique, file = site_locs_duplicates_removed_filename)
 
 # Save a table of sites which were not included within any catchment
 write.csv(sites_without_catchment_id, file = sites_without_catchment_filename)

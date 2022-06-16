@@ -33,10 +33,6 @@ river_downstream_filename <- here::here("data",
                                         "Salmon - V3",
                                         "RoutesDownstreamTable.csv")
 
-# Location of sites, following removal of duplicate sites
-site_locs_duplicates_removed_filename <- here::here("data",
-                                                    "ListSiteLocationsWithCatchmentNoDuplicates.csv")
-
 # Outputs ----------------------------------------------------------------------
 
 # Outputs folder
@@ -56,3 +52,8 @@ sites_with_catchment_filename <- here::here("outputs",
 sites_without_catchment_filename <- here::here("outputs",
                                                scenario_name,
                                                "ListSiteLocationsWithoutCatchment.csv")
+
+# Location of sites, following removal of duplicate sites
+site_locs_duplicates_removed_filename <- here::here("outputs",
+                                                    scenario_name,
+                                                    "ListSiteLocationsWithCatchmentNoDuplicates.csv")
