@@ -57,6 +57,23 @@ full_test_new_loop_duration <- epidemic.duration(full_test_new_loop)
 kable(full_test_new_loop_duration, digits = 1)
 ```
 
+## Updated duplicate removal
+
+```{r load-results-dupes-removed}
+dupes_removed <- mergeSummaryResults(42, here::here("outputs",
+                                                "full_new_dupes_removed"))
+```
+
+```{r epidemic-size-dupes-removed}
+dupes_removed_size <- epidemic.size(dupes_removed)
+kable(dupes_removed_size, digits = 1)
+```
+
+```{r epidemic-duration-dupes-removed}
+dupes_removed_duration <- epidemic.duration(dupes_removed)
+kable(dupes_removed_duration, digits = 1)
+```
+
 ## Different seed
 
 ```{r load-results-diff-seed}
@@ -109,3 +126,4 @@ kable(new_cmd_size, digits = 1)
 new_cmd_duration <- epidemic.duration(new_cmd)
 kable(new_cmd_duration, digits = 1)
 ```
+
