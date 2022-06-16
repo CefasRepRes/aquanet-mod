@@ -53,3 +53,6 @@ vignettes/*.pdf
 
 # Text files
 *.txt
+
+# Aquanet install
+/code/aquanet_install.R
