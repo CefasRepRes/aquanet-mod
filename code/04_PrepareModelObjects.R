@@ -29,7 +29,7 @@ objects_to_keep <- c("gis_filepath",
 objects_in_workspace <- ls()
 objects_to_clear <- objects_in_workspace[!objects_in_workspace %in% objects_to_keep]
 
-rm(list = objects_to_clear)
+# rm(list = objects_to_clear)
 
 # Set CRS
 
@@ -131,6 +131,13 @@ type_vector <- cbind(type_vector, row_sums)
 
 uncategorised_sites <- dplyr::filter(as.data.frame(type_vector), row_sums == 0)
 if(nrow(uncategorised_sites) > 0) message(paste("There are", nrow(uncategorised_sites), "sites with no type designated"))
+
+# Save the type vector
+
+write.csv(type_vector, here::here(outputs_filepath,
+                                  scenario_name,
+                                  "site_types.csv"),
+          row.names = F)
 
 # Get site to site distances ---------------------------------------------------
 
