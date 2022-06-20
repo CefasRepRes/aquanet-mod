@@ -39,6 +39,21 @@ kable(full_test_size, digits = 1)
 full_test_duration <- epidemic.duration(full_test)
 kable(full_test_duration, digits = 1)
 ```
+### James
+
+```{r load-results-james}
+james_baseline <- mergeSummaryResults(42, "Y:/FC1215_Defra_R_and_D_AAD/Working_Area/Theme 4 biosecurity/James Network Model/Raw Results from report scenarios/Baseline/Summary")
+```
+
+```{r epidemic-size-james}
+james_baseline_size <- epidemic.size(james_baseline)
+kable(james_baseline_size, digits = 1)
+```
+
+```{r epidemic-duration-james}
+james_baseline_duration <- epidemic.duration(james_baseline)
+kable(james_baseline_duration, digits = 1)
+```
 
 ## Full test with updated loop
 
@@ -72,6 +87,23 @@ kable(dupes_removed_size, digits = 1)
 ```{r epidemic-duration-dupes-removed}
 dupes_removed_duration <- epidemic.duration(dupes_removed)
 kable(dupes_removed_duration, digits = 1)
+```
+
+## Updated duplicate removal with null
+
+```{r load-results-dupes-removed-null}
+dupes_removed_null <- mergeSummaryResults(42, here::here("outputs",
+                                                "full_new_dupes_removed_null_if_mismatch"))
+```
+
+```{r epidemic-size-dupes-removed-null}
+dupes_removed_null_size <- epidemic.size(dupes_removed_null)
+kable(dupes_removed_null_size, digits = 1)
+```
+
+```{r epidemic-duration-dupes-removed-null}
+dupes_removed_null_duration <- epidemic.duration(dupes_removed_null)
+kable(dupes_removed_null_duration, digits = 1)
 ```
 
 ## Different seed
