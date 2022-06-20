@@ -60,14 +60,18 @@ sites_summary_type <- filter(sites_summary_type, !is.na(smallhatch))
 # Filter out non-farms
 sites_summary_type <- filter(sites_summary_type, farm_vector == 1)
 
+# Load in economic costing -----------------------------------------------------
+
+cull_cost <- read.csv(here::here("data",
+                                 "Economics",
+                                 "cull_costs.csv"))
+
+daily_cost <- read.csv(here::here("data",
+                                  "Economics",
+                                  "daily_costs.csv"))
+
 # Filter by state --------------------------------------------------------------
   # TODO: Expand to other states
-
-# Sum tdiff to get total time, but keep all other factors the same
-state.summary <- function(data){
-  cbind(summarise_each(select(data, tdiff), funs(sum)),
-        summarise_each(select(data, -tdiff), funs(first)))
-}
 
 state.summary <- function(data){
   cbind(summarise(data, across(tdiff, sum)),
@@ -82,19 +86,37 @@ fallow <- filter(sites_summary_type, state == c(4, 14, 24, 34))
 # Summarise
 fallow <- group_by(fallow, siteID) %>% state.summary()
 
-# Allocate costs
- # TODO: make this for all farms/states (currently dummy variables)
-fallow_costs <- data.frame(medium_table = 50.00,
-                           medium_fish = 40.00)
+# Allocate daily costs
+fallow_daily_cost <- dplyr::filter(daily_cost, stage == "fallow")
 
-# Cost to medium table
-  # TODO: find a way to loop/do for all
-fallow$mediumtable <- fallow$mediumtable * fallow$tdiff * fallow_costs$medium_table
-# Cost to medium fishing
-fallow$mediumfish <- fallow$mediumfish * fallow$mediumfish * fallow_costs$medium_fish
+# Get list of site types
+site_types <- cull_cost$site_type
 
-# Get total costs per site
-fallow$site_cost <- rowSums(fallow)
+# Calculate daily costs for each site
+costs <- data.frame()
+for(i in 1:length(site_types)){
+  type <- site_types[[i]]
+  daily_site_cost <- dplyr::filter(fallow_daily_cost, site_type == type)
+  duration_cost <- (fallow[, type] * fallow$tdiff) * daily_site_cost$farm_cost_per_day
+  total_duration_cost <- sum(duration_cost)
+  costs <- rbind(costs, total_duration_cost)
+}
 
-# Get total costs
-fallow_total_cost <- sum(fallow$site_cost)
+# Make into data frame
+fallow_costs <- cbind(site_types, costs)
+colnames(fallow_costs)[2] <- "duration_cost"
+
+# Add in cull costs
+full_cull_cost <- data.frame()
+for(i in 1:length(site_types)){
+  type <- site_types[[i]]
+  filter_cull_cost <- dplyr::filter(cull_cost, site_type == type)
+  farm_cull_cost <- sum(fallow[, type]) * filter_cull_cost$cull_cost_farm
+  fhi_cull_cost <- sum(fallow[, type]) * filter_cull_cost$cull_cost_fhi
+  comb_cull_cost <- data.frame(cull_cost_farm = farm_cull_cost,
+                               cull_cost_fhi = fhi_cull_cost)
+  full_cull_cost <- rbind(full_cull_cost, comb_cull_cost)
+}
+
+# Make into data frame
+cull_costs <- cbind(site_types, full_cull_cost)
