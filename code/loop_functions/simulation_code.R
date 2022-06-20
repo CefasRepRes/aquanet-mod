@@ -666,7 +666,7 @@ simulationCode = function(graph.contactp.objects, runs, tmax, batchNo, ListRunTi
     colnames(simTimes.longTable) = c('timeID','simNo','tdiff','t')
     
     
-    save(simStates.longTable, simTimes.longTable, file = paste(locationSaveResults,"/FullDetails/batchNo-",batchNo,"_simNo-",simNo,"_NoCommits-",numberFullSaves,".RData",sep=""),compress=FALSE)
+    save(simStates.longTable, simTimes.longTable, file = paste(locationSaveResults,"/batch_results/states-batchNo-",batchNo,"_simNo-",simNo,".RData",sep=""),compress=FALSE)
   }
   
   for (k in 1:runs) {
@@ -801,19 +801,19 @@ simulationCode = function(graph.contactp.objects, runs, tmax, batchNo, ListRunTi
       # The following line of code should combine all the site's attributes into a single number, 
       # which uniquely represents all of the attributes co-occuring within the same site
       
-      #set(x = allStates.table, i = (no.variables + 1):(no.variables + contactp.length),j = as.character(noSteps.sinceLastCommit + 1), value = as.integer(combinedStates_vector))
-      #set(x = allStates.table, i = (1:(no.variables + 3)), j = as.character(noSteps.sinceLastCommit + 1), value = as.integer(c(batchNo, k, k + ((batchNo - 1) * runs), combinedStates.total)))
-      #set(x = allStates.table.t, j = as.character(noSteps.sinceLastCommit + 1), value = c(tdiff, t - tdiff))
-      
+      set(x = allStates.table, i = (no.variables + 1):(no.variables + contactp.length),j = as.character(noSteps.sinceLastCommit + 1), value = as.integer(combinedStates_vector))
+      set(x = allStates.table, i = (1:(no.variables + 3)), j = as.character(noSteps.sinceLastCommit + 1), value = as.integer(c(batchNo, k, k + ((batchNo - 1) * runs), combinedStates.total)))
+      set(x = allStates.table.t, j = as.character(noSteps.sinceLastCommit + 1), value = c(tdiff, t - tdiff))
+
       
       # Save the results to disk
-      #if (noSteps.sinceLastCommit == (commitInterval - 1)) {
-      #  numberFullSaves = noSteps %/% commitInterval
-      #  commitResults(allStates.table, allStates.table.t, numberFullSaves)
-      #  allStates.table[,as.character(iterationID.vector):=empty.vector]
-      #  allStates.table.t[,as.character(iterationID.vector):=empty.vector.t]
-      #}
-      
+      if (noSteps.sinceLastCommit == (commitInterval - 1)) {
+       numberFullSaves = noSteps %/% commitInterval
+       commitResults(allStates.table, allStates.table.t, numberFullSaves)
+       allStates.table[,as.character(iterationID.vector):=empty.vector]
+       allStates.table.t[,as.character(iterationID.vector):=empty.vector.t]
+      }
+
       # Pick the next event, and modify a site's state accordingly
       event.objects = do_event(state_vector, control_matrix, transition.rates, tdiff, movement.restrictions.bySite, catchment_time_vector, catchments.all.sites.c5.status, record_transition_times, source.infection.vector, infected.source.matrix)
       
@@ -840,10 +840,10 @@ simulationCode = function(graph.contactp.objects, runs, tmax, batchNo, ListRunTi
   # Print diagnositic information, and format results as appriopriate
   print(c("No Iterations", noSteps))
   
-  #allStates.table[,as.character((noSteps.sinceLastCommit + 1):commitInterval):=NULL]
-  #allStates.table.t[,as.character((noSteps.sinceLastCommit + 1):commitInterval):=NULL]
-  #numberFullSaves = numberFullSaves + 1
-  #commitResults(allStates.table, allStates.table.t, numberFullSaves)
+  allStates.table[,as.character((noSteps.sinceLastCommit + 1):commitInterval):=NULL]
+  allStates.table.t[,as.character((noSteps.sinceLastCommit + 1):commitInterval):=NULL]
+  numberFullSaves = numberFullSaves + 1
+  commitResults(allStates.table, allStates.table.t, numberFullSaves)
   
   save(summaryStates.table, file = paste(locationSaveResults,"/batch_results/batchNo-",batchNo,".RData",sep=""),compress=FALSE)
   
