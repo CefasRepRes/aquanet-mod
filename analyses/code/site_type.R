@@ -69,6 +69,11 @@ state.summary <- function(data){
         summarise_each(select(data, -tdiff), funs(first)))
 }
 
+state.summary <- function(data){
+  cbind(summarise(data, across(tdiff, sum)),
+        summarise(data, across(-tdiff, first)))
+}
+
 ## Fallow ======================================================================
 
 # Select fallow states
