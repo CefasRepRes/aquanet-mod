@@ -78,7 +78,7 @@ fallow <- filter(sites_summary_type, state == c(4, 14, 24, 34))
 fallow <- group_by(fallow, siteID) %>% state.summary()
 
 # Allocate costs
-  # TODO: make this for all farms/states (currently dummy variables)
+ # TODO: make this for all farms/states (currently dummy variables)
 fallow_costs <- data.frame(medium_table = 50.00,
                            medium_fish = 40.00)
 
