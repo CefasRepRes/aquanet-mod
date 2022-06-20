@@ -1,4 +1,9 @@
 state.costs <- function(state, site_codes, site_types){
+  # Create state summary
+  state.summary <- function(data){
+    cbind(summarise(data, across(tdiff, sum)),
+          summarise(data, across(-tdiff, first)))
+  }
   # Select state
   data <- filter(sites_summary_type, state %in% site_codes)
   # Summarise
@@ -7,6 +12,7 @@ state.costs <- function(state, site_codes, site_types){
   # Allocate daily costs
   state_daily_cost <- dplyr::filter(daily_cost, stage == state)
   
+  # TODO: add data frames as inputs
   # Calculate daily costs for each site
   costs <- data.frame()
   for(i in 1:length(site_types)){
