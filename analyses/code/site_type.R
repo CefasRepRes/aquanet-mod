@@ -73,40 +73,38 @@ daily_cost <- read.csv(here::here("data",
 # Filter by state --------------------------------------------------------------
   # TODO: Expand to other states
 
-state.summary <- function(data){
-  cbind(summarise(data, across(tdiff, sum)),
-        summarise(data, across(-tdiff, first)))
-}
+source(here::here("analyses",
+                  "code",
+                  "fun_state_costs.R"))
+
 
 ## Fallow ======================================================================
 
-# Select fallow states
-fallow <- filter(sites_summary_type, state == c(4, 14, 24, 34))
+fallow_costs <- state.costs(state = "fallow",
+                            site_codes = c(4, 14, 24, 34),
+                            site_types = site_types)
 
-# Summarise
-fallow <- group_by(fallow, siteID) %>% state.summary()
+## No management ===============================================================
+  # TODO: find out if this should only exist in the no controls scenario
+no_manage_costs <- state.costs(state = "no_manage",
+                                   site_codes = 10,
+                                   site_types = site_types)
 
-# Allocate daily costs
-fallow_daily_cost <- dplyr::filter(daily_cost, stage == "fallow")
+## Contact tracing =============================================================
 
-# Get list of site types
-site_types <- cull_cost$site_type
+contact_trace_cost <- state.costs(state = "contact_trace",
+                            site_codes = c(1, 11, 21, 31,
+                                           7, 17, 27, 37),
+                            site_types = site_types)
 
-# Calculate daily costs for each site
-costs <- data.frame()
-for(i in 1:length(site_types)){
-  type <- site_types[[i]]
-  daily_site_cost <- dplyr::filter(fallow_daily_cost, site_type == type)
-  duration_cost <- (fallow[, type] * fallow$tdiff) * daily_site_cost$farm_cost_per_day
-  total_duration_cost <- sum(duration_cost)
-  costs <- rbind(costs, total_duration_cost)
-}
+## Catchment controls ==================================================================
 
-# Make into data frame
-fallow_costs <- cbind(site_types, costs)
-colnames(fallow_costs)[2] <- "duration_cost"
+catchment_controls <- state.costs(state = "catchment_control",
+                            site_codes = c(20:29),
+                            site_types = site_types)
 
-# Add in cull costs
+# Add in cull costs ------------------------------------------------------------
+
 full_cull_cost <- data.frame()
 for(i in 1:length(site_types)){
   type <- site_types[[i]]
