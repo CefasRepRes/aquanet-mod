@@ -39,8 +39,22 @@ sites_summary <- dplyr::select(sites_summary,
                                tdiff,
                                simNo)
 
+threes <- filter(sites_summary, state %in% c(3, 13, 23, 33))
+
 # Filter out initialization (tdiff = NA)
 sites_summary <- dplyr::filter(sites_summary, !is.na(tdiff))
+str(sites_summary)
+
+# Get actual site id
+
+site_id_mod <- read.csv(here::here("outputs",
+                                   "full_economics",
+                                   "site_details_with_model_id.csv"))
+
+site_id_mod <- dplyr::select(site_id_mod, siteID, modelID)
+
+sites_summary <- left_join(sites_summary, site_id_mod, by = "modelID")
+sites_summary <- dplyr::select(sites_summary, -modelID)
 
 # Get site type ----------------------------------------------------------------
 
@@ -52,10 +66,6 @@ site_type <- read.csv(here::here("outputs",
 # Join to summary 
 sites_summary_type <- dplyr::left_join(sites_summary, site_type, 
                                        by = c("siteID" = "site_code"))
-
-# Filter out NAs
-  # TODO: work out why we have these NAs. Fishery sites?
-sites_summary_type <- filter(sites_summary_type, !is.na(smallhatch))
 
 # Filter out non-farms
 sites_summary_type <- filter(sites_summary_type, farm_vector == 1)
