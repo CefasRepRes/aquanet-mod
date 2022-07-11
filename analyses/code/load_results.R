@@ -1,6 +1,6 @@
 mergeSummaryResults <- function(no.variables, locationSaveResults) {
   library(data.table)
-  locationOfSummary <- paste(locationSaveResults, "/", sep="")
+  locationOfSummary <- paste(locationSaveResults, "/batch_results/", sep="")
   
   files <- list.files(path = locationOfSummary, 
                       pattern = "\\.RData$",

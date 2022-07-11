@@ -366,7 +366,7 @@ if(length(foreign_sites) != 0) message(paste("Removed", length(foreign_sites),
 # Tidy igraph ------------------------------------------------------------------
 
 # Remove the self loops and multiple edges from the 2010 to 2012 graph
-combined_movements_simplified <- simplify(combined_movements_graph, 
+combined_movements_simplified <- igraph::simplify(combined_movements_graph, 
                                           remove.multiple = TRUE, 
                                           remove.loops = TRUE,
                                           edge.attr.comb = list(withinCatchment = "first",

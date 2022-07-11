@@ -56,3 +56,6 @@ vignettes/*.pdf
 
 # Aquanet install
 /code/aquanet_install.R
+
+# .here file
+.here

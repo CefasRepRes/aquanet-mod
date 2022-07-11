@@ -599,7 +599,7 @@ simulationCode = function(graph.contactp.objects, runs, tmax, batchNo, ListRunTi
     } 
     
     # Update controls on those sites which have passed a given no. days without infection
-    min.trans = ListRunTimeParameters[[8]]
+    min.trans = ListRunTimeParameters[[7]] + ListRunTimeParameters[[8]]
     controlled.sites.c3.logical = as.logical(control_matrix[, 3])
     allow.all.movements = (time_vector > min.trans) & controlled.sites.c3.logical
     allow.all.movements.no = sum(allow.all.movements)
@@ -656,14 +656,14 @@ simulationCode = function(graph.contactp.objects, runs, tmax, batchNo, ListRunTi
                                      as.integer(allStates.matrix@j + ((numberFullSaves - 1) * commitInterval)),
                                      as.integer(allStates.table[3,])[allStates.matrix@j + 1])
     
-    colnames(simStates.longTable) = c('siteID','state','timeID','simNo')
+    colnames(simStates.longTable) = c('modelID','state','timeID','simNo')
     
     simTimes.longTable = data.frame(as.integer(iterationID.vector + ((numberFullSaves - 1) * commitInterval)),
                                     as.integer(allStates.table[3,])[iterationID.vector],
                                     as.numeric(allStates.table.t[1,])[iterationID.vector],
                                     as.numeric(allStates.table.t[2,])[iterationID.vector])
     
-    colnames(simTimes.longTable) = c('timeID','simNo','tdiff','t')
+    colnames(simTimes.longTable) = c('modelID','simNo','tdiff','t')
     
     
     save(simStates.longTable, simTimes.longTable, file = paste(locationSaveResults,"/batch_results/states-batchNo-",batchNo,"_simNo-",simNo,".RData",sep=""),compress=FALSE)
@@ -777,7 +777,7 @@ simulationCode = function(graph.contactp.objects, runs, tmax, batchNo, ListRunTi
       
       noOperations = noOperations + 1
       no.controlled.catchments = withinCatchmentMovements.objects[[7]]
-      set(x = summaryStates.table, j = as.character(noOperations), value = c(batchNo,k, t, tdiff, simNo, rate.type, no.controlled.catchments, sum(cumulativeState_vector), farmcombinedstates.total))
+      set(x = summaryStates.table, j = as.character(noOperations), value = c(batchNo,k, t, tdiff, simNo, rate.type, no.controlled.catchments, sum(cumulativeState_vector), combinedStates.total))
       
       if (noOperations %% commitInterval == (commitInterval - 1)) {
         summaryStates.table[,as.character((ncol(summaryStates.table) + 1):(ncol(summaryStates.table) + 1 + commitInterval)):=empty.vector.byState]
