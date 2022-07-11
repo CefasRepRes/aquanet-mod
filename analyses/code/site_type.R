@@ -44,7 +44,6 @@ threes <- filter(sites_summary, state %in% c(3, 13, 23, 33))
 # Filter out initialization (tdiff = NA)
 sites_summary <- dplyr::filter(sites_summary, !is.na(tdiff))
 str(sites_summary)
-colnames(sites_summary)[1] <- "modelID"
 
 # Get actual site id
 
