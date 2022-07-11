@@ -113,6 +113,9 @@ dir.create(file.path(save_results_filepath), showWarnings = FALSE)
 # Batch results folder
 dir.create(file.path(save_results_filepath, "batch_results"), showWarnings = FALSE)
 
+# Commit results folder
+dir.create(file.path(save_results_filepath, "full_results"), showWarnings = FALSE)
+
 # Code folder
 dir.create(file.path(save_results_filepath, "code"), showWarnings = FALSE)
 
