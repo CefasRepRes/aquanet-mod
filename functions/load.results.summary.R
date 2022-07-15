@@ -1,4 +1,4 @@
-mergeSummaryResults <- function(no.variables, locationSaveResults) {
+load.results.summary <- function(no.variables, locationSaveResults) {
   library(data.table)
   locationOfSummary <- paste(locationSaveResults, "/batch_results/", sep="")
   

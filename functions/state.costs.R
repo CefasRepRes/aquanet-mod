@@ -2,9 +2,8 @@ state.costs <- function(data, state, state_codes, site_types){
   # Select state
   selected_state <- filter(data, state %in% state_codes)
   # Summarise
-  source(here::here("analyses",
-                    "code",
-                    "fun_state_summary.R"))
+  state_sumamry <- cbind(summarise(data, across(tdiff, sum)),
+                         summarise(data, across(-tdiff, first)))
   state_summary <- group_by(selected_state, siteID) %>% state.summary()
   state_summary <- state_summary[, -1] # Remove extra column called simNo
   # Get daily cost for that stage
