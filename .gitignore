@@ -59,3 +59,6 @@ vignettes/*.pdf
 
 # .here file
 .here
+
+# Archive folder
+/archive/
