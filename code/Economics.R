@@ -5,6 +5,7 @@ library(dplyr)
 
 # Load outputs -----------------------------------------------------------------
 
+# Get filenames of where outputs are
 filenames <- list.files(here::here("outputs",
                                    "full_economics",
                                    "batch_results"),
@@ -45,8 +46,10 @@ threes <- filter(sites_summary, state %in% c(3, 13, 23, 33))
 sites_summary <- dplyr::filter(sites_summary, !is.na(tdiff))
 str(sites_summary)
 
-# Get actual site id
+# Change siteID to modelID (because that's what it is)
+colnames(sites_summary)[1] <- "modelID"
 
+# Get actual site id
 site_id_mod <- read.csv(here::here("outputs",
                                    "full_economics",
                                    "site_details_with_model_id.csv"))
