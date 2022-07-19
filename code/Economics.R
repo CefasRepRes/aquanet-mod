@@ -141,4 +141,4 @@ write.csv(outbreak_summary,
                      "full_run_for_economics",
                      "economics",
                      "summary_outbreak_costs.csv"),
-          row.names = F)
+          row.names = T)
