@@ -3,6 +3,8 @@
 library(here)
 library(dplyr)
 
+# TODO: make generic so it works with any input
+
 # Load outputs -----------------------------------------------------------------
 
 source(here::here("functions",
@@ -70,44 +72,73 @@ simulation_daily_costs <- fallow_costs %>%
 
 # Add in cull costs ------------------------------------------------------------
 
-# TODO: finish testing
-
+# For each unique simulation-site combination, add a one-off fallow cost
+  # TODO: figure out if there's a possibility of this not capturing a site which is
+  # fallowed more than once in a single sim
 fallow <- dplyr::filter(sites_summary_type, state %in% c(4, 14, 24, 34))
+fallow_unique_combo <- fallow %>% 
+  dplyr::select(-tdiff, -state) %>% unique()
 sims <- unique(sites_summary_type$simNo)
 
+# Loop over simulations and add the one-off fallow cost, depending on site type
 full_cull_cost <- data.frame()
 for(k in 1:length(sims)){
 for(i in 1:length(site_types)){
   type <- site_types[[i]]
-  fallow_by_sim <- dplyr::filter(fallow, simNo == k)
+  fallow_by_sim <- dplyr::filter(fallow_unique_combo, simNo == k)
   filter_cull_cost <- dplyr::filter(cull_cost, site_type == type)
+  # Separate costs to the farm and the FHI (competent authority)
   farm_cull_cost <- sum(fallow_by_sim[, type]) * filter_cull_cost$cull_cost_farm
   fhi_cull_cost <- sum(fallow_by_sim[, type]) * filter_cull_cost$cull_cost_fhi
+  # Combine into single data frame
   comb_cull_cost <- data.frame(cull_cost_farm = farm_cull_cost,
-                               cull_cost_fhi = fhi_cull_cost)
+                               cull_cost_fhi = fhi_cull_cost,
+                               sim = k)
+  # Save results
   full_cull_cost <- rbind(full_cull_cost, comb_cull_cost)
 }}
 
-# TODO: combine and tidy
+# Summarise per simulation
+full_cull_cost_sim <- full_cull_cost %>% 
+  group_by(sim) %>% 
+  summarise(cull_cost_farm = sum(cull_cost_farm, na.rm = T),
+            cull_cost_fhi = sum(cull_cost_fhi, na.rm = T))
 
-# Make into data frame
-cull_costs <- data.frame(stage = c("cull_farm", "cull_fhi"),
-                         mean_cost = c(mean(full_cull_cost$cull_cost_farm, na.rm = T), 
-                                       mean(full_cull_cost$cull_cost_fhi, na.rm = T)),
-                         sd_cost = c(sd(full_cull_cost$cull_cost_farm, na.rm = T), 
-                                     sd(full_cull_cost$cull_cost_fhi, na.rm = T)),
-                         median_cost = c(median(full_cull_cost$cull_cost_farm, na.rm = T), 
-                                         median(full_cull_cost$cull_cost_fhi, na.rm = T)),
-                         min_cost = c(min(full_cull_cost$cull_cost_farm, na.rm = T), 
-                                      min(full_cull_cost$cull_cost_fhi, na.rm = T)),
-                         max_cost = c(max(full_cull_cost$cull_cost_farm, na.rm = T), 
-                                      max(full_cull_cost$cull_cost_fhi, na.rm = T)))
+# Make into single data frame
+full_outbreak_costs <- simulation_daily_costs %>% dplyr::full_join(full_cull_cost_sim,
+                                                                   by = c("simNo" = "sim"))
 
-# Combine all ------------------------------------------------------------------
-# TODO: get the total average properly
+# Calculate total outbreak cost
+full_outbreak_costs$total_outbreak_cost <- rowSums(full_outbreak_costs[, -1],
+                                                   na.rm = T)
+# Save
+write.csv(full_outbreak_costs,
+          here::here("outputs",
+                     "full_run_for_economics",
+                     "economics",
+                     "full_outbreak_costs.csv"),
+          row.names = F)
 
-outbreak_costs <- rbind(fallow_costs,
-                        no_manage_costs,
-                        catchment_controls,
-                        contact_trace_cost,
-                        cull_costs)
+# Get summary statistics -------------------------------------------------------
+
+# Loop over functions
+functions <- c("mean", "sd", "min", "max")
+outbreak_summary <- data.frame()
+for(i in 1:length(functions)){
+  sum <- apply(full_outbreak_costs, 2, functions[i], na.rm = T)
+  outbreak_summary <- rbind(outbreak_summary, sum)
+}
+
+# Tidy up data frame
+outbreak_summary <- as.data.frame(t(outbreak_summary))
+colnames(outbreak_summary) <- functions
+rownames(outbreak_summary) <- colnames(full_outbreak_costs)
+outbreak_summary <- outbreak_summary[-1, ] # Remove simNo
+
+# Save
+write.csv(outbreak_summary,
+          here::here("outputs",
+                     "full_run_for_economics",
+                     "economics",
+                     "summary_outbreak_costs.csv"),
+          row.names = F)
