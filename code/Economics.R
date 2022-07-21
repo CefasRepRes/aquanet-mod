@@ -2,21 +2,33 @@
 
 library(here)
 library(dplyr)
+library(beepr)
 
 # TODO: make generic so it works with any input
 
-# Load outputs -----------------------------------------------------------------
+# Load and process outputs -----------------------------------------------------
 
+## Load results ================================================================
+
+# Source function
 source(here::here("functions",
                   "load.results.site.type.R"))
 
+# Load results
 sites_summary_type <- load.results.site.type("full_run_for_economics")
+
+# Check we have the correct number of sims
+  # Should be 3000 (or whatever you put in as your number of sims to run)
 max(sites_summary_type$simNo)
 
-# Filter out non-farms
-  # We don't have any data for fisheries
-sites_summary_farms <- filter(sites_summary_type, farm_vector == 1)
-max(sites_summary_farms$simNo)
+## Process results =============================================================
+
+# Source function
+source(here::here("functions",
+                  "time.per.stage.R"))
+
+# Process results - this will take a little while
+time_summary <- time.per.stage("full_run_for_economics");beep(sound = "mario")
 
 # Load in economic costing -----------------------------------------------------
 
@@ -30,6 +42,11 @@ daily_cost <- read.csv(here::here("data",
 
 # Calculate daily costs --------------------------------------------------------
 
+# Filter out non-farms
+# We don't have any duration cost data for fisheries
+time_summary_farms <- filter(time_summary, farm_vector == 1)
+max(time_summary_farms$simNo)
+
 # Load function
 source(here::here("functions",
                   "state.costs.R"))
@@ -38,29 +55,29 @@ source(here::here("functions",
 site_types <- cull_cost$site_type
 
 # Fallow
-fallow_costs <- state.costs(data = sites_summary_farms,
+fallow_costs <- state.costs(data = time_summary_farms,
                             state = "fallow",
                             state_codes = c(4, 14, 24, 34),
                             site_types = site_types)
 
 # No management
   # TODO: find out if this should only exist in the no controls scenario
-no_manage_costs <- state.costs(data = sites_summary_type,
+no_manage_costs <- state.costs(data = time_summary_farms,
                                state = "no_manage",
                                state_codes = 10,
                                site_types = site_types)
 
 # Contact tracing
-contact_trace_cost <- state.costs(data = sites_summary_type,
+contact_trace_cost <- state.costs(data = time_summary_farms,
                                   state = "contact_trace",
                                   state_codes = c(1, 11, 21, 31,
                                                  7, 17, 27, 37),
                                   site_types = site_types)
 
 # Catchment controls
-catchment_controls <- state.costs(data = sites_summary_type,
+catchment_controls <- state.costs(data = time_summary_farms,
                                   state = "catchment_control",
-                                  state_codes = c(21, 22, 23, 24,
+                                  state_codes = c(20, 21, 22, 23, 24,
                                                   25, 26, 27, 28, 29),
                                   site_types = site_types)
 
@@ -72,20 +89,16 @@ simulation_daily_costs <- fallow_costs %>%
 
 # Add in cull costs ------------------------------------------------------------
 
-# For each unique simulation-site combination, add a one-off fallow cost
-  # TODO: figure out if there's a possibility of this not capturing a site which is
-  # fallowed more than once in a single sim
-fallow <- dplyr::filter(sites_summary_type, state %in% c(4, 14, 24, 34))
-fallow_unique_combo <- fallow %>% 
-  dplyr::select(-tdiff, -state) %>% unique()
-sims <- unique(sites_summary_type$simNo)
+# When a site enters a fallow state (34) enter a one-off cost
+fallow <- dplyr::filter(time_summary, state == 34)
+sims <- unique(fallow$simNo)
 
 # Loop over simulations and add the one-off fallow cost, depending on site type
 full_cull_cost <- data.frame()
 for(k in 1:length(sims)){
 for(i in 1:length(site_types)){
   type <- site_types[[i]]
-  fallow_by_sim <- dplyr::filter(fallow_unique_combo, simNo == k)
+  fallow_by_sim <- dplyr::filter(fallow, simNo == sims[k])
   filter_cull_cost <- dplyr::filter(cull_cost, site_type == type)
   # Separate costs to the farm and the FHI (competent authority)
   farm_cull_cost <- sum(fallow_by_sim[, type]) * filter_cull_cost$cull_cost_farm
