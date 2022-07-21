@@ -29,7 +29,7 @@ ggplot(component_data, aes(x = variable, y = value)) +
   # Set better y axis breaks
   scale_y_continuous(breaks = seq(0, 
                                   max(component_data$value, na.rm = T), 
-                                  by = 1000000)) +
+                                  by = 10000000)) +
   # Set better labels for the cost components
   scale_x_discrete(labels = c("fallow_total_cost" = "Fallow",
                               "no_manage_total_cost" = "Unmanaged infection",
