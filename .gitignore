@@ -62,3 +62,6 @@ vignettes/*.pdf
 
 # Archive folder
 /archive/
+
+# RMDs
+*.rmd
