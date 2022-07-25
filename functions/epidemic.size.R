@@ -1,6 +1,6 @@
 epidemic.size <- function(results) {
   # Remove simNo 0
-  results <- results %>% filter(simNo != 0)
+  results <- results %>% dplyr::filter(simNo != 0)
   # Epidemic size
   max_inf_per_sim <- results %>%
     dplyr::select(simNo, cumulativeNoInfectedSites) %>%

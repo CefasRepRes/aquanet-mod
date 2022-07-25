@@ -1,6 +1,6 @@
 epidemic.duration <- function(results) {
   # Remove simNo 0
-  results <- results %>% filter(simNo != 0)
+  results <- results %>% dplyr::filter(simNo != 0)
   # Epidemic duration
   no_days <- results %>%
     dplyr::select(simNo, t) %>%
