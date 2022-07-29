@@ -25,15 +25,12 @@ objects_to_keep <- c("gis_filepath",
                      "noCores",
                      "catchment_movement_controls",
                      "seedNo",
-                     "initial_no_infections")
+                     "initial_no_infections",
+                     "BNG_crs")
 objects_in_workspace <- ls()
 objects_to_clear <- objects_in_workspace[!objects_in_workspace %in% objects_to_keep]
 
 # rm(list = objects_to_clear)
-
-# Set CRS
-
-BNG_crs <- sf::st_crs(27700)
 
 # Load contact network ---------------------------------------------------------
 
