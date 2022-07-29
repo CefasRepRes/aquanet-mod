@@ -14,14 +14,16 @@ assortativity.degree(combined_graph2)
 
 # Look at the number of fish imported
 
-MostImports <- degree(combined_graph2,mode="in")
-meanMI <- mean(MostImports)
-medianMI <- median(MostImports)
-minMI <- min(MostImports)
-maxMI <- max(MostImports)
-qaun95 <- quantile(MostImports, 0.95)
-MINode <- which(MostImports == maxMI)
-MIHistData <- hist(MostImports,main="Histogram of Imports",xlab="Number of Fish Imported")
+site_imports <- degree(new_network,
+                      mode="in")
+mean_site_imports <- mean(site_imports)
+median_site_imports <- median(site_imports)
+min_site_imports <- min(site_imports)
+max_site_imports <- max(site_imports)
+quan_95_site_imports <- quantile(site_imports, 0.95)
+site_with_most_imports <- which(site_imports == max_site_imports)
+hist(site_imports,main="Histogram of Imports",
+     xlab="Number of Fish Imported")
 
 # Look at the number of fish exported
 

@@ -1,58 +1,88 @@
 #### Run model command line ####
 
-library(here) # Makes writing file paths much easier
-
-# Setup -------------------------------------------------------------------
+# Setup ------------------------------------------------------------------------
 
 # Clear the startup screen
 cat('\014')
 
 # Clear objects from the workspace
-rm(list = ls()) # TODO: work out if this is needed and remove if possible
-
-# Detach plyr
-detach("package:plyr", unload = TRUE) # TODO: stop using plyr if possible
+rm(list = ls())
 
 # Set display options
 options(width = 1000)
 
-# Set ocation to save results
-  # This should be transportable if using the R project
-outputs_filepath <- here::here("outputs")
+# Load necessary packages ------------------------------------------------------
 
-# Set species
-Species <- "Salmon - V3" # This is the name of the folder under 'SQL Files'
-                         # TODO: work out if the V3 is necessary
+library(aquanet) # Functions for aquanet model
+library(igraph) # Contact network
+library(sf) # Working with spatial data
+library(here) # Makes writing file paths much easier
+library(Matrix) # Creating and dealing with sparse matrices
 
-# Set parameter file location
-parameter_filepath <- here::here("data", 
-                                 "parameterisation",
-                                 "SimulationParameters_SimpleCase.csv")
-# This is the name of the parameter file
+# Packages for running simulations in parallel
+library(doParallel)
+library(doRNG)
 
-# Set the location of the GIS root directory
-gis_filepath <- here::here("data",
-                           "EA_Catchments")
+# Manipulating tables
+library(data.table)
+library(dplyr)
+
+# User settings ----------------------------------------------------------------
+
+# IMPORTANT: if you change these settings, save the command line before running.
+#            This will ensure the correct code is copied across with the results.
+
+# Scenario name 
+  # This is the name that will appear as your output directory. Make it descriptive
+scenario_name <- "test"
+
+# Data collection period
+  # This is the period of time (in days) over which your LFM data was collected
+data_collection_period <- 365 * 4 # 2011-2014 = 4 years
+
+# tmax
+  # Maximum time (in days) for which each simulation can run
+tmax <- 360 * 10
+
+# Initial number of infections
+# The default is one
+# Adding more would simulate an outbreak resulting from multiple introductions
+initial_no_infections <- 1
+
+# Catchment movement control options
+# Set to 0, 1 or 2
+# 0 = within catchment movements allowed
+# 1 = between and within infected catchments allow
+# 2 = no movement allowed by any sites within infected catchments
+catchment_movement_controls <- 0 
+
+# Number of simulations to be run
+  # Suggest 4 for a test, and 3000 for a full run
+noSims <- 4
+
+# Number of cores to be assigned
+  # We recommend using half the number of cores available on your device
+noCores <- detectCores() / 2
+
+# Seed number
+  # Set the seed associated with pseudo-random number generation
+  # This will ensure your results are repeatable across runs
+  # Only change if you want to compare repeatability when using different seeds
+seedNo <- 123 
 
 # Load in parameters -----------------------------------------------------------
 
+# Set file paths
+source(here::here("code",
+                  "01_SetFilePaths.R"))
+
 # Load parameter file
 parameter_file <- read.csv(file = parameter_filepath, 
-                           header = TRUE) 
-
-# Set scenario name
-
-scenario_name <- "full_test"
+                           header = TRUE)
 
 # Put scenario name into rowname
 rownames(parameter_file) <- scenario_name
 parameter_file$Range <- NULL
-
-# Get model setup parameters
-river_transmission_parameters <- c("River.Downstream.Current_speed",
-                                   "River.Downstream_Transmission_Const",
-                                   "River.UpDownstream.Current_speed",
-                                   "River.UpDownstream_Transmission_Const")
 
 # Get names of variable parameters
 run_time_parameters <- colnames(parameter_file)
@@ -65,20 +95,12 @@ if (length(run_time_parameters) < 12) {
       print("An excess of parameters have been supplied.")
 }
 
-# Clear the startup screen
-cat("\014")
-
 # Print parameters
 print(str(as.list(run_time_parameters)))
-print(str(as.list(river_transmission_parameters)))
 
 # Get parameters as list of numbers
 
 run_time_parameters_list <- unname(parameter_file)
-
-# Load in period of data collection --------------------------------------------
-
-data_collection_period <- 365 * 4 # 2011-2014 = 4 years
 
 # Create directories to save results -------------------------------------------
 
@@ -91,9 +113,8 @@ dir.create(file.path(save_results_filepath), showWarnings = FALSE)
 # Batch results folder
 dir.create(file.path(save_results_filepath, "batch_results"), showWarnings = FALSE)
 
-# Full details folder
-   # TODO: check if this is actually needed
-dir.create(file.path(save_results_filepath, "full_details"), showWarnings = FALSE)
+# Commit results folder
+dir.create(file.path(save_results_filepath, "full_results"), showWarnings = FALSE)
 
 # Code folder
 dir.create(file.path(save_results_filepath, "code"), showWarnings = FALSE)
@@ -116,7 +137,8 @@ message(paste("Results are saved in:", save_results_filepath))
 
 # Load and run components of AquaNet model --------------------------------
 
-source('code/CreateContactNetwork.R')
-source('code/PrepareModelObjects.R')
-source('code/CreateRiverContactMatrices.R', local = TRUE)
-source('code/RunCoreSimulationLoop-Parallel.R', local = TRUE)
+#source('code/02_CheckCatchmentSiteRelationships.R') # Don't need to run this if you have no duplicates file already
+source('code/03_CreateContactNetwork.R')
+source('code/04_PrepareModelObjects.R')
+source('code/05_CreateRiverContactMatrices.R', local = TRUE)
+source('code/06_RunCoreSimulationLoop-Parallel.R', local = TRUE)

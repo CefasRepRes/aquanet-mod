@@ -53,3 +53,15 @@ vignettes/*.pdf
 
 # Text files
 *.txt
+
+# Aquanet install
+/code/aquanet_install.R
+
+# .here file
+.here
+
+# Archive folder
+/archive/
+
+# RMDs
+*.rmd
