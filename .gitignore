@@ -47,6 +47,7 @@ vignettes/*.pdf
 /data/
 /code/aquanet_functions/
 /reports/
+/archive/
 
 # HTML files
 *.html
@@ -59,3 +60,6 @@ vignettes/*.pdf
 
 # .here file
 .here
+
+# .Rmd
+*.Rmd
