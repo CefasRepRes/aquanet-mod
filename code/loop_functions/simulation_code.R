@@ -666,7 +666,7 @@ simulationCode = function(graph.contactp.objects, runs, tmax, batchNo, ListRunTi
     colnames(simTimes.longTable) = c('modelID','simNo','tdiff','t')
     
     
-    save(simStates.longTable, simTimes.longTable, file = paste(locationSaveResults,"/batch_results/states-batchNo-",batchNo,"_simNo-",simNo,".RData",sep=""),compress=FALSE)
+    save(simStates.longTable, simTimes.longTable, file = paste(locationSaveResults,"/full_results/states-batchNo-",batchNo,"_simNo-",simNo,"_NoCommits-", noSteps.sinceLastCommit, ".RData",sep=""),compress=FALSE)
   }
   
   for (k in 1:runs) {
