@@ -116,6 +116,9 @@ dir.create(file.path(save_results_filepath, "batch_results"), showWarnings = FAL
 # Code folder
 dir.create(file.path(save_results_filepath, "code"), showWarnings = FALSE)
 
+# Full results folder
+dir.create(file.path(save_results_filepath, "full_results"), showWarnings = FALSE)
+
 # Save code and data for reproducibility ---------------------------------------
 
 # Get list of coding files
@@ -132,9 +135,22 @@ file.copy(parameter_filepath,
 # Print where results are saved
 message(paste("Results are saved in:", save_results_filepath))
 
+# Load in live fish movement (LFM) data ----------------------------------------
+
+# Section 30
+
+section_30_movements <- read.csv(section_30_lfm_filename, 
+                                 colClasses = "character") 
+
+# Farm-to-farm
+
+farm_to_farm_movements <- read.csv(farm_to_farm_lfm_filename, 
+                                   colClasses = "character") 
+
 # Load and run components of AquaNet model --------------------------------
 
-#source('code/02_CheckCatchmentSiteRelationships.R') # Don't need to run this if you have no duplicates file already
+source('code/02_CheckCatchmentSiteRelationships.R') # Don't need to run this if you have no duplicates file already
+Twyi
 source('code/03_CreateContactNetwork.R')
 source('code/04_PrepareModelObjects.R')
 source('code/05_CreateRiverContactMatrices.R', local = TRUE)
