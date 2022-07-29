@@ -70,6 +70,10 @@ noCores <- detectCores() / 2
   # Only change if you want to compare repeatability when using different seeds
 seedNo <- 123 
 
+# Coordinate reference system (CGS)
+
+BNG_crs <- sf::st_crs(27700) # Number is the EPSG for the British National Grid
+
 # Load in parameters -----------------------------------------------------------
 
 # Set file paths

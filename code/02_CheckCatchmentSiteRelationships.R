@@ -1,9 +1,5 @@
 #### Check catchment site relationships ####
 
-# Set up British National Grid CRS ---------------------------------------------
-
-BNG_crs <- sf::st_crs(27700) # Number is the EPSG for the British National Grid
-
 # Create a data frame of all sites, including duplicates -----------------------
 
 # Site ID
