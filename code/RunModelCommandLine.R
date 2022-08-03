@@ -13,19 +13,25 @@ options(width = 1000)
 
 # Load necessary packages ------------------------------------------------------
 
+# List required packages
+pkgs <- c("igraph", "sf", "here", "Matrix",
+          "doParallel", "doRNG", "data.table", "dplyr")
+
+# Check whether installed and if not install from CRAN
+for (i in pkgs){
+  print(paste0("Checking: ", i))
+  if (!requireNamespace(i, quietly = T)) {
+    print(paste0("Installing: ", i))
+    install.packages(i)
+  }
+}
+
+# Load packages
+lapply(pkgs, library, character.only = T)
+
+# TODO: add install aquanet when it does not require PAT
 library(aquanet) # Functions for aquanet model
-library(igraph) # Contact network
-library(sf) # Working with spatial data
-library(here) # Makes writing file paths much easier
-library(Matrix) # Creating and dealing with sparse matrices
 
-# Packages for running simulations in parallel
-library(doParallel)
-library(doRNG)
-
-# Manipulating tables
-library(data.table)
-library(dplyr)
 
 # User settings ----------------------------------------------------------------
 
