@@ -104,6 +104,9 @@ run_time_parameters_list <- unname(parameter_file)
 
 # Create directories to save results -------------------------------------------
 
+# Create outputs file if doesn't exist
+dir.create(outputs_filepath, showWarnings = FALSE)
+
 # Get the filepath
 save_results_filepath <- paste(outputs_filepath, scenario_name, sep = "/")
 
