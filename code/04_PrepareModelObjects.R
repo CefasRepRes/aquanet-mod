@@ -57,14 +57,9 @@ write.csv(site_details_with_model_id,
 
 # Get site - catchment relationships -------------------------------------------
 
-# Get file patch of catchment shapefile
-file_path_catchments <- here::here("data",
-                                   "EA_Catchments",
-                                   "catchmnt_50k+TrunkCodes-Filtered-Merged_region.shp")
-
 # Get catchment to site matrix
 catchment_site_matrix <- aquanet::createCatchmentToSiteMatrix(graph = graph_full,
-                                                              filename_catchment_layer = file_path_catchments,
+                                                              filename_catchment_layer = catchment_layer_filename,
                                                               crs_epsg = BNG_crs)
 
 # Extract within-catchment movements -------------------------------------------
