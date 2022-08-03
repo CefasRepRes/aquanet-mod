@@ -35,7 +35,7 @@ print(
         farm_vector = farm_vector, 
         noCores = noCores,
         associatedSiteControlType = catchment_movement_controls,
-        locationSaveResults = save_results_filepath,
+        locationSaveResults = dirs[["results"]],
         seedNo = seedNo,
         initialNoInfections = initial_no_infections)
     }
