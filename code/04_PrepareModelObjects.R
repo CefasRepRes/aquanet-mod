@@ -12,7 +12,6 @@ objects_to_keep <- c("gis_filepath",
                      "run_time_parameters",
                      "run_time_parameters_list",
                      "river_transmission_parameters", 
-                     "outputs_filepath", 
                      "parameterIndex", 
                      "dirs",
                      "site_locs_duplicates_removed_filename",
@@ -128,8 +127,7 @@ if(nrow(uncategorised_sites) > 0) message(paste("There are", nrow(uncategorised_
 
 # Save the type vector
 
-write.csv(type_vector, here::here(outputs_filepath,
-                                  scenario_name,
+write.csv(type_vector, here::here(dirs[["results"]],
                                   "site_types.csv"),
           row.names = F)
 
