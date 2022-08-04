@@ -201,64 +201,18 @@ site_categories_ordered <- site_categories_ordered[order(site_categories_ordered
 igraph::E(combined_movements_graph)$scrType <- site_categories_ordered$Category.scr
 igraph::E(combined_movements_graph)$recType <- site_categories_ordered$Category.rec
 
-# Add site type as logical to edges of igraph
-# TODO: streamline
+# Get site types
+type_columns <- colnames(site_categories_ordered)
 
-# Small hatchery
-igraph::E(combined_movements_graph)$smallhatch.scr <- site_categories_ordered$SmallHatch.scr
-igraph::E(combined_movements_graph)$smalllhatch.rec <-site_categories_ordered$SmallHatch.rec
+# Filter those that start with small medium or large
+type_columns <- sort(type_columns[grepl("^Small.|^Medium.|^Large.", type_columns)])
 
-# Large hatchery
-igraph::E(combined_movements_graph)$largehatch.scr <- site_categories_ordered$LargeHatch.scr
-igraph::E(combined_movements_graph)$largehatch.rec <- site_categories_ordered$LargeHatch.rec
-
-# Small restocker
-igraph::E(combined_movements_graph)$smallrestock.scr <- site_categories_ordered$SmallRestock.scr
-igraph::E(combined_movements_graph)$smallrestock.rec <- site_categories_ordered$SmallRestock.rec
-
-# Medium restocker
-igraph::E(combined_movements_graph)$mediumrestock.scr <- site_categories_ordered$MediumRestock.scr
-igraph::E(combined_movements_graph)$mediumrestock.rec <- site_categories_ordered$MediumRestock.rec
-
-# Large restocker
-igraph::E(combined_movements_graph)$largerestock.scr <- site_categories_ordered$LargeRestock.scr
-igraph::E(combined_movements_graph)$largerestock.rec <- site_categories_ordered$LargeRestock.rec
-
-# Small table
-igraph::E(combined_movements_graph)$smalltable.scr <- site_categories_ordered$SmallTable.scr
-igraph::E(combined_movements_graph)$smalltable.rec <- site_categories_ordered$SmallTable.rec
-
-# Medium table
-igraph::E(combined_movements_graph)$mediumtable.scr <- site_categories_ordered$MediumTable.scr
-igraph::E(combined_movements_graph)$mediumtable.rec <- site_categories_ordered$MediumTable.rec
-
-# Large table
-igraph::E(combined_movements_graph)$largetable.scr <- site_categories_ordered$LargeTable.scr
-igraph::E(combined_movements_graph)$largetable.rec <- site_categories_ordered$LargeTable.rec
-
-# Small ongrowers
-igraph::E(combined_movements_graph)$smallongrow.scr <- site_categories_ordered$SmallOngrow.scr
-igraph::E(combined_movements_graph)$smallongrow.rec <- site_categories_ordered$SmallOngrow.rec
-
-#  Medium ongrowers
-igraph::E(combined_movements_graph)$mediumongrow.scr <- site_categories_ordered$MediumOngrow.scr
-igraph::E(combined_movements_graph)$mediumongrow.rec <- site_categories_ordered$MediumOngrow.rec
-
-# Large ongrowers
-igraph::E(combined_movements_graph)$largeongrow.scr <- site_categories_ordered$LargeOngrow.scr
-igraph::E(combined_movements_graph)$largeongrow.rec <- site_categories_ordered$LargeOngrow.rec
-
-# Small fishing
-igraph::E(combined_movements_graph)$smallfish.scr <- site_categories_ordered$SmallFish.scr
-igraph::E(combined_movements_graph)$smallfish.rec <- site_categories_ordered$SmallFish.rec
-
-# Medium fishing
-igraph::E(combined_movements_graph)$mediumfish.scr <- site_categories_ordered$MediumFish.scr
-igraph::E(combined_movements_graph)$mediumfish.rec <- site_categories_ordered$MediumFish.rec
-
-# Large fishing
-igraph::E(combined_movements_graph)$largefish.scr <- site_categories_ordered$LargeFish.scr
-igraph::E(combined_movements_graph)$largefish.rec <- site_categories_ordered$LargeFish.rec
+# Add site type to edges of igraph
+for (type in type_columns) {
+  combined_movements_graph <- set_edge_attr(graph = combined_movements_graph,
+                                            name = tolower(type), #lowercase name
+                                            value = site_categories_ordered[[type]])
+}
 
 
 # Transfer information on the site's category from edges to vertices -----------
