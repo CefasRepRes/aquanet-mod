@@ -34,10 +34,6 @@ objects_to_clear <- objects_in_workspace[!objects_in_workspace %in% objects_to_k
 
 # Load contact network ---------------------------------------------------------
 
-# Location where the contact network was saved
-   # TODO: put in commmand line?
-
-
 # Load contact network
 graph_full <- read.graph(file = contact_network_filename, format = "graphml")
 
