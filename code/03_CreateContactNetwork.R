@@ -150,9 +150,6 @@ for (col in edge_columns) {
     combined_movements[[paste0("rec", edgeName)]]
 }
 
-#combinedMovements.graph <- combined_movements_graph
-#vertexList <- vertex_matrix
-
 # Add site category ------------------------------------------------------------
 
 # Load
