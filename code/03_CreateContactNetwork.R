@@ -130,20 +130,20 @@ vertex_matrix <- igraph::get.edges(graph = combined_movements_graph,
 edge_columns <- c("siteID", "PersonID", "code", "CatchmentID")
 
 for (col in edge_columns) {
-  # Make two 
+  # Make two names title case as per original code
   if (col == "siteID" | col == "code") {
     edgeName <- gsub("(^[[:alpha:]])", "\\U\\1", col, perl=TRUE)
   } else {
     edgeName <- col
   }
   
-  # Sources
+  # Sources - set vertex attribute
   vertex_attr(combined_movements_graph,
               name = col,
               index = V(combined_movements_graph)[vertex_matrix[ , 1]]) <-
     combined_movements[[paste0("scr", edgeName)]]
   
-  # Receivers
+  # Receivers - set vertex attribute
   vertex_attr(combined_movements_graph,
               name = col,
               index = V(combined_movements_graph)[vertex_matrix[ , 2]]) <-
