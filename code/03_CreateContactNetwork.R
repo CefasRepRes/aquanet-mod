@@ -97,48 +97,21 @@ combined_movement_ids <- as.matrix(combined_movement_ids)
 
 # Create igraph
 combined_movements_graph <- igraph::graph.edgelist(combined_movement_ids)
-str(combined_movements_graph)
+
 # Add information to network edges ---------------------------------------------
 
-# Site Details
-# TODO: figure out a way to streamline this - loops in igraph are hard
+# Get names of columns from combined_movements dataframe and add edges to igraph
+columns <- colnames(combined_movements)
 
-# for(i in ncol(combined_movements)){
-#   combined_movements_graph <- set_edge_attr(graph = combined_movements_graph,
-#                                             name = colnames(combined_movements)[i],
-#                                             value = combined_movements[, i])
-# }
-# str(combined_movements_graph)
-# 
-# combined_movements_graph <- set_edge_attr(graph = combined_movements_graph, 
-#                                           name = "scrCode", 
-#                                           value = combined_movements[, "scrCode"])
-
-# Person ID
-igraph::E(combined_movements_graph)$scrPersonID <- combined_movements$scrPersonID
-igraph::E(combined_movements_graph)$recPersonID <- combined_movements$recPersonID
-
-# Code
-igraph::E(combined_movements_graph)$scrCode <- combined_movements$scrCode
-igraph::E(combined_movements_graph)$recCode <- combined_movements$recCode
-
-# Site ID
-igraph::E(combined_movements_graph)$scrSiteID <- combined_movements$scrSiteID
-igraph::E(combined_movements_graph)$recSiteID <- combined_movements$recSiteID
-
-# Catchment ID
-igraph::E(combined_movements_graph)$scrCatchmentID <- combined_movements$scrCatchmentID
-igraph::E(combined_movements_graph)$recCatchmentID <- combined_movements$recCatchmentID
+for (i in columns) {
+  combined_movements_graph <- set_edge_attr(graph = combined_movements_graph,
+                                            name = i,
+                                            value = combined_movements[[i]])
+}
 
 # Within catchment movements (logical)
 igraph::E(combined_movements_graph)$withinCatchment <- 
   igraph::E(combined_movements_graph)$scrCatchmentID == igraph::E(combined_movements_graph)$recCatchmentID
-
-# Year of movement
-igraph::E(combined_movements_graph)$year <- combined_movements$year
-
-# Unique reference
-igraph::E(combined_movements_graph)$reference <- combined_movements$reference
 
 # Number of movements
    # Farm to farm = take from database
