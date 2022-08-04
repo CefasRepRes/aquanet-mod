@@ -123,35 +123,32 @@ igraph::E(combined_movements_graph)$movements[E(combined_movements_graph)$moveme
 # Transfer attributes from edge to vertices ------------------------------------
 
 # Store information on edge connectivity
-
 vertex_matrix <- igraph::get.edges(graph = combined_movements_graph, 
                                    es = E(combined_movements_graph))
 
-# TODO: streamline
+# Define names of vertices to add
+edge_columns <- c("siteID", "PersonID", "code", "CatchmentID")
 
-# Source ID
-igraph::V(combined_movements_graph)[vertex_matrix[, 1]]$siteID <- 
-  igraph::E(combined_movements_graph)$scrSiteID
-igraph::V(combined_movements_graph)[vertex_matrix[, 2]]$siteID <- 
-  igraph::E(combined_movements_graph)$recSiteID
-
-# Person ID
-igraph::V(combined_movements_graph)[vertex_matrix[, 1]]$PersonID <- 
-  E(combined_movements_graph)$scrPersonID
-igraph::V(combined_movements_graph)[vertex_matrix[, 2]]$PersonID <- 
-  igraph::E(combined_movements_graph)$recPersonID
-
-# Code
-igraph::V(combined_movements_graph)[vertex_matrix[, 1]]$code <- 
-  E(combined_movements_graph)$scrCode
-igraph::V(combined_movements_graph)[vertex_matrix[, 2]]$code <- 
-  igraph::E(combined_movements_graph)$recCode
-
-# Catchment ID
-igraph::V(combined_movements_graph)[vertex_matrix[, 1]]$catchmentID <- 
-  igraph::E(combined_movements_graph)$scrCatchmentID
-igraph::V(combined_movements_graph)[vertex_matrix[, 2]]$catchmentID <-
-  igraph::E(combined_movements_graph)$recCatchmentID
+for (col in edge_columns) {
+  # Make two 
+  if (col == "siteID" | col == "code") {
+    edgeName <- gsub("(^[[:alpha:]])", "\\U\\1", col, perl=TRUE)
+  } else {
+    edgeName <- col
+  }
+  
+  # Sources
+  vertex_attr(combined_movements_graph,
+              name = col,
+              index = V(combined_movements_graph)[vertex_matrix[ , 1]]) <-
+    combined_movements[[paste0("scr", edgeName)]]
+  
+  # Receivers
+  vertex_attr(combined_movements_graph,
+              name = col,
+              index = V(combined_movements_graph)[vertex_matrix[ , 2]]) <-
+    combined_movements[[paste0("rec", edgeName)]]
+}
 
 #combinedMovements.graph <- combined_movements_graph
 #vertexList <- vertex_matrix
