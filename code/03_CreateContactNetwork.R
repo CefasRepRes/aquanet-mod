@@ -104,9 +104,9 @@ combined_movements_graph <- igraph::graph.edgelist(combined_movement_ids)
 columns <- colnames(combined_movements)
 
 for (i in columns) {
-  combined_movements_graph <- set_edge_attr(graph = combined_movements_graph,
-                                            name = i,
-                                            value = combined_movements[[i]])
+  combined_movements_graph <- igraph::set_edge_attr(graph = combined_movements_graph,
+                                                    name = i,
+                                                    value = combined_movements[[i]])
 }
 
 # Within catchment movements (logical)
@@ -124,7 +124,7 @@ igraph::E(combined_movements_graph)$movements[E(combined_movements_graph)$moveme
 
 # Store information on edge connectivity
 vertex_matrix <- igraph::get.edges(graph = combined_movements_graph, 
-                                   es = E(combined_movements_graph))
+                                   es = igraph::E(combined_movements_graph))
 
 # Define names of vertices to add
 edge_columns <- c("siteID", "PersonID", "code", "CatchmentID")
@@ -138,15 +138,15 @@ for (col in edge_columns) {
   }
   
   # Sources - set vertex attribute
-  vertex_attr(combined_movements_graph,
-              name = col,
-              index = V(combined_movements_graph)[vertex_matrix[ , 1]]) <-
+  igraph::vertex_attr(combined_movements_graph,
+                      name = col,
+                      index = igraph::V(combined_movements_graph)[vertex_matrix[ , 1]]) <-
     combined_movements[[paste0("scr", edgeName)]]
   
   # Receivers - set vertex attribute
-  vertex_attr(combined_movements_graph,
-              name = col,
-              index = V(combined_movements_graph)[vertex_matrix[ , 2]]) <-
+  igraph::vertex_attr(combined_movements_graph,
+                      name = col,
+                      index = igraph::V(combined_movements_graph)[vertex_matrix[ , 2]]) <-
     combined_movements[[paste0("rec", edgeName)]]
 }
 
@@ -203,9 +203,9 @@ type_columns <- sort(type_columns[grepl("^Small.|^Medium.|^Large.", type_columns
 
 # Add site type to edges of igraph
 for (type in type_columns) {
-  combined_movements_graph <- set_edge_attr(graph = combined_movements_graph,
-                                            name = tolower(type), #lowercase name
-                                            value = site_categories_ordered[[type]])
+  combined_movements_graph <- igraph::set_edge_attr(graph = combined_movements_graph,
+                                                    name = tolower(type), #lowercase name
+                                                    value = site_categories_ordered[[type]])
 }
 
 
@@ -221,15 +221,15 @@ type_columns_uniq <- unique(gsub("*.rec|.scr", "", type_columns))
 for (col in type_columns_uniq) {
 
   # Sources - set vertex attribute
-  vertex_attr(combined_movements_graph,
-              name = paste0(tolower(col)),
-              index = V(combined_movements_graph)[vertex_matrix[ , 1]]) <-
+  igraph::vertex_attr(combined_movements_graph,
+                      name = paste0(tolower(col)),
+                      index = igraph::V(combined_movements_graph)[vertex_matrix[ , 1]]) <-
     site_categories_ordered[[paste0(col, ".scr")]]
 
   # Receivers - set vertex attribute
-  vertex_attr(combined_movements_graph,
-              name = paste0(tolower(col)),
-              index = V(combined_movements_graph)[vertex_matrix[ , 2]]) <-
+  igraph::vertex_attr(combined_movements_graph,
+                      name = paste0(tolower(col)),
+                      index = igraph::V(combined_movements_graph)[vertex_matrix[ , 2]]) <-
     site_categories_ordered[[paste0(col, ".rec")]]
 }
 
