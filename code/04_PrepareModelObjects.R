@@ -40,12 +40,8 @@ graph_full <- read.graph(file = contact_network_filename, format = "graphml")
 # Save site information --------------------------------------------------------
 # Including enough information to make it possible to infect specific sites within the model
 
-# Load ListSiteDetailsWithModelID.R
-   # TODO: update with Becca's package
-source('code/aquanet_functions/ListSiteDetailsWithModelID.R')
-
-site_details_with_model_id <- ListSiteDetailsWithModelID(graph_full, 
-                                                         site_locs_duplicates_removed_filename)
+site_details_with_model_id <- aquanet::mergeGraphMetaWithCatchmentLocation(graph = graph_full, 
+                                                                           filename_sites_catchments = site_locs_duplicates_removed_filename) 
 
 file_path_sites_with_model_id <- here::here("outputs",
                                             paste0(scenario_name, "/"))
