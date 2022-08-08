@@ -1,16 +1,5 @@
 #### Check catchment site relationships ####
 
-# Set up British National Grid CRS ---------------------------------------------
-
-BNG_crs <- sf::st_crs(27700) # Number is the EPSG for the British National Grid
-
-# Get LFM records --------------------------------------------------------------
-
-section_30_movements <- read.csv(section_30_lfm_filename,
-                                 colClasses = "character")
-farm_to_farm_movements <- read.csv(farm_to_farm_lfm_filename,
-                                   colClasses = "character")
-
 # Create a data frame of all sites, including duplicates -----------------------
 
 # Site ID

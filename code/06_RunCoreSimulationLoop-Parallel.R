@@ -30,7 +30,7 @@ print(
         ListRunTimeParameters = run_time_parameters_list, 
         graph.withinCatchmentEdges.objects = within_catchment_movements, 
         graph.catchment2Site.objects = catchment_site_matrix, 
-        graph.riverDistance.objects = river_downstream_transmission_objects, 
+        graph.riverDistance.objects = river_downstream_transmission_matrix, 
         graph.estimateSiteDistances.objects = site_distances_matrix, 
         farm_vector = farm_vector, 
         noCores = noCores,
