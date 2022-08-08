@@ -8,17 +8,6 @@ cat("\014")
 # Display without scientific notation
 options(scipen = 999)
 
-# Load functions ----------------------------------------------------------
-
-# TODO: replace with Becca's package
-
-source(here::here("code",
-                  "loop_functions",
-                  "simulation_code.R"))
-source(here::here("code",
-                  "loop_functions",
-                  "run_simulations.R"))
-
 # Run model ---------------------------------------------------------------
 
 print(system.time( # Print the system time used by the runSimulations function
