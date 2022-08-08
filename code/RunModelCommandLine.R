@@ -124,10 +124,6 @@ dirs <- c("outputs" = here::here("outputs"),
 # Create output directories
 lapply(dirs, dir.create, showWarnings = F)
 
-
-# Full results folder
-dir.create(file.path(save_results_filepath, "full_results"), showWarnings = FALSE)
-
 # Save code and data for reproducibility ---------------------------------------
 
 # Get list of coding files
