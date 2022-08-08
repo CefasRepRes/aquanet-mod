@@ -2,12 +2,6 @@
 
 # Load data --------------------------------------------------------------------
 
-# Live fish movements (LFMs)
-section_30_movements <- read.csv(section_30_lfm_filename,
-                                 colClasses = "character")
-farm_movements <- read.csv(farm_to_farm_lfm_filename,
-                           colClasses = "character")
-
 # Import site locations
 site_locs_dupes_removed <- read.csv(site_locs_duplicates_removed_filename,
                                     stringsAsFactors = FALSE)[,c('siteID','ID','NAME','TRUNK_CODE')]
@@ -32,7 +26,7 @@ section_30_movements <- merge(x = section_30_movements,
                               suffixes = c('.Source','.Receiving'))
 
 # Farm to farm movements - source
-farm_movements <- merge(x = farm_movements,
+farm_movements <- merge(x = farm_to_farm_movements,
                         y = site_locs_dupes_removed,
                         all.x = TRUE,
                         sort = TRUE,

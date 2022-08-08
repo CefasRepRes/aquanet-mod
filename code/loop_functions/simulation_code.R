@@ -390,9 +390,8 @@ simulationCode = function(graph.contactp.objects,
       transition.rates = combineTransitions(latent.sites.secondOutbreak, transition.rates)
       
       
-      # Calculate the probability of a contact occuring downstream of an outbreak, through the river network
-      graph.riverDownstream.objects = graph.riverDistance.objects[[1]]
-      riverDownstream.matrix = graph.riverDownstream.objects[[2]]
+      # Calculate the probability of a contact occurring downstream of an outbreak, through the river network
+      riverDownstream.matrix = graph.riverDistance.objects[[2]] 
       susceptable.sites.exposure.byRiver.downstream.objects = calcRiverTransmission(riverDownstream.matrix, clinical.vector, spread.offSite.prevented, spread.onSite.prevented, 10)
       transition.rates = combineTransitions(susceptable.sites.exposure.byRiver.downstream.objects, transition.rates)
       
@@ -660,8 +659,7 @@ simulationCode = function(graph.contactp.objects,
     return(list(state_vector, control_matrix, time_vector, catchment_time_vector, catchments.all.sites.c5.status, record_transition_times, source.infection.vector, rate.type, infected.source.matrix))
   }
   
-
-  #source(here::here("code", "aquanet_functions", "CommitResults.R"))
+  source(here::here("code", "aquanet_functions", "CommitResults.R"))
   
   for (k in 1:runs) {
     # Calculate a simulation number, which is equivilent to k, but valid across every thread / process
