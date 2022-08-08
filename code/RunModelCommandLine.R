@@ -60,7 +60,8 @@ initial_no_infections <- 1
 # 0 = within catchment movements allowed
 # 1 = between and within infected catchments allow
 # 2 = no movement allowed by any sites within infected catchments
-catchment_movement_controls <- 0 
+# None = no catchment movement controls whatsoever
+catchment_movement_controls <- 0
 
 # Number of simulations to be run
   # Suggest 4 for a test, and 3000 for a full run
@@ -127,13 +128,10 @@ dir.create(file.path(save_results_filepath), showWarnings = FALSE)
 dir.create(file.path(save_results_filepath, "batch_results"), showWarnings = FALSE)
 
 # Commit results folder
-dir.create(file.path(save_results_filepath, "full_results"), showWarnings = FALSE)
+dir.create(file.path(save_results_filepath, "FullDetails"), showWarnings = FALSE)
 
 # Code folder
 dir.create(file.path(save_results_filepath, "code"), showWarnings = FALSE)
-
-# Full results folder
-dir.create(file.path(save_results_filepath, "full_results"), showWarnings = FALSE)
 
 # Save code and data for reproducibility ---------------------------------------
 
