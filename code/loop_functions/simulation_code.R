@@ -76,7 +76,9 @@ simulationCode = function(graph.contactp.objects,
     associatedSiteControlType = withinCatchmentMovements.objects[[5]]
     
     # Identify catchments placed under control, based on the list of sites currently under control    
-    controlled.catchments = t(graph.catchment2site.matrix2) %*% movement.restrictions.bySite
+     ifelse(associatedSiteControlType != "None",
+            controlled.catchments <- t(graph.catchment2site.matrix2) %*% movement.restrictions.bySite,
+            controlled.catchments <- t(graph.catchment2site.matrix2) %*% movement.restrictions.bySite*0)
     no.controlled.catchments = sum(controlled.catchments > 0)
     
     # If the same catchments are under control as the last time the function was called, skip several steps
@@ -302,9 +304,11 @@ simulationCode = function(graph.contactp.objects,
     atriskcontacts = t(atriskcontacts) * !transport.onSite.prevented
     atriskcontacts = t(atriskcontacts)
     
+    if(associatedSiteControlType != "None"){
     withinCatchmentMovements.out.objects = excludeWithinCatchmentMovements(movement.restrictions.bySite, atriskcontacts, withinCatchmentMovements.objects)
     atriskcontacts = withinCatchmentMovements.out.objects[[1]]
     withinCatchmentMovements.objects = withinCatchmentMovements.out.objects[[2]]
+    }
     
     # Create an edge list for live fish movements from infected to exposed sites
     susceptable.sites.exposure.rate.objects = listInfectionRates(atriskcontacts, state_vector, 0) 
