@@ -26,6 +26,8 @@ print(
     expr = {
       runSimulations( 
         graph.contactp.objects = contact_probability_matrix, 
+        graph.contactpalt.objects = contact_probability_matrix_top_sites_removed,
+        remove_top_sites = remove_top_sites,
         simulationCode = simulationCode, 
         ListRunTimeParameters = run_time_parameters_list, 
         graph.withinCatchmentEdges.objects = within_catchment_movements, 
@@ -54,6 +56,7 @@ print(
 # 
 # system.time(expr =
 #               {simulationCode(graph.contactp.objects = contact_probability_matrix,
+#                               graph.contactpalt.objects = contact_probability_matrix_top_sites_removed,
 #                               runs = 4,
 #                               tmax = tmax,
 #                               batchNo = 1,

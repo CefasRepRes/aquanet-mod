@@ -1,4 +1,4 @@
-runSimulations = function(graph.contactp.objects, simulationCode, ListRunTimeParameters, graph.withinCatchmentEdges.objects, graph.catchment2Site.objects, graph.riverDistance.objects, graph.estimateSiteDistances.objects, farm_vector, associatedSiteControlType, noCores, locationSaveResults, seedNo, initialNoInfections) {
+runSimulations = function(graph.contactp.objects, graph.contactpalt.objects, remove_top_sites, simulationCode, ListRunTimeParameters, graph.withinCatchmentEdges.objects, graph.catchment2Site.objects, graph.riverDistance.objects, graph.estimateSiteDistances.objects, farm_vector, associatedSiteControlType, noCores, locationSaveResults, seedNo, initialNoInfections) {
   clearResults = function(locationSaveResults) {
     files = list.files(path = locationSaveResults, pattern = "\\.RData$",recursive = TRUE)
     
@@ -30,7 +30,7 @@ runSimulations = function(graph.contactp.objects, simulationCode, ListRunTimePar
   print(c(noSims, noSimsPerJob, overallNoInterations))
   
   set.seed(seedNo)
-  allruns = foreach(batchNo=1:noCores, .combine=c) %dorng% simulationCode(graph.contactp.objects, runs, tmax, batchNo, ListRunTimeParameters, graph.withinCatchmentEdges.objects, graph.catchment2Site.objects, graph.riverDistance.objects, graph.estimateSiteDistances.objects, farm_vector, associatedSiteControlType, locationSaveResults, initialNoInfections)
+  allruns = foreach(batchNo=1:noCores, .combine=c) %dorng% simulationCode(graph.contactp.objects, graph.contactpalt.objects, remove_top_sites, runs, tmax, batchNo, ListRunTimeParameters, graph.withinCatchmentEdges.objects, graph.catchment2Site.objects, graph.riverDistance.objects, graph.estimateSiteDistances.objects, farm_vector, associatedSiteControlType, locationSaveResults, initialNoInfections)
   
   stopCluster(cl = Cluster)
   

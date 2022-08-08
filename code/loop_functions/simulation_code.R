@@ -1,4 +1,6 @@
 simulationCode = function(graph.contactp.objects, 
+                          graph.contactpalt.objects,
+                          remove.top.sites,
                           runs, 
                           tmax, 
                           batchNo, 
@@ -258,11 +260,13 @@ simulationCode = function(graph.contactp.objects,
     
     ######## This mechanism allow us to introduce a nationwide standstill or prevent movements from sites with top 10 in or out movements
     ######## This can either be based on the total number of infections or whether there are any sites currently infected
-    #if (sum(cumulativeState_vector) >1 ) {
-    #  contactp = graph.contactpalt.objects[[3]]
-    #}  else {
-    #  contactp = graph.contactp.objects[[3]]
-    #}
+    if(remove_top_sites == TRUE){
+      if (sum(cumulativeState_vector) >1 ) {
+        contactp = graph.contactpalt.objects[[3]]
+      }  else {
+        contactp = graph.contactp.objects[[3]]
+      }
+    }
     
     
     #if (sum(control_matrix[,c(2,4,5]) >1) {
@@ -271,8 +275,6 @@ simulationCode = function(graph.contactp.objects,
     #  contactp = graph.contactp.objects[[3]]
     #}
     
-    
-    contactp = graph.contactp.objects[[3]]
     transition.rates = c(list(NULL),list(NULL),list(NULL),list(NULL))
     
     # When a site has been contact traced it will be subject to movement controls, but 
