@@ -114,23 +114,16 @@ run_time_parameters_list <- unname(parameter_file)
 
 # Create directories to save results -------------------------------------------
 
-# Create outputs file if doesn't exist
-dir.create(outputs_filepath, showWarnings = FALSE)
+# Define output directories
+dirs <- c("outputs" = here::here("outputs"),
+          "results" = here::here("outputs", scenario_name),
+          "results_batch" = here::here("outputs", scenario_name, "batch_results"),
+          "results_full" = here::here("outputs", scenario_name, "full_results"),
+          "results_code" = here::here("outputs", scenario_name, "code"))
 
-# Get the filepath
-save_results_filepath <- paste(outputs_filepath, scenario_name, sep = "/")
+# Create output directories
+lapply(dirs, dir.create, showWarnings = F)
 
-# Overall results file
-dir.create(file.path(save_results_filepath), showWarnings = FALSE)
-
-# Batch results folder
-dir.create(file.path(save_results_filepath, "batch_results"), showWarnings = FALSE)
-
-# Commit results folder
-dir.create(file.path(save_results_filepath, "full_results"), showWarnings = FALSE)
-
-# Code folder
-dir.create(file.path(save_results_filepath, "code"), showWarnings = FALSE)
 
 # Full results folder
 dir.create(file.path(save_results_filepath, "full_results"), showWarnings = FALSE)
@@ -138,18 +131,19 @@ dir.create(file.path(save_results_filepath, "full_results"), showWarnings = FALS
 # Save code and data for reproducibility ---------------------------------------
 
 # Get list of coding files
-coding_files <- list.files(file.path("code"))
+coding_files <- list.files(here::here("code"))
 
-# Copy code to new coding folder
-file.copy(file.path("code", coding_files), 
-          file.path(save_results_filepath, "code"),
+# Copy code and parameter file to new coding folder
+file.copy(here::here("code", coding_files),
+          here::here(dirs[["results_code"]]),
           overwrite = TRUE)
+
 file.copy(parameter_filepath, 
-          file.path(save_results_filepath, "code"),
+          here::here(dirs[["results_code"]]),
           overwrite = TRUE)
 
 # Print where results are saved
-message(paste("Results are saved in:", save_results_filepath))
+message(paste("Results are saved in:", dirs[["results"]]))
 
 # Load in live fish movement (LFM) data ----------------------------------------
 
