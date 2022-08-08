@@ -8,9 +8,3 @@ river_downstream_transmission_matrix <-
     out_createContactProbabilityMatrix = contact_probability_matrix,
     max_dist = parameter_file$Max_Distance_River_Transmission,
     p1km = parameter_file$Probability_River_Transmission)
-
-# Get fomite transmission probability matrix -----------------------------------
-
-fomite_transmission_matrix <- site_distances_matrix
-
-fomite_transmission_objects <- list(fomite_transmission_matrix)
