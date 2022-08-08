@@ -16,6 +16,7 @@ objects_to_keep <- c("gis_filepath",
                      "parameterIndex", 
                      "save_results_filepath",
                      "site_locs_duplicates_removed_filename",
+                     "site_details_with_model_id_filename",
                      "scenario_name",
                      "data_collection_period",
                      "contact_network_filename",
@@ -25,21 +26,14 @@ objects_to_keep <- c("gis_filepath",
                      "noCores",
                      "catchment_movement_controls",
                      "seedNo",
-                     "initial_no_infections")
+                     "initial_no_infections",
+                     "BNG_crs")
 objects_in_workspace <- ls()
 objects_to_clear <- objects_in_workspace[!objects_in_workspace %in% objects_to_keep]
 
 # rm(list = objects_to_clear)
 
-# Set CRS
-
-BNG_crs <- sf::st_crs(27700)
-
 # Load contact network ---------------------------------------------------------
-
-# Location where the contact network was saved
-   # TODO: put in commmand line?
-
 
 # Load contact network
 graph_full <- read.graph(file = contact_network_filename, format = "graphml")
@@ -47,31 +41,17 @@ graph_full <- read.graph(file = contact_network_filename, format = "graphml")
 # Save site information --------------------------------------------------------
 # Including enough information to make it possible to infect specific sites within the model
 
-# Load ListSiteDetailsWithModelID.R
-   # TODO: update with Becca's package
-source('code/aquanet_functions/ListSiteDetailsWithModelID.R')
+site_details_with_model_id <- aquanet::mergeGraphMetaWithCatchmentLocation(graph = graph_full, 
+                                                                           filename_sites_catchments = site_locs_duplicates_removed_filename)
 
-site_details_with_model_id <- ListSiteDetailsWithModelID(graph_full, 
-                                                         site_locs_duplicates_removed_filename)
-
-file_path_sites_with_model_id <- here::here("outputs",
-                                            paste0(scenario_name, "/"))
 write.csv(site_details_with_model_id,
-          file = here::here("outputs",
-                            scenario_name,
-                            "site_details_with_model_id.csv"), 
+          file = site_details_with_model_id_filename, 
           row.names = FALSE)
 
 # Get site - catchment relationships -------------------------------------------
 
-# Get file patch of catchment shapefile
-file_path_catchments <- here::here("data",
-                                   "EA_Catchments",
-                                   "catchmnt_50k+TrunkCodes-Filtered-Merged_region.shp")
-
-# Get catchment to site matrix
 catchment_site_matrix <- aquanet::createCatchmentToSiteMatrix(graph = graph_full,
-                                                              filename_catchment_layer = file_path_catchments,
+                                                              filename_catchment_layer = catchment_layer_filename,
                                                               crs_epsg = BNG_crs)
 
 # Extract within-catchment movements -------------------------------------------
@@ -141,6 +121,9 @@ write.csv(type_vector, here::here(outputs_filepath,
 
 # Get site to site distances ---------------------------------------------------
 
-site_distances_matrix <- aquanet::createDistanceMatrix(graph_full, 
-                                                       site_locs_duplicates_removed_filename,
-                                                       crs_epsg = BNG_crs)
+site_distances_matrix <- aquanet::createDistanceMatrix(graph = graph_full, 
+                                                       filename_site_catchments = site_locs_duplicates_removed_filename,
+                                                       crs_epsg = BNG_crs,
+                                                       sdm_max_dist = parameter_file$Max_Distance_River_Transmission,
+                                                       sdm_rate_gamma = parameter_file$Probability_River_Transmission,
+                                                       sdm_scalar_lambda = parameter_file$Local_Scalar)

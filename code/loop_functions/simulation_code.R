@@ -378,9 +378,8 @@ simulationCode = function(graph.contactp.objects, runs, tmax, batchNo, ListRunTi
       transition.rates = combineTransitions(latent.sites.secondOutbreak, transition.rates)
       
       
-      # Calculate the probability of a contact occuring downstream of an outbreak, through the river network
-      graph.riverDownstream.objects = graph.riverDistance.objects[[1]]
-      riverDownstream.matrix = graph.riverDownstream.objects[[2]]
+      # Calculate the probability of a contact occurring downstream of an outbreak, through the river network
+      riverDownstream.matrix = graph.riverDistance.objects[[2]] 
       susceptable.sites.exposure.byRiver.downstream.objects = calcRiverTransmission(riverDownstream.matrix, clinical.vector, spread.offSite.prevented, spread.onSite.prevented, 10)
       transition.rates = combineTransitions(susceptable.sites.exposure.byRiver.downstream.objects, transition.rates)
       
@@ -666,7 +665,7 @@ simulationCode = function(graph.contactp.objects, runs, tmax, batchNo, ListRunTi
     colnames(simTimes.longTable) = c('modelID','simNo','tdiff','t')
     
     
-    save(simStates.longTable, simTimes.longTable, file = paste(locationSaveResults,"/batch_results/states-batchNo-",batchNo,"_simNo-",simNo,".RData",sep=""),compress=FALSE)
+    save(simStates.longTable, simTimes.longTable, file = paste(locationSaveResults,"/full_results/states-batchNo-",batchNo,"_simNo-",simNo,"_NoCommits-", noSteps.sinceLastCommit, ".RData",sep=""),compress=FALSE)
   }
   
   for (k in 1:runs) {
