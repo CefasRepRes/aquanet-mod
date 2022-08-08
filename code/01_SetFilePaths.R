@@ -57,3 +57,8 @@ sites_without_catchment_filename <- here::here("outputs",
 site_locs_duplicates_removed_filename <- here::here("outputs",
                                                     scenario_name,
                                                     "ListSiteLocationsWithCatchmentNoDuplicates.csv")
+
+# Site details with model ID
+site_details_with_model_id_filename <- here::here("outputs",
+                                                  scenario_name,
+                                                  "site_details_with_model_id.csv")
