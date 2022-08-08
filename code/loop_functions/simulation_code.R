@@ -1,4 +1,16 @@
-simulationCode = function(graph.contactp.objects, runs, tmax, batchNo, ListRunTimeParameters, graph.withinCatchmentEdges.objects, graph.catchment2Site.objects, graph.riverDistance.objects, graph.estimateSiteDistances.objects, farm_vector, associatedSiteControlType, locationSaveResults, initialNoInfections) {
+simulationCode = function(graph.contactp.objects, 
+                          runs, 
+                          tmax, 
+                          batchNo, 
+                          ListRunTimeParameters, 
+                          graph.withinCatchmentEdges.objects, 
+                          graph.catchment2Site.objects, 
+                          graph.riverDistance.objects, 
+                          graph.estimateSiteDistances.objects, 
+                          farm_vector, 
+                          associatedSiteControlType, 
+                          locationSaveResults, 
+                          initialNoInfections) {
   
   # Sparse Matrices and Data Tables are used for memory or computational efficiency
   # The packages are loaded here, since parallel execution does not allow them to be loaded earlier
@@ -647,26 +659,7 @@ simulationCode = function(graph.contactp.objects, runs, tmax, batchNo, ListRunTi
     return(list(state_vector, control_matrix, time_vector, catchment_time_vector, catchments.all.sites.c5.status, record_transition_times, source.infection.vector, rate.type, infected.source.matrix))
   }
   
-  commitResults = function(allStates.table, allStates.table.t, numberFullSaves) {
-    allStates.matrix = as(object = as.matrix(allStates.table[((no.variables + 1):(no.variables + contactp.length)),]), Class = "dgTMatrix")
-    
-    simStates.longTable = data.frame(as.integer(site.index[(allStates.matrix@i + 1)] + 1),
-                                     as.integer(allStates.matrix@x),
-                                     as.integer(allStates.matrix@j + ((numberFullSaves - 1) * commitInterval)),
-                                     as.integer(allStates.table[3,])[allStates.matrix@j + 1])
-    
-    colnames(simStates.longTable) = c('modelID','state','timeID','simNo')
-    
-    simTimes.longTable = data.frame(as.integer(iterationID.vector + ((numberFullSaves - 1) * commitInterval)),
-                                    as.integer(allStates.table[3,])[iterationID.vector],
-                                    as.numeric(allStates.table.t[1,])[iterationID.vector],
-                                    as.numeric(allStates.table.t[2,])[iterationID.vector])
-    
-    colnames(simTimes.longTable) = c('modelID','simNo','tdiff','t')
-    
-    
-    save(simStates.longTable, simTimes.longTable, file = paste(locationSaveResults,"/full_results/states-batchNo-",batchNo,"_simNo-",simNo,"_NoCommits-", noSteps.sinceLastCommit, ".RData",sep=""),compress=FALSE)
-  }
+  source(here::here("code", "aquanet_functions", "CommitResults.R"))
   
   for (k in 1:runs) {
     # Calculate a simulation number, which is equivilent to k, but valid across every thread / process
@@ -804,11 +797,21 @@ simulationCode = function(graph.contactp.objects, runs, tmax, batchNo, ListRunTi
       set(x = allStates.table, i = (1:(no.variables + 3)), j = as.character(noSteps.sinceLastCommit + 1), value = as.integer(c(batchNo, k, k + ((batchNo - 1) * runs), combinedStates.total)))
       set(x = allStates.table.t, j = as.character(noSteps.sinceLastCommit + 1), value = c(tdiff, t - tdiff))
 
-      
+
       # Save the results to disk
       if (noSteps.sinceLastCommit == (commitInterval - 1)) {
        numberFullSaves = noSteps %/% commitInterval
-       commitResults(allStates.table, allStates.table.t, numberFullSaves)
+       aquanet::commitResults(df_states = allStates.table,
+                     df_time = allStates.table.t,
+                     n_states = no.variables,
+                     n_sites = contactp.length,
+                     site_indices = site.index,
+                     commit_int = commitInterval,
+                     iteration_vector = iterationID.vector,
+                     batch_num = batchNo,
+                     simulation_num = simNo,
+                     save_num = numberFullSaves,
+                     filepath_results = locationSaveResults)
        allStates.table[,as.character(iterationID.vector):=empty.vector]
        allStates.table.t[,as.character(iterationID.vector):=empty.vector.t]
       }
@@ -842,7 +845,17 @@ simulationCode = function(graph.contactp.objects, runs, tmax, batchNo, ListRunTi
   allStates.table[,as.character((noSteps.sinceLastCommit + 1):commitInterval):=NULL]
   allStates.table.t[,as.character((noSteps.sinceLastCommit + 1):commitInterval):=NULL]
   numberFullSaves = numberFullSaves + 1
-  commitResults(allStates.table, allStates.table.t, numberFullSaves)
+  aquanet::commitResults(df_states = allStates.table, 
+                df_time = allStates.table.t, 
+                n_states = no.variables,
+                n_sites = contactp.length,
+                site_indices = site.index,
+                commit_int = commitInterval,
+                iteration_vector = iterationID.vector,
+                batch_num = batchNo,
+                simulation_num = simNo,
+                save_num = numberFullSaves,
+                filepath_results = locationSaveResults)
   
   save(summaryStates.table, file = paste(locationSaveResults,"/batch_results/batchNo-",batchNo,".RData",sep=""),compress=FALSE)
   

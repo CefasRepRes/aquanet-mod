@@ -61,5 +61,8 @@ vignettes/*.pdf
 # .here file
 .here
 
-# .Rmd
-*.Rmd
+# Archive folder
+/archive/
+
+# RMDs
+*.rmd
