@@ -40,7 +40,8 @@ print(
         locationSaveResults = save_results_filepath,
         seedNo = seedNo,
         initialNoInfections = initial_no_infections,
-        contact_tracing = contact_tracing)
+        contact_tracing = contact_tracing,
+        disease_controls = disease_controls)
     }
   )
 )

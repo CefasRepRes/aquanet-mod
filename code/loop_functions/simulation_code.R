@@ -13,7 +13,8 @@ simulationCode = function(graph.contactp.objects,
                           associatedSiteControlType, 
                           locationSaveResults, 
                           initialNoInfections,
-                          contact_tracing) {
+                          contact_tracing,
+                          disease_controls) {
   
   # Sparse Matrices and Data Tables are used for memory or computational efficiency
   # The packages are loaded here, since parallel execution does not allow them to be loaded earlier
@@ -386,9 +387,11 @@ simulationCode = function(graph.contactp.objects,
     # Identify sites that can become controlled
     # Create a vector showing the position of sites that can be controlled
     # Create a vector with the control rate of infected sites
+    if(disease_controls == TRUE){
     infected.sites.notControlled = control_matrix[,1]
     infected.sites.control.rate.objects = listTransitionRates(infected.sites.notControlled, 6, site.index, 1)
     transition.rates = combineTransitions(infected.sites.control.rate.objects, transition.rates)
+    }
     
     if (winter == FALSE) {	
       # Identify any latent, infected sites
@@ -422,10 +425,11 @@ simulationCode = function(graph.contactp.objects,
     # Identify sites that may become fallow
     # Create a vector showing the position of sites that can become fallow
     # Create a vector with the rate at which sites become fallow
+    if(disease_controls == TRUE){
     controlled.farms = movement.restrictions.allSite * culling_vector
     controlled.sites.fallow.rate.objects = listTransitionRates(controlled.farms, 9, site.index, 1)
     transition.rates = combineTransitions(controlled.sites.fallow.rate.objects, transition.rates)
-    
+  }
     return(list(transition.rates, withinCatchmentMovements.objects, movement.restrictions.bySite))
   }
   
@@ -737,8 +741,10 @@ simulationCode = function(graph.contactp.objects,
     
     
     ######## Produce a vector for culling a random number of fisheries
+    if(disease_controls == TRUE){
     culling <- ifelse(farm_vector == 1, 0, runif(length(farm_vector)))
     culling_vector <- ifelse(culling < 0.5, 1, 0)
+    }
     ########
     
     while(t<tmax){
