@@ -42,7 +42,7 @@ library(aquanet) # Functions for aquanet model
 
 # Scenario name 
   # This is the name that will appear as your output directory. Make it descriptive
-scenario_name <- "test_without_plus_one_sim_time"
+scenario_name <- "test"
 
 # Remove top sites
 remove_top_sites <- FALSE # Whether or not to remove the top most connected sites
@@ -72,6 +72,10 @@ catchment_movement_controls <- 0
 # Contact tracing options
 # Either true or false
 contact_tracing <- TRUE
+
+# Disease control options
+# Either true or false
+disease_controls <- TRUE
 
 # Number of simulations to be run
   # Suggest 4 for a test, and 3000 for a full run
