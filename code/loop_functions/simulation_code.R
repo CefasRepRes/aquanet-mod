@@ -12,7 +12,8 @@ simulationCode = function(graph.contactp.objects,
                           farm_vector, 
                           associatedSiteControlType, 
                           locationSaveResults, 
-                          initialNoInfections) {
+                          initialNoInfections,
+                          contact_tracing) {
   
   # Sparse Matrices and Data Tables are used for memory or computational efficiency
   # The packages are loaded here, since parallel execution does not allow them to be loaded earlier
@@ -78,9 +79,9 @@ simulationCode = function(graph.contactp.objects,
     associatedSiteControlType = withinCatchmentMovements.objects[[5]]
     
     # Identify catchments placed under control, based on the list of sites currently under control    
-     ifelse(associatedSiteControlType != "None",
-            controlled.catchments <- t(graph.catchment2site.matrix2) %*% movement.restrictions.bySite,
-            controlled.catchments <- t(graph.catchment2site.matrix2) %*% movement.restrictions.bySite*0)
+    ifelse(associatedSiteControlType != "None",
+           controlled.catchments <- t(graph.catchment2site.matrix2) %*% movement.restrictions.bySite,
+           controlled.catchments <- t(graph.catchment2site.matrix2) %*% movement.restrictions.bySite*0)
     no.controlled.catchments = sum(controlled.catchments > 0)
     
     # If the same catchments are under control as the last time the function was called, skip several steps
@@ -307,9 +308,9 @@ simulationCode = function(graph.contactp.objects,
     atriskcontacts = t(atriskcontacts)
     
     if(associatedSiteControlType != "None"){
-    withinCatchmentMovements.out.objects = excludeWithinCatchmentMovements(movement.restrictions.bySite, atriskcontacts, withinCatchmentMovements.objects)
-    atriskcontacts = withinCatchmentMovements.out.objects[[1]]
-    withinCatchmentMovements.objects = withinCatchmentMovements.out.objects[[2]]
+      withinCatchmentMovements.out.objects = excludeWithinCatchmentMovements(movement.restrictions.bySite, atriskcontacts, withinCatchmentMovements.objects)
+      atriskcontacts = withinCatchmentMovements.out.objects[[1]]
+      withinCatchmentMovements.objects = withinCatchmentMovements.out.objects[[2]]
     }
     
     # Create an edge list for live fish movements from infected to exposed sites
@@ -365,10 +366,11 @@ simulationCode = function(graph.contactp.objects,
     # Identify sites which have been contact traced
     # Create a vector showing the position of sites which have been contact traced
     # Create a vector showing the rate at which contact traced sites will be tested
-    contact.traced.sites = control_matrix[,7]
-    contact.traced.sites.rate.testing = listTransitionRates(contact.traced.sites, 12, site.index, 1)
-    transition.rates = combineTransitions(contact.traced.sites.rate.testing, transition.rates)
-    
+    if(contact_tracing == TRUE){
+      contact.traced.sites = control_matrix[,7]
+      contact.traced.sites.rate.testing = listTransitionRates(contact.traced.sites, 12, site.index, 1)
+      transition.rates = combineTransitions(contact.traced.sites.rate.testing, transition.rates)
+    }
     ########
     # Identify sites that are under surveillance or management
     # This is so the simulation continues even if there is no infection left in the system
@@ -531,39 +533,40 @@ simulationCode = function(graph.contactp.objects,
       # Note any sites which have been in contact with 
       # the infected site and which transmitted infection
       # via live fish movements or river-based transmission
-      source.infection = source.infection.vector[site]
-      
-      if (source.infection != 0) {
-        source.infection.vector[site] = 0
+      if(contact_tracing == TRUE){
+        source.infection = source.infection.vector[site]
         
-        # Don't test a site for infection if it has already
-        # been subject to controls
-        if (sum(control_matrix[source.infection, 2:5]) == 0) {
-          control_matrix[source.infection, 7] = 1
-        }
-      }
-      
-      ######## Forward Tracing 
-      # Note any sites which have been in contacted by 
-      # the infected site and which transmitted infection
-      # via live fish movements or river-based transmission
-      infected.source = infected.source.matrix[site,]
-      infected.sites = which(infected.source == 1)
-      
-      
-      if(sum(infected.source) != 0){ 
-        infected.source.matrix[site,] = 0
-        
-        for(i in 1:length(infected.sites)){
+        if (source.infection != 0) {
+          source.infection.vector[site] = 0
+          
           # Don't test a site for infection if it has already
           # been subject to controls
-          source.site = infected.sites[i]
-          if(sum(control_matrix[source.site, 2:5]) == 0) {
-            control_matrix[source.site,  7] = 1
-          } 
+          if (sum(control_matrix[source.infection, 2:5]) == 0) {
+            control_matrix[source.infection, 7] = 1
+          }
+        }
+        
+        ######## Forward Tracing 
+        # Note any sites which have been in contacted by 
+        # the infected site and which transmitted infection
+        # via live fish movements or river-based transmission
+        infected.source = infected.source.matrix[site,]
+        infected.sites = which(infected.source == 1)
+        
+        
+        if(sum(infected.source) != 0){ 
+          infected.source.matrix[site,] = 0
+          
+          for(i in 1:length(infected.sites)){
+            # Don't test a site for infection if it has already
+            # been subject to controls
+            source.site = infected.sites[i]
+            if(sum(control_matrix[source.site, 2:5]) == 0) {
+              control_matrix[source.site,  7] = 1
+            } 
+          }
         }
       }
-      
       ########
     } 
     
@@ -801,27 +804,29 @@ simulationCode = function(graph.contactp.objects,
       
       set(x = allStates.table, i = (no.variables + 1):(no.variables + contactp.length),j = as.character(noSteps.sinceLastCommit + 1), value = as.integer(combinedStates_vector))
       set(x = allStates.table, i = (1:(no.variables + 3)), j = as.character(noSteps.sinceLastCommit + 1), value = as.integer(c(batchNo, k, k + ((batchNo - 1) * runs), combinedStates.total)))
-      set(x = allStates.table.t, j = as.character(noSteps.sinceLastCommit + 1), value = c(tdiff, t - tdiff))
-
-
+      set(x = allStates.table.t, 
+          j = as.character(noSteps.sinceLastCommit + 1), 
+          value = c(tdiff, t - tdiff))
+      
+      
       # Save the results to disk
       if (noSteps.sinceLastCommit == (commitInterval - 1)) {
-       numberFullSaves = noSteps %/% commitInterval
-       aquanet::commitResults(df_states = allStates.table,
-                     df_time = allStates.table.t,
-                     n_states = no.variables,
-                     n_sites = contactp.length,
-                     site_indices = site.index,
-                     commit_int = commitInterval,
-                     iteration_vector = iterationID.vector,
-                     batch_num = batchNo,
-                     simulation_num = simNo,
-                     save_num = numberFullSaves,
-                     filepath_results = locationSaveResults)
-       allStates.table[,as.character(iterationID.vector):=empty.vector]
-       allStates.table.t[,as.character(iterationID.vector):=empty.vector.t]
+        numberFullSaves = noSteps %/% commitInterval
+        aquanet::commitResults(df_states = allStates.table,
+                               df_time = allStates.table.t,
+                               n_states = no.variables,
+                               n_sites = contactp.length,
+                               site_indices = site.index,
+                               commit_int = commitInterval,
+                               iteration_vector = iterationID.vector,
+                               batch_num = batchNo,
+                               simulation_num = simNo,
+                               save_num = numberFullSaves,
+                               filepath_results = locationSaveResults)
+        allStates.table[,as.character(iterationID.vector):=empty.vector]
+        allStates.table.t[,as.character(iterationID.vector):=empty.vector.t]
       }
-
+      
       # Pick the next event, and modify a site's state accordingly
       event.objects = do_event(state_vector, control_matrix, transition.rates, tdiff, movement.restrictions.bySite, catchment_time_vector, catchments.all.sites.c5.status, record_transition_times, source.infection.vector, infected.source.matrix)
       
@@ -843,7 +848,7 @@ simulationCode = function(graph.contactp.objects,
     }
     
     
-    }
+  }
   
   # Print diagnositic information, and format results as appriopriate
   print(c("No Iterations", noSteps))
@@ -852,16 +857,16 @@ simulationCode = function(graph.contactp.objects,
   allStates.table.t[,as.character((noSteps.sinceLastCommit + 1):commitInterval):=NULL]
   numberFullSaves = numberFullSaves + 1
   aquanet::commitResults(df_states = allStates.table, 
-                df_time = allStates.table.t, 
-                n_states = no.variables,
-                n_sites = contactp.length,
-                site_indices = site.index,
-                commit_int = commitInterval,
-                iteration_vector = iterationID.vector,
-                batch_num = batchNo,
-                simulation_num = simNo,
-                save_num = numberFullSaves,
-                filepath_results = locationSaveResults)
+                         df_time = allStates.table.t, 
+                         n_states = no.variables,
+                         n_sites = contactp.length,
+                         site_indices = site.index,
+                         commit_int = commitInterval,
+                         iteration_vector = iterationID.vector,
+                         batch_num = batchNo,
+                         simulation_num = simNo,
+                         save_num = numberFullSaves,
+                         filepath_results = locationSaveResults)
   
   save(summaryStates.table, file = paste(locationSaveResults,"/batch_results/batchNo-",batchNo,".RData",sep=""),compress=FALSE)
   

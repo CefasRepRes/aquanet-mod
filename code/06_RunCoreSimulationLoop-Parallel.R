@@ -39,7 +39,8 @@ print(
         associatedSiteControlType = catchment_movement_controls,
         locationSaveResults = save_results_filepath,
         seedNo = seedNo,
-        initialNoInfections = initial_no_infections)
+        initialNoInfections = initial_no_infections,
+        contact_tracing = contact_tracing)
     }
   )
 )

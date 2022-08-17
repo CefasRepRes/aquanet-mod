@@ -1,5 +1,7 @@
 #### Run model command line ####
 
+library(beepr)
+
 # Setup ------------------------------------------------------------------------
 
 # Clear the startup screen
@@ -40,10 +42,10 @@ library(aquanet) # Functions for aquanet model
 
 # Scenario name 
   # This is the name that will appear as your output directory. Make it descriptive
-scenario_name <- "top_sites_removed_baseline"
+scenario_name <- "test_without_plus_one_sim_time"
 
 # Remove top sites
-remove_top_sites <- TRUE # Whether or not to remove the top most connected sites
+remove_top_sites <- FALSE # Whether or not to remove the top most connected sites
 prop_sites_keep <- 0.95 # If removing most connected sites, which proportion should be kept?
 
 # Data collection period
@@ -67,9 +69,13 @@ initial_no_infections <- 1
 # None = no catchment movement controls whatsoever
 catchment_movement_controls <- 0
 
+# Contact tracing options
+# Either true or false
+contact_tracing <- TRUE
+
 # Number of simulations to be run
   # Suggest 4 for a test, and 3000 for a full run
-noSims <- 3000
+noSims <- 4
 
 # Number of cores to be assigned
   # We recommend using half the number of cores available on your device
@@ -172,4 +178,4 @@ Twyi
 source('code/03_CreateContactNetwork.R')
 source('code/04_PrepareModelObjects.R')
 source('code/05_CreateRiverContactMatrices.R', local = TRUE)
-source('code/06_RunCoreSimulationLoop-Parallel.R', local = TRUE)
+source('code/06_RunCoreSimulationLoop-Parallel.R', local = TRUE);beep()
