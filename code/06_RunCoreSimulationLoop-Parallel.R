@@ -29,6 +29,7 @@ print(system.time( # Print the system time used by the runSimulations function
       n_states = 42,
       n_initial_infections = initial_no_infections,
       type_catchment_controls = catchment_movement_controls,
+      contact_tracing = contact_tracing,
       filepath_results = dirs[["results"]]
     )
   }))
