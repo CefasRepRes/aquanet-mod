@@ -42,10 +42,10 @@ library(aquanet) # Functions for aquanet model
 
 # Scenario name 
   # This is the name that will appear as your output directory. Make it descriptive
-scenario_name <- "remove_top_sites_full_test"
+scenario_name <- "no_controls_test"
 
 # Remove top sites
-remove_top_sites <- TRUE # Whether or not to remove the top most connected sites
+remove_top_sites <- FALSE # Whether or not to remove the top most connected sites
 prop_sites_keep <- 0.95 # If removing most connected sites, which proportion should be kept?
 n_infections_remove_top_sites <- 5 # After cumulative number of sites exceeds this number, remove top sites
 
@@ -76,11 +76,11 @@ contact_tracing <- TRUE
 
 # Disease control options
 # Either true or false
-disease_controls <- TRUE
+disease_controls <- FALSE
 
 # Number of simulations to be run
   # Suggest 4 for a test, and 3000 for a full run
-noSims <- 3000
+noSims <- 12
 
 # Number of cores to be assigned
   # We recommend using half the number of cores available on your device
