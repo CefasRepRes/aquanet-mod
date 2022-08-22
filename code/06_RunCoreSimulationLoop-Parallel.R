@@ -32,6 +32,7 @@ print(system.time( # Print the system time used by the runSimulations function
       type_catchment_controls = catchment_movement_controls,
       contact_tracing = contact_tracing,
       remove_top_sites = remove_top_sites,
+      n_infections_remove_top_sites = n_infections_remove_top_sites,
       filepath_results = dirs[["results"]]
     )
   }))

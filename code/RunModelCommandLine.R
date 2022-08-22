@@ -42,11 +42,12 @@ library(aquanet) # Functions for aquanet model
 
 # Scenario name 
   # This is the name that will appear as your output directory. Make it descriptive
-scenario_name <- "test"
+scenario_name <- "remove_top_sites_full_test"
 
 # Remove top sites
-remove_top_sites <- FALSE # Whether or not to remove the top most connected sites
+remove_top_sites <- TRUE # Whether or not to remove the top most connected sites
 prop_sites_keep <- 0.95 # If removing most connected sites, which proportion should be kept?
+n_infections_remove_top_sites <- 5 # After cumulative number of sites exceeds this number, remove top sites
 
 # Data collection period
   # This is the period of time (in days) over which your LFM data was collected
@@ -79,7 +80,7 @@ disease_controls <- TRUE
 
 # Number of simulations to be run
   # Suggest 4 for a test, and 3000 for a full run
-noSims <- 4
+noSims <- 3000
 
 # Number of cores to be assigned
   # We recommend using half the number of cores available on your device
@@ -92,7 +93,6 @@ noCores <- detectCores() / 2
 seedNo <- 123 
 
 # Coordinate reference system (CGS)
-
 BNG_crs <- sf::st_crs(27700) # Number is the EPSG for the British National Grid
 
 # Load in parameters -----------------------------------------------------------
