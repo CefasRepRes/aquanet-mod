@@ -21,6 +21,7 @@ print(system.time( # Print the system time used by the runSimulations function
       run_time_params = parameter_file,
       non_peak_season_length = "90",
       out_createContactProbabilityMatrix = contact_probability_matrix,
+      out_createContactProbabilityMatrixTopSitesRemoved = contact_probability_matrix_top_sites_removed,
       out_createWithinCatchmentEdges = within_catchment_movements,
       out_createCatchmentToSiteMatrix = catchment_site_matrix,
       out_createRiverDistanceProbabilityMatrix = river_downstream_transmission_matrix,
@@ -30,6 +31,7 @@ print(system.time( # Print the system time used by the runSimulations function
       n_initial_infections = initial_no_infections,
       type_catchment_controls = catchment_movement_controls,
       contact_tracing = contact_tracing,
+      remove_top_sites = remove_top_sites,
       filepath_results = dirs[["results"]]
     )
   }))
