@@ -66,3 +66,5 @@ vignettes/*.pdf
 
 # RMDs
 *.rmd
+
+analyses/code/scenario_checking.R
