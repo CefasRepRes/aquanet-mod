@@ -33,7 +33,7 @@ load.results.summary <- function(no.variables, locationSaveResults) {
   no.per.state.wide = data.frame(t(as.matrix(no.per.state.wide)))
   colnames(no.per.state.wide) = c('batchNo',
                                   'k',
-                                  't',
+                                  "t",
                                   'tdiff',
                                   'simNo',
                                   'rate.type',
