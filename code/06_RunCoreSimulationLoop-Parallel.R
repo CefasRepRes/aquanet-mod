@@ -14,22 +14,28 @@ print(system.time( # Print the system time used by the runSimulations function
   expr = {
     aquanet::runSimulations(
       n_cores = noCores,
-      n_sims = noSims,
-      seed_num = seedNo,
-      clear_results = T,
-      tmax = tmax,
+      n_sims = model_parameters$noSims,
+      seed_num = model_parameters$seedNo,
+      clear_results = model_parameters$clear_results,
+      tmax = model_parameters$tmax,
       run_time_params = parameter_file,
-      non_peak_season_length = "90",
+      non_peak_season_length = model_parameters$non_peak_season_length,
       out_createContactProbabilityMatrix = contact_probability_matrix,
+      out_createContactProbabilityMatrixTopSitesRemoved = contact_probability_matrix_top_sites_removed,
       out_createWithinCatchmentEdges = within_catchment_movements,
       out_createCatchmentToSiteMatrix = catchment_site_matrix,
       out_createRiverDistanceProbabilityMatrix = river_downstream_transmission_matrix,
       out_createDistanceMatrix = site_distances_matrix,
       farm_vector = farm_vector,
-      n_states = 42,
-      n_initial_infections = initial_no_infections,
-      type_catchment_controls = catchment_movement_controls,
-      filepath_results = dirs[["results"]]
+      n_states = model_parameters$n_states,
+      n_initial_infections = model_parameters$initial_no_infections,
+      type_catchment_controls = model_parameters$catchment_movement_controls,
+      filepath_results = dirs[["results"]],
+      contact_tracing = model_parameters$contact_tracing,
+      remove_top_sites = model_parameters$remove_top_sites,
+      n_infections_remove_top_sites = model_parameters$n_infections_remove_top_sites,
+      disease_controls = model_parameters$disease_controls,
+      proportion_cullable = model_parameters$proportion_cullable
     )
   }))
 

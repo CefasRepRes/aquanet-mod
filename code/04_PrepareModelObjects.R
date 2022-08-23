@@ -16,16 +16,10 @@ objects_to_keep <- c("gis_filepath",
                      "dirs",
                      "site_locs_duplicates_removed_filename",
                      "site_details_with_model_id_filename",
-                     "scenario_name",
-                     "data_collection_period",
+                     "model_parameters",
                      "contact_network_filename",
                      "river_downstream_filename",
-                     "tmax",
-                     "noSims",
                      "noCores",
-                     "catchment_movement_controls",
-                     "seedNo",
-                     "initial_no_infections",
                      "BNG_crs")
 objects_in_workspace <- ls()
 objects_to_clear <- objects_in_workspace[!objects_in_workspace %in% objects_to_keep]
@@ -62,13 +56,13 @@ within_catchment_movements <- aquanet::createWithinCatchmentEdgesMatrix(graph_fu
 
 contact_probability_matrix <- 
    aquanet::createContactProbabilityMatrix(graph_full,
-                                           data_collection_period)
+                                           model_parameters$data_collection_period)
 
 # As above, but remove the top 5% of sites (in terms of number of LFMs)
    # This is required to run some control scenarios and/or to evaluate the impacts of these sites on transmission
 contact_probability_matrix_top_sites_removed <- 
    aquanet::createContactProbabilityMatrixTopSitesRemoved(graph_full, 
-                                                          data_collection_period,
+                                                          model_parameters$data_collection_period,
                                                           percentile = 0.95)
 
 # Get site categories ----------------------------------------------------------
