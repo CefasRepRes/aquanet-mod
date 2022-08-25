@@ -4,15 +4,14 @@ library(here)
 library(dplyr)
 library(beepr)
 library(data.table)
+library(aquanet)
 
 # Load and process outputs -----------------------------------------------------
 
-# Source function
-source(here::here("functions",
-                  "time.per.stage.R"))
+loadResultsFullSiteType("test")
 
 # Process results - this will take a little while
-time_summary <- time.per.stage("full_run_for_economics");beep()
+time_summary <- timePerStage("test");beep()
 
 # Load results
 load(here::here("outputs",
