@@ -1,8 +1,11 @@
 cull.cost <- function(data, cull_costs){
   # When a site enters a fallow state enter a one-off cost
   data <- data.table(data)
-  fallow <- data[state %in% c(14, 34)]
-  sims <- unique(data[, simNo])
+  fallow <- data[state %in% c(4, 5,
+                              14, 15,
+                              24, 25,
+                              34, 35)]
+  sims <- unique(data[, sim_no])
   # Loop over simulations and add the one-off fallow cost, depending on site type
   full_cull_cost <- data.table()
   system.time({
@@ -10,7 +13,7 @@ cull.cost <- function(data, cull_costs){
       for(i in 1:length(site_types)){
         type <- site_types[[i]]
         fallow <- data.table(fallow)
-        fallow_by_sim <- fallow[simNo == sims[k]]
+        fallow_by_sim <- fallow[sim_no == sims[k]]
         #filter_cull_cost <- dplyr::filter(cull_cost, site_type == type)
         cull_cost <- data.table(cull_cost)
         filter_cull_cost <- cull_cost[site_type == type]

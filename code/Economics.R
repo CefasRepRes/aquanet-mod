@@ -65,7 +65,7 @@ simulation_daily_costs <- fallow_costs %>%
 source(here::here("functions",
                   "cull.cost.R"))
 
-full_cull_cost_sim <- cull.cost(data = time_summary,
+full_cull_cost_sim_2 <- cull.cost(data = time_summary,
                                 cull_cost = cull_cost)
 
 # Make into single data frame
