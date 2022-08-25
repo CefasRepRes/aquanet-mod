@@ -80,7 +80,7 @@ disease_controls <- TRUE
 
 # Number of simulations to be run
   # Suggest 4 for a test, and 3000 for a full run
-noSims <- 3000
+noSims <- 12
 
 # Number of cores to be assigned
   # We recommend using half the number of cores available on your device
