@@ -1,5 +1,7 @@
 #### Run model command line ####
 
+library(beepr)
+
 # Setup ------------------------------------------------------------------------
 
 # Clear the startup screen
@@ -40,7 +42,12 @@ library(aquanet) # Functions for aquanet model
 
 # Scenario name 
   # This is the name that will appear as your output directory. Make it descriptive
-scenario_name <- "test"
+scenario_name <- "no_controls_test"
+
+# Remove top sites
+remove_top_sites <- FALSE # Whether or not to remove the top most connected sites
+prop_sites_keep <- 0.95 # If removing most connected sites, which proportion should be kept?
+n_infections_remove_top_sites <- 5 # After cumulative number of sites exceeds this number, remove top sites
 
 # Data collection period
   # This is the period of time (in days) over which your LFM data was collected
@@ -60,11 +67,20 @@ initial_no_infections <- 1
 # 0 = within catchment movements allowed
 # 1 = between and within infected catchments allow
 # 2 = no movement allowed by any sites within infected catchments
-catchment_movement_controls <- 0 
+# None = no catchment movement controls whatsoever
+catchment_movement_controls <- 0
+
+# Contact tracing options
+# Either true or false
+contact_tracing <- TRUE
+
+# Disease control options
+# Either true or false
+disease_controls <- FALSE
 
 # Number of simulations to be run
   # Suggest 4 for a test, and 3000 for a full run
-noSims <- 4
+noSims <- 12
 
 # Number of cores to be assigned
   # We recommend using half the number of cores available on your device
@@ -77,7 +93,6 @@ noCores <- detectCores() / 2
 seedNo <- 123 
 
 # Coordinate reference system (CGS)
-
 BNG_crs <- sf::st_crs(27700) # Number is the EPSG for the British National Grid
 
 # Load in parameters -----------------------------------------------------------
@@ -121,12 +136,7 @@ dirs <- c("outputs" = here::here("outputs"),
           "results_full" = here::here("outputs", scenario_name, "full_results"),
           "results_code" = here::here("outputs", scenario_name, "code"))
 
-# Create output directories
 lapply(dirs, dir.create, showWarnings = F)
-
-
-# Full results folder
-dir.create(file.path(save_results_filepath, "full_results"), showWarnings = FALSE)
 
 # Save code and data for reproducibility ---------------------------------------
 
@@ -164,4 +174,4 @@ Tywi
 source('code/03_CreateContactNetwork.R')
 source('code/04_PrepareModelObjects.R')
 source('code/05_CreateRiverContactMatrices.R', local = TRUE)
-source('code/06_RunCoreSimulationLoop-Parallel.R', local = TRUE)
+source('code/06_RunCoreSimulationLoop-Parallel.R', local = TRUE);beep()
