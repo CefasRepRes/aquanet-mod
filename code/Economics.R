@@ -8,10 +8,8 @@ library(aquanet)
 
 # Load and process outputs -----------------------------------------------------
 
-loadResultsFullSiteType("test")
-
 # Process results - this will take a little while
-time_summary <- timePerStage("test");beep()
+time_summary <- timePerStage("test")
 
 # Load in economic costing -----------------------------------------------------
 
@@ -61,24 +59,24 @@ simulation_daily_costs <- fallow_costs %>%
 
 # Add in cull costs ------------------------------------------------------------
 
-# Load function
-source(here::here("functions",
-                  "cull.cost.R"))
-
-full_cull_cost_sim_2 <- cull.cost(data = time_summary,
-                                cull_cost = cull_cost)
+full_cull_cost_sim <- cullCost(data = time_summary,
+                               cull_cost = cull_cost,
+                               site_types = site_types)
 
 # Make into single data frame
 full_outbreak_costs <- simulation_daily_costs %>% dplyr::full_join(full_cull_cost_sim,
-                                                                   by = c("simNo" = "sim"))
+                                                                   by = "sim_no")
 
 # Calculate total outbreak cost
 full_outbreak_costs$total_outbreak_cost <- rowSums(full_outbreak_costs[, -1],
                                                    na.rm = T)
+# Replace NA with 0
+full_outbreak_costs[is.na(full_outbreak_costs)] <- 0
+
 # Save
 write.csv(full_outbreak_costs,
           here::here("outputs",
-                     "full_run_for_economics",
+                     "test",
                      "economics",
                      "full_outbreak_costs.csv"),
           row.names = F)
@@ -103,7 +101,7 @@ outbreak_summary <- outbreak_summary[-1, ] # Remove simNo
 # Save
 write.csv(outbreak_summary,
           here::here("outputs",
-                     "full_run_for_economics",
+                     "test",
                      "economics",
                      "summary_outbreak_costs.csv"),
           row.names = T)
