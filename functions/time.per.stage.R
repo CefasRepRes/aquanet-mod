@@ -10,36 +10,36 @@ time.per.stage <- function(scenario_name){
     # Begin loop -----
     ## Loop over simulations =====
     # Create list of simulation numbers
-    sims <- unique(sites_summary_type[, simNo])
+    sims <- unique(sites_summary_type[, sim_no])
     # Empty data frame to save results into
     sims_site_time_summary <- data.table()
     for(k in 1:length(sims)){
       # Filter by simulation
-      sim <- sites_summary_type[simNo == sims[k]]
+      sim <- sites_summary_type[sim_no == sims[k]]
       ## Loop over sites =====
       # Create list of site IDs
-      site_ID <- unique(sim[, siteID])
+      site_ID <- unique(sim[, site_id])
       # Empty data frame to store results
       store <- data.table()
       for(s in 1:length(site_ID)){
         # Filter by site
-        by_site <- sim[siteID == site_ID[s]]
+        by_site <- sim[site_id == site_ID[s]]
         # Create a record ID for each row
         by_site$recordID <- rownames(by_site)
         # Create a vector to store rows to be removed
         remove_row <- rep(NA, nrow(by_site))
         ## Loop over rows ======
         # This loop checks if he state matches that on the previous row.
-        # If it does match, it sums the time (tdiff) and removes the previous row
+        # If it does match, it sums the time (t_diff) and removes the previous row
         # If not, the time remains the same.
         for(i in 1:nrow(by_site)){
           # If the state is the same as the previous state, add the times together
           if((by_site$state[i] == data.table::shift(by_site$state)[i]) %in% TRUE){
-            by_site$tdiff[i] <- by_site$tdiff[i] + by_site$tdiff[i - 1]
+            by_site$t_diff[i] <- by_site$t_diff[i] + by_site$t_diff[i - 1]
             # Save the previous row for removal
             remove_row[[i]] <- as.numeric(i - 1)
           } else { # If the states are not the same, save the time
-            by_site$tdiff[i] <- by_site$tdiff[i]
+            by_site$t_diff[i] <- by_site$t_diff[i]
           }
         }
         # Remove excess rows
@@ -51,7 +51,7 @@ time.per.stage <- function(scenario_name){
       # Bind to data frame
       sims_site_time_summary <- rbind(sims_site_time_summary, store)
       # Print the simulation number to see progress
-      print(sims[k])
+      print(k)
     }
     ## Save the results =====
     save(sims_site_time_summary,
