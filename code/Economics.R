@@ -30,32 +30,28 @@ daily_cost <- read.csv(here::here("data",
 time_summary_farms <- dplyr::filter(time_summary, farm_vector == 1)
 max(time_summary_farms$sim_no)
 
-# Load function
-source(here::here("functions",
-                  "state.costs.R"))
-
 # Get a list of site types
 site_types <- cull_cost$site_type
 
 # Fallow
-fallow_costs <- state.costs(data = time_summary_farms,
-                            state = "fallow",
-                            site_types = site_types)
+fallow_costs <- stateCosts(data = time_summary_farms,
+                           state = "fallow",
+                           site_types = site_types)
 
 # No management
-no_manage_costs <- state.costs(data = time_summary_farms,
-                               state = "no_manage",
-                               site_types = site_types)
+no_manage_costs <- stateCosts(data = time_summary_farms,
+                              state = "no_manage",
+                              site_types = site_types)
 
 # Contact tracing
-contact_trace_cost <- state.costs(data = time_summary_farms,
-                                  state = "contact_trace",
-                                  site_types = site_types)
+contact_trace_cost <- stateCosts(data = time_summary_farms,
+                                 state = "contact_trace",
+                                 site_types = site_types)
 
 # Catchment controls
-catchment_controls <- state.costs(data = time_summary_farms,
-                                  state = "catchment_control",
-                                  site_types = site_types)
+catchment_controls <- stateCosts(data = time_summary_farms,
+                                 state = "catchment_control",
+                                 site_types = site_types)
 
  # Combine into single daily cost data frame
 simulation_daily_costs <- fallow_costs %>% 
