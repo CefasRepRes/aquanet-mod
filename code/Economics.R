@@ -13,13 +13,6 @@ loadResultsFullSiteType("test")
 # Process results - this will take a little while
 time_summary <- timePerStage("test");beep()
 
-# Load results
-load(here::here("outputs",
-                "full_run_for_economics",
-                "economics",
-                "full_run_for_economics-site-time-summary.Rdata"))
-time_summary <- sims_site_time_summary
-
 # Load in economic costing -----------------------------------------------------
 
 cull_cost <- read.csv(here::here("data",
@@ -35,7 +28,7 @@ daily_cost <- read.csv(here::here("data",
 # Filter out non-farms
 # We don't have any duration cost data for fisheries
 time_summary_farms <- dplyr::filter(time_summary, farm_vector == 1)
-max(time_summary_farms$simNo)
+max(time_summary_farms$sim_no)
 
 # Load function
 source(here::here("functions",
@@ -66,9 +59,9 @@ catchment_controls <- state.costs(data = time_summary_farms,
 
  # Combine into single daily cost data frame
 simulation_daily_costs <- fallow_costs %>% 
-  dplyr::full_join(no_manage_costs, by = "simNo") %>% 
-  dplyr::full_join(contact_trace_cost, by = "simNo") %>%
-  dplyr::full_join(catchment_controls, by = "simNo")
+  dplyr::full_join(no_manage_costs, by = "sim_no") %>% 
+  dplyr::full_join(contact_trace_cost, by = "sim_no") %>%
+  dplyr::full_join(catchment_controls, by = "sim_no")
 
 # Add in cull costs ------------------------------------------------------------
 
