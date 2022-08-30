@@ -31,11 +31,6 @@ sites_unique <- plyr::ddply(site_data_frame,
                             summarise,
                             noOccurances = length(siteID))
 
-duplicate_sites <- plyr::ddply(sites_unique,
-                               ~siteID,
-                               summarise,
-                               frequency = length(siteID))
-
 # Warn of and remove sites without location -----------------------------------
 
 print(c("Number of sites with no location: ",
@@ -150,6 +145,13 @@ for(i in 1:length(dupe_site_id)){
     catchment <- readline(prompt = paste("Enter correct river catchment name for site", 
                                          duplicates$siteID[i], 
                                          ": "))
+    options <- duplicates %>% dplyr::filter(siteID == duplicates$siteID[i]) %>%
+      dplyr::select(NAME)
+    options <- as.list(options)
+    if(!(catchment %in% options[[1]])){
+      stop(paste("The catchment you entered is incorrect or may be misspelled. Your options are:"),
+      options)
+    }
     pair_merged <- dplyr::filter(pair, NAME == catchment)
   }
   organised_dupes <- rbind(organised_dupes, pair_merged)
