@@ -28,7 +28,8 @@ objects_to_keep <- c("gis_filepath",
                      "initial_no_infections",
                      "BNG_crs",
                      "prop_sites_keep",
-                     "remove_top_sites")
+                     "remove_top_sites",
+                     "proportion_cullable")
 objects_in_workspace <- ls()
 objects_to_clear <- objects_in_workspace[!objects_in_workspace %in% objects_to_keep]
 

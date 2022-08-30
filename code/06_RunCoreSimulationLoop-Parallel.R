@@ -34,6 +34,7 @@ print(system.time( # Print the system time used by the runSimulations function
       remove_top_sites = remove_top_sites,
       n_infections_remove_top_sites = n_infections_remove_top_sites,
       disease_controls = disease_controls,
+      proportion_cullable = proportion_cullable,
       filepath_results = dirs[["results"]]
     )
   }))
