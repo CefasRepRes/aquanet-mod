@@ -6,10 +6,17 @@ library(beepr)
 library(data.table)
 library(aquanet)
 
+# Select scenario name
+
+scenario_name <- "baseline"
+
 # Load and process outputs -----------------------------------------------------
 
+# Load results
+loadResultsFullSiteType(scenario_name)
+
 # Process results - this will take a little while
-time_summary <- timePerStage("test")
+time_summary <- timePerStage(scenario_name)
 
 # Load in economic costing -----------------------------------------------------
 
@@ -76,7 +83,7 @@ full_outbreak_costs[is.na(full_outbreak_costs)] <- 0
 # Save
 write.csv(full_outbreak_costs,
           here::here("outputs",
-                     "test",
+                     scenario_name,
                      "economics",
                      "full_outbreak_costs.csv"),
           row.names = F)
@@ -101,7 +108,7 @@ outbreak_summary <- outbreak_summary[-1, ] # Remove simNo
 # Save
 write.csv(outbreak_summary,
           here::here("outputs",
-                     "test",
+                     scenario_name,
                      "economics",
                      "summary_outbreak_costs.csv"),
           row.names = T)
