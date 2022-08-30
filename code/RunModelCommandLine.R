@@ -42,7 +42,7 @@ library(aquanet) # Functions for aquanet model
 
 # Scenario name 
   # This is the name that will appear as your output directory. Make it descriptive
-scenario_name <- "no_controls_test"
+scenario_name <- "baseline"
 
 # Remove top sites
 remove_top_sites <- FALSE # Whether or not to remove the top most connected sites
@@ -76,11 +76,11 @@ contact_tracing <- TRUE
 
 # Disease control options
 # Either true or false
-disease_controls <- FALSE
+disease_controls <- TRUE
 
 # Number of simulations to be run
   # Suggest 4 for a test, and 3000 for a full run
-noSims <- 12
+noSims <- 3000
 
 # Number of cores to be assigned
   # We recommend using half the number of cores available on your device
@@ -170,7 +170,7 @@ farm_to_farm_movements <- read.csv(farm_to_farm_lfm_filename,
 # Load and run components of AquaNet model --------------------------------
 
 source('code/02_CheckCatchmentSiteRelationships.R') # Don't need to run this if you have no duplicates file already
-Twyi
+Tywi
 source('code/03_CreateContactNetwork.R')
 source('code/04_PrepareModelObjects.R')
 source('code/05_CreateRiverContactMatrices.R', local = TRUE)
