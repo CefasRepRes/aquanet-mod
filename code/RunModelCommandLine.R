@@ -34,7 +34,6 @@ lapply(pkgs, library, character.only = T)
 # TODO: add install aquanet when it does not require PAT
 library(aquanet) # Functions for aquanet model
 
-
 # User settings ----------------------------------------------------------------
 
 # IMPORTANT: if you change these settings, save the command line before running.
@@ -42,7 +41,7 @@ library(aquanet) # Functions for aquanet model
 
 # Scenario name 
   # This is the name that will appear as your output directory. Make it descriptive
-scenario_name <- "baseline"
+scenario_name <- "baseline_test"
 
 # Remove top sites
 remove_top_sites <- FALSE # Whether or not to remove the top most connected sites
@@ -94,6 +93,9 @@ seedNo <- 123
 
 # Coordinate reference system (CGS)
 BNG_crs <- sf::st_crs(27700) # Number is the EPSG for the British National Grid
+
+# Proportion of cullable fisheries
+proportion_cullable <- 0.5
 
 # Load in parameters -----------------------------------------------------------
 
