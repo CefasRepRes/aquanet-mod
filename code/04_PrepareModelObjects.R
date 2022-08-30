@@ -29,11 +29,15 @@ objects_to_keep <- c("gis_filepath",
                      "BNG_crs",
                      "prop_sites_keep",
                      "remove_top_sites",
-                     "proportion_cullable")
+                     "proportion_cullable",
+                     "catchment_layer_filename",
+                     "contact_tracing",
+                     "n_infections_remove_top_sites",
+                     "disease_controls")
 objects_in_workspace <- ls()
 objects_to_clear <- objects_in_workspace[!objects_in_workspace %in% objects_to_keep]
 
-# rm(list = objects_to_clear)
+rm(list = objects_to_clear)
 
 # Load contact network ---------------------------------------------------------
 
