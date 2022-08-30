@@ -26,7 +26,9 @@ objects_to_keep <- c("gis_filepath",
                      "catchment_movement_controls",
                      "seedNo",
                      "initial_no_infections",
-                     "BNG_crs")
+                     "BNG_crs",
+                     "prop_sites_keep",
+                     "remove_top_sites")
 objects_in_workspace <- ls()
 objects_to_clear <- objects_in_workspace[!objects_in_workspace %in% objects_to_keep]
 
@@ -69,14 +71,12 @@ contact_probability_matrix <-
 contact_probability_matrix_top_sites_removed <- 
    aquanet::createContactProbabilityMatrixTopSitesRemoved(graph_full, 
                                                           data_collection_period,
-                                                          percentile = 0.95)
+                                                          percentile = prop_sites_keep)
 
 # Get site categories ----------------------------------------------------------
    # TODO: use to incorporate economic data
    # TODO: figure out how to carry this forward to get useful economic outputs
    # Returns 1 for sites being that category, and 0 for site not being that category
-
-source('code/aquanet_functions/CreateSiteTypeVector.R')
 
 # Create list of all possible site types
 type_list <- c("smallhatch", "largehatch",
@@ -86,10 +86,13 @@ type_list <- c("smallhatch", "largehatch",
                "smallfish", "mediumfish", "largefish")
 
 # Save site ID
-type_vector <- vertex_attr(graph_full, "siteID")
+type_vector <- igraph::vertex_attr(graph_full, "siteID")
 type_vector <- as.numeric(type_vector)
 
 # Get site type vectors
+source(here::here("code",
+                  "aquanet_functions",
+                  "CreateSiteTypeVector.R"))
 for(i in 1:length(type_list)){
    t_vector <- createSiteTypeVector(graph_full,
                         type_list[i])

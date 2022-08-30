@@ -8,14 +8,14 @@ load.results.site.type <- function(scenario_name){
     # TODO: update with correct file path
   filenames <- list.files(here::here("outputs",
                                      scenario_name,
-                                     "FullDetails"),
+                                     "full_results"),
                           pattern = "batchNo-*")
   # Load simulation states
   sim_states_all <- data.frame()
   for(i in 1:length(filenames)){
     load(here::here("outputs",
                     scenario_name,
-                    "FullDetails",
+                    "full_results",
                     filenames[i]))
     sim_states_all <- rbind(sim_states_all, sim_states)}
   # Load simulation times
@@ -23,7 +23,7 @@ load.results.site.type <- function(scenario_name){
   for(i in 1:length(filenames)){
     load(here::here("outputs",
                     scenario_name,
-                    "FullDetails",
+                    "full_results",
                     filenames[i]))
     sim_times_all <- rbind(sim_times_all, sim_times)}
   # Combine states and time spent in each state
