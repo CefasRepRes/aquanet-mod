@@ -95,12 +95,9 @@ type_vector <- igraph::vertex_attr(graph_full, "siteID")
 type_vector <- as.numeric(type_vector)
 
 # Get site type vectors
-source(here::here("code",
-                  "aquanet_functions",
-                  "CreateSiteTypeVector.R"))
 for(i in 1:length(type_list)){
-   t_vector <- createSiteTypeVector(graph_full,
-                        type_list[i])
+   t_vector <- aquanet::createSiteTypeVector(graph_full,
+                                             type_list[i])
    type_vector <- rbind(type_vector, t_vector)
 }
 
