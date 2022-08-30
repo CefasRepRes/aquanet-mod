@@ -41,7 +41,7 @@ library(aquanet) # Functions for aquanet model
 
 # Scenario name 
   # This is the name that will appear as your output directory. Make it descriptive
-scenario_name <- "baseline_test"
+scenario_name <- "baseline"
 
 # Remove top sites
 remove_top_sites <- FALSE # Whether or not to remove the top most connected sites
