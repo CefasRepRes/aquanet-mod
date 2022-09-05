@@ -27,7 +27,7 @@ objects_to_keep <- c("gis_filepath",
                      "seedNo",
                      "initial_no_infections",
                      "BNG_crs",
-                     "prop_sites_keep",
+                     "n_remove",
                      "remove_top_sites",
                      "proportion_cullable",
                      "catchment_layer_filename",
@@ -76,7 +76,7 @@ contact_probability_matrix <-
 contact_probability_matrix_top_sites_removed <- 
    aquanet::createContactProbabilityMatrixTopSitesRemoved(graph_full, 
                                                           data_collection_period,
-                                                          percentile = prop_sites_keep)
+                                                          n_remove = n_remove)
 
 # Get site categories ----------------------------------------------------------
    # TODO: use to incorporate economic data

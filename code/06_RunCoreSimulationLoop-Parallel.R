@@ -10,8 +10,8 @@ options(scipen = 999)
 
 # Run model ---------------------------------------------------------------
 
-print(system.time( # Print the system time used by the runSimulations function
-  expr = {
+# print(system.time( # Print the system time used by the runSimulations function
+#   expr = {
     aquanet::runSimulations(
       n_cores = noCores,
       n_sims = noSims,
@@ -37,7 +37,7 @@ print(system.time( # Print the system time used by the runSimulations function
       proportion_cullable = proportion_cullable,
       filepath_results = dirs[["results"]]
     )
-  }))
+  # }))
 
 # # Testing ----------------------------------------------------------------------
 #

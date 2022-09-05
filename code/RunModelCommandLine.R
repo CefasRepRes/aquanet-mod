@@ -41,11 +41,11 @@ library(aquanet) # Functions for aquanet model
 
 # Scenario name 
   # This is the name that will appear as your output directory. Make it descriptive
-scenario_name <- "baseline"
+scenario_name <- "no_controls_top_sites_removed"
 
 # Remove top sites
-remove_top_sites <- FALSE # Whether or not to remove the top most connected sites
-prop_sites_keep <- 0.95 # If removing most connected sites, which proportion should be kept?
+remove_top_sites <- TRUE # Whether or not to remove the top most connected sites
+n_remove <- 10 # If removing most connected sites, how many to remove
 n_infections_remove_top_sites <- 5 # After cumulative number of sites exceeds this number, remove top sites
 
 # Data collection period
@@ -75,7 +75,7 @@ contact_tracing <- TRUE
 
 # Disease control options
 # Either true or false
-disease_controls <- TRUE
+disease_controls <- FALSE
 
 # Number of simulations to be run
   # Suggest 4 for a test, and 3000 for a full run
