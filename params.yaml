@@ -81,6 +81,7 @@ Contact_Detection: 3
 Max_Distance_River_Transmission: 5000
 Probability_River_Transmission: 0.005
 Local_Scalar: 0.0001
+days_before_catchment_restock: 4
 
 
 ## RIVER NETWORK PARAMETERS ---
