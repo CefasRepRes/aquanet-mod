@@ -3,32 +3,19 @@
 library(here)
 library(dplyr)
 library(beepr)
+library(data.table)
+library(aquanet)
 
-# TODO: make generic so it works with any input
+# Select scenario name
+scenario_name <- "no_contact_tracing"
 
 # Load and process outputs -----------------------------------------------------
 
-## Load results ================================================================
-
-# Source function
-source(here::here("functions",
-                  "load.results.site.type.R"))
-
 # Load results
-sites_summary_type <- load.results.site.type("full_run_for_economics")
-
-# Check we have the correct number of sims
-  # Should be 3000 (or whatever you put in as your number of sims to run)
-max(sites_summary_type$simNo)
-
-## Process results =============================================================
-
-# Source function
-source(here::here("functions",
-                  "time.per.stage.R"))
+full_results <- loadResultsFullSiteType(scenario_name)
 
 # Process results - this will take a little while
-time_summary <- time.per.stage("full_run_for_economics");beep(sound = "mario")
+time_summary <- timePerStage(scenario_name);beep()
 
 # Load in economic costing -----------------------------------------------------
 
@@ -43,91 +30,76 @@ daily_cost <- read.csv(here::here("data",
 # Calculate daily costs --------------------------------------------------------
 
 # Filter out non-farms
-# We don't have any duration cost data for fisheries
-time_summary_farms <- filter(time_summary, farm_vector == 1)
-max(time_summary_farms$simNo)
+  # We don't have any duration cost data for fisheries
+time_summary_farms <- dplyr::filter(time_summary, farm_vector == 1)
 
-# Load function
-source(here::here("functions",
-                  "state.costs.R"))
+# Filter out fisheries
+  # To do cull cost
+time_summary_non_farms <- dplyr::filter(time_summary, farm_vector == 0)
 
 # Get a list of site types
 site_types <- cull_cost$site_type
 
 # Fallow
-fallow_costs <- state.costs(data = time_summary_farms,
-                            state = "fallow",
-                            state_codes = c(4, 14, 24, 34),
-                            site_types = site_types)
+fallow_costs <- stateCosts(data = time_summary_farms,
+                           state = "fallow",
+                           site_types = site_types);beep()
 
 # No management
-  # TODO: find out if this should only exist in the no controls scenario
-no_manage_costs <- state.costs(data = time_summary_farms,
-                               state = "no_manage",
-                               state_codes = 10,
-                               site_types = site_types)
+no_manage_costs <- stateCosts(data = time_summary_farms,
+                              state = "no_manage",
+                              site_types = site_types);beep()
 
 # Contact tracing
-contact_trace_cost <- state.costs(data = time_summary_farms,
-                                  state = "contact_trace",
-                                  state_codes = c(1, 11, 21, 31,
-                                                 7, 17, 27, 37),
-                                  site_types = site_types)
+contact_trace_cost <- stateCosts(data = time_summary_farms,
+                                 state = "contact_trace",
+                                 site_types = site_types);beep()
 
 # Catchment controls
-catchment_controls <- state.costs(data = time_summary_farms,
-                                  state = "catchment_control",
-                                  state_codes = c(20, 21, 22, 23, 24,
-                                                  25, 26, 27, 28, 29),
-                                  site_types = site_types)
+catchment_controls <- stateCosts(data = time_summary_farms,
+                                 state = "catchment_control",
+                                 site_types = site_types);beep()
 
-# Combine into single daily cost data frame
-simulation_daily_costs <- fallow_costs %>% 
-  dplyr::full_join(no_manage_costs, by = "simNo") %>% 
-  dplyr::full_join(contact_trace_cost, by = "simNo") %>%
-  dplyr::full_join(catchment_controls, by = "simNo")
+ # Combine into single daily cost data frame
+simulation_daily_costs <- fallow_costs[["summary_state_costs"]] %>% 
+  dplyr::full_join(no_manage_costs[["summary_state_costs"]], by = "sim_no") %>% 
+  dplyr::full_join(contact_trace_cost[["summary_state_costs"]], by = "sim_no") %>%
+  dplyr::full_join(catchment_controls[["summary_state_costs"]], by = "sim_no")
 
 # Add in cull costs ------------------------------------------------------------
 
-# When a site enters a fallow state (34) enter a one-off cost
-fallow <- dplyr::filter(time_summary, state == 34)
-sims <- unique(fallow$simNo)
-
-# Loop over simulations and add the one-off fallow cost, depending on site type
-full_cull_cost <- data.frame()
-for(k in 1:length(sims)){
-for(i in 1:length(site_types)){
-  type <- site_types[[i]]
-  fallow_by_sim <- dplyr::filter(fallow, simNo == sims[k])
-  filter_cull_cost <- dplyr::filter(cull_cost, site_type == type)
-  # Separate costs to the farm and the FHI (competent authority)
-  farm_cull_cost <- sum(fallow_by_sim[, type]) * filter_cull_cost$cull_cost_farm
-  fhi_cull_cost <- sum(fallow_by_sim[, type]) * filter_cull_cost$cull_cost_fhi
-  # Combine into single data frame
-  comb_cull_cost <- data.frame(cull_cost_farm = farm_cull_cost,
-                               cull_cost_fhi = fhi_cull_cost,
-                               sim = k)
-  # Save results
-  full_cull_cost <- rbind(full_cull_cost, comb_cull_cost)
-}}
-
-# Summarise per simulation
-full_cull_cost_sim <- full_cull_cost %>% 
-  group_by(sim) %>% 
-  summarise(cull_cost_farm = sum(cull_cost_farm, na.rm = T),
-            cull_cost_fhi = sum(cull_cost_fhi, na.rm = T))
+full_cull_cost_sim <- cullCost(farm_data = time_summary_farms,
+                               non_farm_data = time_summary_non_farms,
+                               cull_cost = cull_cost,
+                               site_types = site_types);beep()
 
 # Make into single data frame
 full_outbreak_costs <- simulation_daily_costs %>% dplyr::full_join(full_cull_cost_sim,
-                                                                   by = c("simNo" = "sim"))
+                                                                   by = "sim_no")
 
 # Calculate total outbreak cost
 full_outbreak_costs$total_outbreak_cost <- rowSums(full_outbreak_costs[, -1],
                                                    na.rm = T)
+# Replace NA with 0
+  # Important to get correct stats
+all_sims <- data.frame(sim_no = 1:3000)
+full_outbreak_costs <- merge(all_sims,
+                             full_outbreak_costs,
+                             all = TRUE)
+missing_sims <- dplyr::filter(full_outbreak_costs, is.na(total_outbreak_cost))
+missing_sims <- missing_sims %>% dplyr::filter(!(sim_no %in% full_results$sim_no))
+write.csv(missing_sims,
+          here::here("outputs",
+                     scenario_name,
+                     "economics",
+                     "missing_simulations.csv"),
+          row.names = T)
+full_outbreak_costs[is.na(full_outbreak_costs)] <- 0
+
 # Save
 write.csv(full_outbreak_costs,
           here::here("outputs",
-                     "full_run_for_economics",
+                     scenario_name,
                      "economics",
                      "full_outbreak_costs.csv"),
           row.names = F)
@@ -145,13 +117,14 @@ for(i in 1:length(functions)){
 # Tidy up data frame
 outbreak_summary <- as.data.frame(t(outbreak_summary))
 colnames(outbreak_summary) <- functions
-rownames(outbreak_summary) <- colnames(full_outbreak_costs)
+rownames(outbreak_summary) <- 1:nrow(outbreak_summary)
+outbreak_summary$cost_component <- colnames(full_outbreak_costs)
 outbreak_summary <- outbreak_summary[-1, ] # Remove simNo
 
 # Save
 write.csv(outbreak_summary,
           here::here("outputs",
-                     "full_run_for_economics",
+                     scenario_name,
                      "economics",
                      "summary_outbreak_costs.csv"),
           row.names = T)

@@ -1,5 +1,7 @@
 #### Run model command line ####
 
+library(beepr)
+
 # Setup ------------------------------------------------------------------------
 
 # Clear the startup screen
@@ -32,12 +34,15 @@ lapply(pkgs, library, character.only = T)
 # TODO: add install aquanet when it does not require PAT
 library(aquanet) # Functions for aquanet model
 
-
 # User settings ----------------------------------------------------------------
 
 # Number of cores to be assigned
   # We recommend using half the number of cores available on your device
 noCores <- detectCores() / 2
+
+# Remove top sites
+# TODO: ADD TO PARAMS WHEN CONTROL TOP SITES ADJUSTED - rename model_parameters$percentile
+n_remove <- 10 # If removing most connected sites, how many to remove
 
 # Load in parameters -----------------------------------------------------------
 
@@ -64,7 +69,6 @@ dirs <- c("outputs" = here::here("outputs"),
           "results_full" = here::here("outputs", model_parameters$scenario_name, "full_results"),
           "results_code" = here::here("outputs", model_parameters$scenario_name, "code"))
 
-# Create output directories
 lapply(dirs, dir.create, showWarnings = F)
 
 # Save code and data for reproducibility ---------------------------------------
@@ -100,8 +104,8 @@ farm_to_farm_movements <- read.csv(farm_to_farm_lfm_filename,
 # Load and run components of AquaNet model --------------------------------
 
 source('code/02_CheckCatchmentSiteRelationships.R') # Don't need to run this if you have no duplicates file already
-Twyi
+Tywi
 source('code/03_CreateContactNetwork.R')
 source('code/04_PrepareModelObjects.R')
 source('code/05_CreateRiverContactMatrices.R', local = TRUE)
-source('code/06_RunCoreSimulationLoop-Parallel.R', local = TRUE)
+source('code/06_RunCoreSimulationLoop-Parallel.R', local = TRUE);beep()
