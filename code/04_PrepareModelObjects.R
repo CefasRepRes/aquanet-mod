@@ -7,8 +7,6 @@
 
 objects_to_keep <- c("gis_filepath",
                      "farm_to_farm_lmf_filename",
-                     "parameter_filepath", 
-                     "parameter_file",
                      "run_time_parameters",
                      "run_time_parameters_list",
                      "river_transmission_parameters", 
@@ -16,24 +14,12 @@ objects_to_keep <- c("gis_filepath",
                      "dirs",
                      "site_locs_duplicates_removed_filename",
                      "site_details_with_model_id_filename",
-                     "scenario_name",
-                     "data_collection_period",
+                     "model_parameters",
                      "contact_network_filename",
                      "river_downstream_filename",
-                     "tmax",
-                     "noSims",
                      "noCores",
-                     "catchment_movement_controls",
-                     "seedNo",
-                     "initial_no_infections",
-                     "BNG_crs",
-                     "n_remove",
-                     "remove_top_sites",
-                     "proportion_cullable",
-                     "catchment_layer_filename",
-                     "contact_tracing",
-                     "n_infections_remove_top_sites",
-                     "disease_controls")
+                     "BNG_crs")
+
 objects_in_workspace <- ls()
 objects_to_clear <- objects_in_workspace[!objects_in_workspace %in% objects_to_keep]
 
@@ -69,14 +55,15 @@ within_catchment_movements <- aquanet::createWithinCatchmentEdgesMatrix(graph_fu
 
 contact_probability_matrix <- 
    aquanet::createContactProbabilityMatrix(graph_full,
-                                           data_collection_period)
+                                           model_parameters$data_collection_period)
 
-# As above, but remove the top 5% of sites (in terms of number of LFMs)
+# As above, but remove the top % of sites (in terms of number of LFMs)
    # This is required to run some control scenarios and/or to evaluate the impacts of these sites on transmission
 contact_probability_matrix_top_sites_removed <- 
-   aquanet::createContactProbabilityMatrixTopSitesRemoved(graph_full, 
-                                                          data_collection_period,
-                                                          n_remove = n_remove)
+   aquanet::createContactProbabilityMatrixTopSitesRemoved(graph_full,
+                                                          model_parameters$data_collection_period,
+                                                          percentile = 0.992)
+
 
 # Get site categories ----------------------------------------------------------
    # TODO: use to incorporate economic data
@@ -127,6 +114,6 @@ write.csv(type_vector, here::here(dirs[["results"]],
 site_distances_matrix <- aquanet::createDistanceMatrix(graph_full, 
                                                        site_locs_duplicates_removed_filename,
                                                        crs_epsg = BNG_crs,
-                                                       sdm_max_dist = parameter_file$Max_Distance_River_Transmission,
-                                                       sdm_rate_gamma = parameter_file$Probability_River_Transmission,
-                                                       sdm_scalar_lambda = parameter_file$Local_Scalar)
+                                                       sdm_max_dist = model_parameters$Max_Distance_River_Transmission,
+                                                       sdm_rate_gamma = model_parameters$Probability_River_Transmission,
+                                                       sdm_scalar_lambda = model_parameters$Local_Scalar)
