@@ -82,10 +82,6 @@ file.copy(here::here("code", coding_files),
           here::here(dirs[["results_code"]]),
           overwrite = TRUE)
 
-# file.copy(parameter_filepath, 
-#           here::here(dirs[["results_code"]]),
-#           overwrite = TRUE)
-
 # Print where results are saved
 message(paste("Results are saved in:", dirs[["results"]]))
 
