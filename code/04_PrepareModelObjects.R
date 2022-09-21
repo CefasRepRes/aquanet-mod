@@ -16,6 +16,7 @@ objects_to_keep <- c("gis_filepath",
                      "site_details_with_model_id_filename",
                      "model_parameters",
                      "contact_network_filename",
+                     "catchment_layer_filename",
                      "river_downstream_filename",
                      "noCores",
                      "BNG_crs")
