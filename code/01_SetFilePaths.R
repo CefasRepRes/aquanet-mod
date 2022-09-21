@@ -5,11 +5,6 @@
 
 # Import data ------------------------------------------------------------------
 
-# Location of parameter file
-parameter_filepath <- here::here("data", 
-                                 "parameterisation",
-                                 "SimulationParameters_SimpleCase.csv")
-
 # Location of the Section 30 Records
 section_30_lfm_filename <- here::here("data",
                                       "SQL_Files",
@@ -40,25 +35,25 @@ outputs_filepath <- here::here("outputs")
 
 # Contact network
 contact_network_filename <- here::here("outputs",
-                                       scenario_name,
+                                       model_parameters$scenario_name,
                                        "combined_movements_simplified_graph.xml")
 
 # Location to save the site locations, together with catchment details
 sites_with_catchment_filename <- here::here("outputs",
-                                            scenario_name,
+                                            model_parameters$scenario_name,
                                             "ListSiteLocationsWithCatchment.csv")
 
 # Location of sites which were not located within any catchment
 sites_without_catchment_filename <- here::here("outputs",
-                                               scenario_name,
+                                               model_parameters$scenario_name,
                                                "ListSiteLocationsWithoutCatchment.csv")
 
 # Location of sites, following removal of duplicate sites
 site_locs_duplicates_removed_filename <- here::here("outputs",
-                                                    scenario_name,
+                                                    model_parameters$scenario_name,
                                                     "ListSiteLocationsWithCatchmentNoDuplicates.csv")
 
 # Site details with model ID
 site_details_with_model_id_filename <- here::here("outputs",
-                                                  scenario_name,
+                                                  model_parameters$scenario_name,
                                                   "site_details_with_model_id.csv")

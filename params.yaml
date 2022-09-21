@@ -1,0 +1,90 @@
+# Scenario name 
+# This is the name that will appear as your output directory. Make it descriptive
+scenario_name: "test"
+
+# Data collection period
+# This is the period of time (in days) over which your LFM data was collected
+# e.g. 365 * 4 (4 years)
+data_collection_period: 1460
+
+# tmax
+# Maximum time (in days) for which each simulation can run
+# e.g. 360 (days in a simulation year) * years
+tmax: 3600
+
+# Initial number of infections
+# The default is one
+# Adding more would simulate an outbreak resulting from multiple introductions
+initial_no_infections: 1
+
+# Catchment movement control options
+# Set to 0, 1 or 2
+# 0 = within catchment movements allowed
+# 1 = between and within infected catchments allow
+# 2 = no movement allowed by any sites within infected catchments
+catchment_movement_controls: 0 
+
+# Number of simulations to be run
+  # Suggest 4 for a test, and 3000 for a full run
+noSims: 4
+
+# Seed number
+# Set the seed associated with pseudo-random number generation
+# This will ensure your results are repeatable across runs
+# Only change if you want to compare repeatability when using different seeds
+seedNo: 123
+
+# Coordinate reference system (CGS)
+# Number is the EPSG for the British National Grid
+epsg: 27700
+
+
+## SIMULATION SETTINGS --------
+
+# Logical whether to clear results in results directory before runs
+clear_results: TRUE
+
+# Set disease surveillance criteria
+disease_controls: TRUE
+contact_tracing: TRUE
+remove_top_sites: FALSE
+n_infections_remove_top_sites: 10
+
+# Set proportion of fisheries able to cull
+proportion_cullable: 0.5
+
+# Number of possible states (include some redundancy here)
+n_states: 42
+
+# Define disease seasonality
+# Accepted character values listed within aquanet::isNonPeakTransmissionSeason()
+# "180" = non peak transmission period is 180 days long
+# "90" = non peak transmission period is 90 days long
+# "0" = non peak transmission is 0 days long and never occurs
+non_peak_season_length: "90"
+
+
+## INFECTION PARAMETERS -------
+
+Reinfection_After_Restocking_Const: 21
+Infection_Becomes_Subclinical: 90
+Site_Recovers: 90
+Second_Outbreak_Due_To_Subclinical_Infection: 1080
+Clearing_Of_Latency_From_Infected_Sites: 1080
+Detection_Reporting_Disease: 60
+Early_Controls_Fisheries: 50
+Late_Controls_Fisheries: 360
+Time_Required_Cull_Site: 14
+Fallow_Period: 42
+Fomite_Transmission_Independant_Prob: 1500
+Contact_Detection: 3
+Max_Distance_River_Transmission: 5000
+Probability_River_Transmission: 0.005
+Local_Scalar: 0.0001
+
+
+## RIVER NETWORK PARAMETERS ---
+River.Downstream.Current_speed: 0.18
+River.Downstream_Transmission_Const: 1988.27
+River.UpDownstream.Current_speed: NA
+River.UpDownstream_Transmission_Const: NA
