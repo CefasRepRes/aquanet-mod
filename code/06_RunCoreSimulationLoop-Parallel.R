@@ -35,7 +35,8 @@ options(scipen = 999)
       remove_top_sites = model_parameters$remove_top_sites,
       n_infections_remove_top_sites = model_parameters$n_infections_remove_top_sites,
       disease_controls = model_parameters$disease_controls,
-      proportion_cullable = model_parameters$proportion_cullable
+      proportion_cullable = model_parameters$proportion_cullable,
+      days_before_catchment_restock = model_parameters$days_before_catchment_restock
     )
   # }))
 
