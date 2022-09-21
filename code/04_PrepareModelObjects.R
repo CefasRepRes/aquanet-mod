@@ -19,10 +19,11 @@ objects_to_keep <- c("gis_filepath",
                      "river_downstream_filename",
                      "noCores",
                      "BNG_crs")
+
 objects_in_workspace <- ls()
 objects_to_clear <- objects_in_workspace[!objects_in_workspace %in% objects_to_keep]
 
-# rm(list = objects_to_clear)
+rm(list = objects_to_clear)
 
 # Load contact network ---------------------------------------------------------
 
@@ -56,19 +57,18 @@ contact_probability_matrix <-
    aquanet::createContactProbabilityMatrix(graph_full,
                                            model_parameters$data_collection_period)
 
-# As above, but remove the top 5% of sites (in terms of number of LFMs)
+# As above, but remove the top % of sites (in terms of number of LFMs)
    # This is required to run some control scenarios and/or to evaluate the impacts of these sites on transmission
 contact_probability_matrix_top_sites_removed <- 
-   aquanet::createContactProbabilityMatrixTopSitesRemoved(graph_full, 
+   aquanet::createContactProbabilityMatrixTopSitesRemoved(graph_full,
                                                           model_parameters$data_collection_period,
-                                                          percentile = 0.95)
+                                                          percentile = 0.992)
+
 
 # Get site categories ----------------------------------------------------------
    # TODO: use to incorporate economic data
    # TODO: figure out how to carry this forward to get useful economic outputs
    # Returns 1 for sites being that category, and 0 for site not being that category
-
-source('code/aquanet_functions/CreateSiteTypeVector.R')
 
 # Create list of all possible site types
 type_list <- c("smallhatch", "largehatch",
@@ -78,13 +78,13 @@ type_list <- c("smallhatch", "largehatch",
                "smallfish", "mediumfish", "largefish")
 
 # Save site ID
-type_vector <- vertex_attr(graph_full, "siteID")
+type_vector <- igraph::vertex_attr(graph_full, "siteID")
 type_vector <- as.numeric(type_vector)
 
 # Get site type vectors
 for(i in 1:length(type_list)){
-   t_vector <- createSiteTypeVector(graph_full,
-                        type_list[i])
+   t_vector <- aquanet::createSiteTypeVector(graph_full,
+                                             type_list[i])
    type_vector <- rbind(type_vector, t_vector)
 }
 

@@ -10,8 +10,8 @@ options(scipen = 999)
 
 # Run model ---------------------------------------------------------------
 
-print(system.time( # Print the system time used by the runSimulations function
-  expr = {
+# print(system.time( # Print the system time used by the runSimulations function
+#   expr = {
     aquanet::runSimulations(
       n_cores = noCores,
       n_sims = model_parameters$noSims,
@@ -37,7 +37,7 @@ print(system.time( # Print the system time used by the runSimulations function
       disease_controls = model_parameters$disease_controls,
       proportion_cullable = model_parameters$proportion_cullable
     )
-  }))
+  # }))
 
 # # Testing ----------------------------------------------------------------------
 #
@@ -51,6 +51,7 @@ print(system.time( # Print the system time used by the runSimulations function
 # 
 # system.time(expr =
 #               {simulationCode(graph.contactp.objects = contact_probability_matrix,
+#                               graph.contactpalt.objects = contact_probability_matrix_top_sites_removed,
 #                               runs = 4,
 #                               tmax = tmax,
 #                               batchNo = 1,
