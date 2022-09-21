@@ -51,31 +51,6 @@ model_parameters <- yaml::yaml.load_file(model_parameter_filepath)
 source(here::here("code",
                   "01_SetFilePaths.R"))
 
-# Load parameter file
-parameter_file <- read.csv(file = parameter_filepath, 
-                           header = TRUE)
-
-# Put scenario name into rowname
-rownames(parameter_file) <- model_parameters$scenario_name
-parameter_file$Range <- NULL
-
-# Get names of variable parameters
-run_time_parameters <- colnames(parameter_file)
-
-# Check all required setup parameters have been supplied
-if (length(run_time_parameters) < 12) {
-   print("Not all of the required parameters have been supplied.")
-} else { 
-   if (length(run_time_parameters) > 12)
-      print("An excess of parameters have been supplied.")
-}
-
-# Print parameters
-print(str(as.list(run_time_parameters)))
-
-# Get parameters as list of numbers
-
-run_time_parameters_list <- unname(parameter_file)
 
 # Coordinate reference system (CGS)
 BNG_crs <- sf::st_crs(model_parameters$epsg) # Number is the EPSG for the British National Grid
@@ -107,9 +82,9 @@ file.copy(here::here("code", coding_files),
           here::here(dirs[["results_code"]]),
           overwrite = TRUE)
 
-file.copy(parameter_filepath, 
-          here::here(dirs[["results_code"]]),
-          overwrite = TRUE)
+# file.copy(parameter_filepath, 
+#           here::here(dirs[["results_code"]]),
+#           overwrite = TRUE)
 
 # Print where results are saved
 message(paste("Results are saved in:", dirs[["results"]]))

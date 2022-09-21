@@ -7,8 +7,6 @@
 
 objects_to_keep <- c("gis_filepath",
                      "farm_to_farm_lmf_filename",
-                     "parameter_filepath", 
-                     "parameter_file",
                      "run_time_parameters",
                      "run_time_parameters_list",
                      "river_transmission_parameters", 
@@ -116,6 +114,6 @@ write.csv(type_vector, here::here(dirs[["results"]],
 site_distances_matrix <- aquanet::createDistanceMatrix(graph_full, 
                                                        site_locs_duplicates_removed_filename,
                                                        crs_epsg = BNG_crs,
-                                                       sdm_max_dist = parameter_file$Max_Distance_River_Transmission,
-                                                       sdm_rate_gamma = parameter_file$Probability_River_Transmission,
-                                                       sdm_scalar_lambda = parameter_file$Local_Scalar)
+                                                       sdm_max_dist = model_parameters$Max_Distance_River_Transmission,
+                                                       sdm_rate_gamma = model_parameters$Probability_River_Transmission,
+                                                       sdm_scalar_lambda = model_parameters$Local_Scalar)

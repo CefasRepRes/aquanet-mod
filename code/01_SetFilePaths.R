@@ -5,11 +5,6 @@
 
 # Import data ------------------------------------------------------------------
 
-# Location of parameter file
-parameter_filepath <- here::here("data", 
-                                 "parameterisation",
-                                 "SimulationParameters_SimpleCase.csv")
-
 # Location of the Section 30 Records
 section_30_lfm_filename <- here::here("data",
                                       "SQL_Files",

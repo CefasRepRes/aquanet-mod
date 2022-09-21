@@ -18,7 +18,7 @@ print(system.time( # Print the system time used by the runSimulations function
       seed_num = model_parameters$seedNo,
       clear_results = model_parameters$clear_results,
       tmax = model_parameters$tmax,
-      run_time_params = parameter_file,
+      run_time_params = model_parameters, # note contains all probabilities for transmission methods
       non_peak_season_length = model_parameters$non_peak_season_length,
       out_createContactProbabilityMatrix = contact_probability_matrix,
       out_createContactProbabilityMatrixTopSitesRemoved = contact_probability_matrix_top_sites_removed,
