@@ -49,6 +49,7 @@ disease_controls: TRUE
 contact_tracing: TRUE
 remove_top_sites: FALSE
 n_infections_remove_top_sites: 10
+n_top_sites_to_remove: 10
 
 # Set proportion of fisheries able to cull
 proportion_cullable: 0.5

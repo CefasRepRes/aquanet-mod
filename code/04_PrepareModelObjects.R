@@ -63,7 +63,8 @@ contact_probability_matrix <-
 contact_probability_matrix_top_sites_removed <- 
    aquanet::createContactProbabilityMatrixTopSitesRemoved(graph_full,
                                                           model_parameters$data_collection_period,
-                                                          percentile = 0.992)
+                                                          n_remove = model_parameters$n_top_sites_to_remove)
+
 
 
 # Get site categories ----------------------------------------------------------
