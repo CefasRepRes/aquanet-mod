@@ -1,6 +1,6 @@
 # Scenario name 
 # This is the name that will appear as your output directory. Make it descriptive
-scenario_name: "baseline_yaml"
+scenario_name: "baseline"
 
 # Data collection period
 # This is the period of time (in days) over which your LFM data was collected
@@ -23,6 +23,10 @@ initial_no_infections: 1
 # 1 = between and within infected catchments allow
 # 2 = no movement allowed by any sites within infected catchments
 catchment_movement_controls: 0 
+
+# Remove top sites
+  # If removing most connected sites, how many to remove
+n_remove: 10 
 
 # Number of simulations to be run
   # Suggest 4 for a test, and 3000 for a full run
@@ -81,7 +85,7 @@ Fomite_Transmission_Independant_Prob: 1500
 Contact_Detection: 3
 Max_Distance_River_Transmission: 5000
 Probability_River_Transmission: 0.005
-Local_Scalar: 0.0001
+Local_Scalar: 0.000001
 days_before_catchment_restock: 4
 
 
