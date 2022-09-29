@@ -28,7 +28,7 @@ site_data_frame <- data.frame(siteID,
 
 sites_unique <- plyr::ddply(site_data_frame,
                             ~siteID + easting + northing,
-                            summarise,
+                            dplyr::summarise,
                             noOccurances = length(siteID))
 
 # Warn of and remove sites without location -----------------------------------
