@@ -1,6 +1,6 @@
 # Scenario name 
 # This is the name that will appear as your output directory. Make it descriptive
-scenario_name: "test"
+scenario_name: "baseline_yaml"
 
 # Data collection period
 # This is the period of time (in days) over which your LFM data was collected
@@ -26,7 +26,7 @@ catchment_movement_controls: 0
 
 # Number of simulations to be run
   # Suggest 4 for a test, and 3000 for a full run
-noSims: 4
+noSims: 3000
 
 # Seed number
 # Set the seed associated with pseudo-random number generation
