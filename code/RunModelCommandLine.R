@@ -40,10 +40,6 @@ library(aquanet) # Functions for aquanet model
   # We recommend using half the number of cores available on your device
 noCores <- detectCores() / 2
 
-# Remove top sites
-# TODO: ADD TO PARAMS WHEN CONTROL TOP SITES ADJUSTED - rename model_parameters$percentile
-n_remove <- 10 # If removing most connected sites, how many to remove
-
 # Load in parameters -----------------------------------------------------------
 
 # Location of model parameters file
@@ -58,7 +54,7 @@ source(here::here("code",
 
 
 # Coordinate reference system (CGS)
-BNG_crs <- sf::st_crs(model_parameters$epsg) # Number is the EPSG for the British National Grid
+BNG_crs <- sf::st_crs(model_parameters$epsg)
 
 # Create directories to save results -------------------------------------------
 
