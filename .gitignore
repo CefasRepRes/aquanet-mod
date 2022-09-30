@@ -67,5 +67,11 @@ vignettes/*.pdf
 # RMDs
 *.rmd
 
+# Job files
+*.sub
+
 # Test scripts
 /analyses/code/scenario_checking.R
+
+# Modified script for POD
+/code/RunModelCommandLine_POD.R
