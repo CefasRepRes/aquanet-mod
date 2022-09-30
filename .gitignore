@@ -75,3 +75,6 @@ vignettes/*.pdf
 
 # Modified script for POD
 /code/RunModelCommandLine_POD.R
+
+# Non-baseline yamls
+params_no_catchment.yaml
