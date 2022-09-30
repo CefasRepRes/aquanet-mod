@@ -15,7 +15,7 @@ section_30_lfm_filename <- here::here("data",
 farm_to_farm_lfm_filename <- here::here("data",
                                         "SQL_Files",
                                         "Salmon - V3",
-                                        "Farm-farmLFM11-14.csv")
+                                        "Farm-FarmLFM11-14.csv")
 
 # Location of the EA Catchments
 catchment_layer_filename <- here::here("data",
