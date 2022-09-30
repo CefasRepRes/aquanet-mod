@@ -24,10 +24,6 @@ initial_no_infections: 1
 # 2 = no movement allowed by any sites within infected catchments
 catchment_movement_controls: 0 
 
-# Remove top sites
-  # If removing most connected sites, how many to remove
-n_remove: 10 
-
 # Number of simulations to be run
   # Suggest 4 for a test, and 3000 for a full run
 noSims: 3000
