@@ -7,15 +7,12 @@ library(data.table)
 library(aquanet)
 
 # Select scenario name
-scenario_name <- "no_contact_tracing"
+scenario_name <- "baseline"
 
 # Load and process outputs -----------------------------------------------------
 
-# Load results
-full_results <- loadResultsFullSiteType(scenario_name)
-
-# Process results - this will take a little while
-time_summary <- timePerStage(scenario_name);beep()
+# # Load and process results
+time_summary <- aquanet::importAndCondense(scenario_name = scenario_name)
 
 # Load in economic costing -----------------------------------------------------
 
