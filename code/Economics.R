@@ -6,13 +6,21 @@ library(beepr)
 library(data.table)
 library(aquanet)
 
-# Select scenario name
-scenario_name <- "baseline"
+# Load model parameters scenario name if missing
+if(!exists("model_parameters")) {
+  
+  # Location of model parameters file
+  model_parameter_filepath <- here::here("params.yaml")
+  
+  # Load input parameter file
+  model_parameters <- yaml::yaml.load_file(model_parameter_filepath)
+  
+}
 
 # Load and process outputs -----------------------------------------------------
 
 # # Load and process results
-time_summary <- aquanet::importAndCondense(scenario_name = scenario_name)
+time_summary <- aquanet::importAndCondense(scenario_name = model_parameters$scenario_name)
 
 # Load in economic costing -----------------------------------------------------
 
@@ -87,7 +95,7 @@ missing_sims <- dplyr::filter(full_outbreak_costs, is.na(total_outbreak_cost))
 missing_sims <- missing_sims %>% dplyr::filter(!(sim_no %in% full_results$sim_no))
 write.csv(missing_sims,
           here::here("outputs",
-                     scenario_name,
+                     model_parameters$scenario_name,
                      "economics",
                      "missing_simulations.csv"),
           row.names = T)
@@ -96,7 +104,7 @@ full_outbreak_costs[is.na(full_outbreak_costs)] <- 0
 # Save
 write.csv(full_outbreak_costs,
           here::here("outputs",
-                     scenario_name,
+                     model_parameters$scenario_name,
                      "economics",
                      "full_outbreak_costs.csv"),
           row.names = F)
@@ -121,7 +129,7 @@ outbreak_summary <- outbreak_summary[-1, ] # Remove simNo
 # Save
 write.csv(outbreak_summary,
           here::here("outputs",
-                     scenario_name,
+                     model_parameters$scenario_name,
                      "economics",
                      "summary_outbreak_costs.csv"),
           row.names = T)
