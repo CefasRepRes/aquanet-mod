@@ -2,7 +2,6 @@
 
 library(here)
 library(dplyr)
-library(beepr)
 library(data.table)
 library(aquanet)
 
@@ -48,22 +47,22 @@ site_types <- cull_cost$site_type
 # Fallow
 fallow_costs <- aquanet::stateCosts(data = time_summary_farms,
                                     state = "fallow",
-                                    site_types = site_types);beep()
+                                    site_types = site_types)
 
 # No management
 no_manage_costs <- aquanet::stateCosts(data = time_summary_farms,
                                        state = "no_manage",
-                                       site_types = site_types);beep()
+                                       site_types = site_types)
 
 # Contact tracing
 contact_trace_cost <- aquanet::stateCosts(data = time_summary_farms,
                                           state = "contact_trace",
-                                          site_types = site_types);beep()
+                                          site_types = site_types)
 
 # Catchment controls
 catchment_controls <- aquanet::stateCosts(data = time_summary_farms,
                                           state = "catchment_control",
-                                          site_types = site_types);beep()
+                                          site_types = site_types)
 
  # Combine into single daily cost data frame
 simulation_daily_costs <- fallow_costs[["summary_state_costs"]] %>% 
@@ -76,7 +75,7 @@ simulation_daily_costs <- fallow_costs[["summary_state_costs"]] %>%
 full_cull_cost_sim <- cullCost(farm_data = time_summary_farms,
                                non_farm_data = time_summary_non_farms,
                                cull_cost = cull_cost,
-                               site_types = site_types);beep()
+                               site_types = site_types)
 
 # Make into single data frame
 full_outbreak_costs <- simulation_daily_costs %>% dplyr::full_join(full_cull_cost_sim,
