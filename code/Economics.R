@@ -46,24 +46,24 @@ time_summary_non_farms <- dplyr::filter(time_summary, farm_vector == 0)
 site_types <- cull_cost$site_type
 
 # Fallow
-fallow_costs <- stateCosts(data = time_summary_farms,
-                           state = "fallow",
-                           site_types = site_types);beep()
+fallow_costs <- aquanet::stateCosts(data = time_summary_farms,
+                                    state = "fallow",
+                                    site_types = site_types);beep()
 
 # No management
-no_manage_costs <- stateCosts(data = time_summary_farms,
-                              state = "no_manage",
-                              site_types = site_types);beep()
+no_manage_costs <- aquanet::stateCosts(data = time_summary_farms,
+                                       state = "no_manage",
+                                       site_types = site_types);beep()
 
 # Contact tracing
-contact_trace_cost <- stateCosts(data = time_summary_farms,
-                                 state = "contact_trace",
-                                 site_types = site_types);beep()
+contact_trace_cost <- aquanet::stateCosts(data = time_summary_farms,
+                                          state = "contact_trace",
+                                          site_types = site_types);beep()
 
 # Catchment controls
-catchment_controls <- stateCosts(data = time_summary_farms,
-                                 state = "catchment_control",
-                                 site_types = site_types);beep()
+catchment_controls <- aquanet::stateCosts(data = time_summary_farms,
+                                          state = "catchment_control",
+                                          site_types = site_types);beep()
 
  # Combine into single daily cost data frame
 simulation_daily_costs <- fallow_costs[["summary_state_costs"]] %>% 
