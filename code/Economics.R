@@ -2,7 +2,8 @@
 
 library(here)
 library(dplyr)
-library(data.table)
+#library(data.table)
+library(magrittr)
 library(aquanet)
 
 # Load model parameters scenario name if missing
@@ -72,10 +73,10 @@ simulation_daily_costs <- fallow_costs[["summary_state_costs"]] %>%
 
 # Add in cull costs ------------------------------------------------------------
 
-full_cull_cost_sim <- cullCost(farm_data = time_summary_farms,
-                               non_farm_data = time_summary_non_farms,
-                               cull_cost = cull_cost,
-                               site_types = site_types)
+full_cull_cost_sim <- aquanet::cullCost(farm_data = time_summary_farms,
+                                        non_farm_data = time_summary_non_farms,
+                                        cull_cost = cull_cost,
+                                        site_types = site_types)
 
 # Make into single data frame
 full_outbreak_costs <- simulation_daily_costs %>% dplyr::full_join(full_cull_cost_sim,
