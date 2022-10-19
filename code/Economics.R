@@ -2,7 +2,6 @@
 
 library(here)
 library(dplyr)
-#library(data.table)
 library(magrittr)
 library(aquanet)
 
@@ -92,7 +91,7 @@ full_outbreak_costs <- merge(all_sims,
                              full_outbreak_costs,
                              all = TRUE)
 missing_sims <- dplyr::filter(full_outbreak_costs, is.na(total_outbreak_cost))
-missing_sims <- missing_sims %>% dplyr::filter(!(sim_no %in% full_results$sim_no))
+missing_sims <- missing_sims %>% dplyr::filter(!(sim_no %in% time_summary$sim_no))
 write.csv(missing_sims,
           here::here("outputs",
                      model_parameters$scenario_name,
