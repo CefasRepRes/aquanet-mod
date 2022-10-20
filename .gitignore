@@ -58,6 +58,9 @@ vignettes/*.pdf
 # Aquanet install
 /code/aquanet_install.R
 
+# Plot folder
+/plots/
+
 # .here file
 .here
 
