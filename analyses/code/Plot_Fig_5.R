@@ -1,4 +1,4 @@
-#### Figure 6 ####
+#### Figure 5 ####
 
 library(tidyverse)
 library(here)
@@ -43,61 +43,55 @@ sens_duration <- read.csv(here::here("outputs",
 sens_duration$mean_dur_diff <- sens_duration$mean_duration - baseline_duration_mean
 sens_duration$q95_dur_diff <- sens_duration$q95_duration - baseline_duration_q95
 
-# Select disease params --------------------------------------------------------
+# Select model params --------------------------------------------------------
 
 # Size
-disease_params_size <- sens_size %>%
-  dplyr::filter(scenario %in% c("sens_f_high",
-                                "sens_f_low",
-                                "sens_sc_high",
-                                "sens_sc_low",
-                                "sens_se_high",
-                                "sens_se_low",
-                                "sens_sl_high",
-                                "sens_sl_low",
-                                "sens_dr_high",
-                                "sens_dr_low"))
-disease_params_size <- disease_params_size %>% 
+model_params_size <- sens_size %>%
+  dplyr::filter(scenario %in% c("sens_a_high",
+                                "sens_a_low",
+                                "sens_b_high",
+                                "sens_b_low",
+                                "sens_d_high",
+                                "sens_d_low",
+                                "sens_s_high",
+                                "sens_s_low"))
+model_params_size <- model_params_size %>% 
   select(scenario, mean_inf_diff, q95_inf_diff) %>%
   pivot_longer(cols = c(mean_inf_diff,
                         q95_inf_diff))
 
 # Duration
-disease_params_duration <- sens_duration %>%
-  dplyr::filter(scenario %in% c("sens_f_high",
-                                "sens_f_low",
-                                "sens_sc_high",
-                                "sens_sc_low",
-                                "sens_se_high",
-                                "sens_se_low",
-                                "sens_sl_high",
-                                "sens_sl_low",
-                                "sens_dr_high",
-                                "sens_dr_low"))
-disease_params_duration <- disease_params_duration %>% 
+model_params_duration <- sens_duration %>%
+  dplyr::filter(scenario %in% c("sens_a_high",
+                                "sens_a_low",
+                                "sens_b_high",
+                                "sens_b_low",
+                                "sens_d_high",
+                                "sens_d_low",
+                                "sens_s_high",
+                                "sens_s_low"))
+model_params_duration <- model_params_duration %>% 
   select(scenario, mean_dur_diff, q95_dur_diff) %>%
   pivot_longer(cols = c(mean_dur_diff,
                         q95_dur_diff))
 
 # Set param names
-disease_params_names <- c("sl -",
-                          "sl +",
-                          "se -",
-                          "se +",
-                          "sc -",
-                          "sc +",
-                          "f -",
-                          "f +",
-                          "dr -",
-                          "dr +")
+model_params_names <- c(expression(paste(alpha, " -")),
+                        expression(paste(alpha, " +")),
+                        expression(paste(beta, " -")),
+                        expression(paste(beta, " +")),
+                        expression(paste(delta, " -")),
+                        expression(paste(delta, " +")),
+                        "s -",
+                        "s +")
 
 # Plots ------------------------------------------------------------------------
 
 # Size
-disease_size <- ggplot(disease_params_size, aes(x = value,
-                                y = scenario,
-                                fill = name,
-                                shape = name)) +
+model_size <- ggplot(model_params_size, aes(x = value,
+                                                y = scenario,
+                                                fill = name,
+                                                shape = name)) +
   geom_point(alpha = 0.6, size = 3) +
   scale_fill_manual(values = c("#D55E00", "#E69F00"),
                     name = "Epidemic values",
@@ -107,17 +101,17 @@ disease_size <- ggplot(disease_params_size, aes(x = value,
                      labels = c("Mean size", "95% size")) +
   ylab("") +
   xlab("Change in epidemic \nsize from baseline") +
-  scale_y_discrete(labels = disease_params_names, 
-                   limits = rev) +
+  scale_y_discrete(labels = model_params_names,
+                 limits = rev) +
   geom_vline(xintercept = 0) +
   theme_light()+
   labs(tag = "A")
 
 # Duration
-disease_duration <- ggplot(disease_params_duration, aes(x = value,
-                                y = scenario,
-                                fill = name,
-                                shape = name)) +
+model_duration <- ggplot(model_params_duration, aes(x = value,
+                                                        y = scenario,
+                                                        fill = name,
+                                                        shape = name)) +
   geom_point(alpha = 0.6, size = 3) +
   scale_fill_manual(values = c("#56B4E9", "#009E73"),
                     name = "Epidemic values",
@@ -127,21 +121,21 @@ disease_duration <- ggplot(disease_params_duration, aes(x = value,
                      labels = c("Mean duration", "95% duration")) +
   ylab("") +
   xlab("Change in epidemic \nduration from baseline") +
-  scale_y_discrete(labels = disease_params_names, 
-                   limits = rev) +
+  scale_y_discrete(labels = model_params_names,
+                 limits = rev) +
   geom_vline(xintercept = 0) +
   theme_light() +
   labs(tag = "B")
 
 # Arrange
-grid.arrange(disease_size,
-             disease_duration,
+grid.arrange(model_size,
+             model_duration,
              ncol = 2)
 
 svg(here::here("plots",
-               "fig_6.svg"),
+               "fig_5.svg"),
     width = 11, height = 4)
-grid.arrange(disease_size,
-             disease_duration,
+grid.arrange(model_size,
+             model_duration,
              ncol = 2)
 dev.off()
