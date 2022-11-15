@@ -34,7 +34,7 @@ epidemic_size$scenario <- c("baseline",
                              "no_contact",
                              "no_controls",
                              "top_sites")
-epidemic_size[, 1:9] <- round(epidemic_size[, 1:9], digits = 1)
+epidemic_size[, 1:9] <- round(epidemic_size[, 1:9], digits = 2)
 write.csv(epidemic_size, here::here("outputs",
                                     "epidemic_size_scenario_summary.csv"))
 
@@ -59,7 +59,7 @@ epidemic_duration$scenario <- c("baseline",
                             "no_contact",
                             "no_controls",
                             "top_sites")
-epidemic_duration[, 1:9] <- round(epidemic_duration[, 1:9], digits = 0)
+epidemic_duration[, 1:9] <- round(epidemic_duration[, 1:9], digits = 2)
 write.csv(epidemic_duration, here::here("outputs",
                                     "epidemic_duration_scenario_summary.csv"))
 
@@ -95,6 +95,7 @@ sens_tests <- c("sens_a_high", "sens_a_low",
                 "sens_b_high", "sens_b_low",
                 "sens_d_high", "sens_d_low",
                 "sens_dr_high", "sens_dr_low",
+                "sens_ct_high", "sens_ct_low",
                 "sens_f_high", "sens_f_low",
                 "sens_s_high", "sens_s_low",
                 "sens_sc_high", "sens_sc_low",
@@ -122,9 +123,9 @@ for(i in 1:length(sens_tests)){
 };beep()
 
 # Save
-epidemic_size_sens[, 1:9] <- round(epidemic_size_sens[, 1:9], digits = 1)
+epidemic_size_sens[, 1:9] <- round(epidemic_size_sens[, 1:9], digits = 2)
 write.csv(epidemic_size_sens, here::here("outputs",
                                          "epidemic_size_sensitivity.csv"))
-epidemic_duration_sens[, 1:9] <- round(epidemic_duration_sens[, 1:9], digits = 1)
+epidemic_duration_sens[, 1:9] <- round(epidemic_duration_sens[, 1:9], digits = 2)
 write.csv(epidemic_duration_sens, here::here("outputs",
                                          "epidemic_duration_sensitivity.csv"))
