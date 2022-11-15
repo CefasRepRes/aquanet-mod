@@ -34,14 +34,14 @@ baseline_duration_q95 <- baseline_duration %>%
 # Size
 sens_size <- read.csv(here::here("outputs",
                                  "epidemic_size_sensitivity.csv"))
-sens_size$mean_inf_diff <- sens_size$mean_infections - baseline_size_mean
-sens_size$q95_inf_diff <- sens_size$q95_infections - baseline_size_q95
+sens_size$mean_inf_diff <- (sens_size$mean_infections - baseline_size_mean)/baseline_size_mean * 100
+sens_size$q95_inf_diff <- (sens_size$q95_infections - baseline_size_q95)/baseline_size_q95 * 100
 
 # Duration
 sens_duration <- read.csv(here::here("outputs",
                                      "epidemic_duration_sensitivity.csv"))
-sens_duration$mean_dur_diff <- sens_duration$mean_duration - baseline_duration_mean
-sens_duration$q95_dur_diff <- sens_duration$q95_duration - baseline_duration_q95
+sens_duration$mean_dur_diff <- (sens_duration$mean_duration - baseline_duration_mean)/baseline_duration_mean * 100
+sens_duration$q95_dur_diff <- (sens_duration$q95_duration - baseline_duration_q95)/baseline_duration_q95 * 100
 
 # Select model params --------------------------------------------------------
 
@@ -82,8 +82,8 @@ model_params_names <- c(expression(paste(alpha, " -")),
                         expression(paste(beta, " +")),
                         expression(paste(delta, " -")),
                         expression(paste(delta, " +")),
-                        "s -",
-                        "s +")
+                        expression(paste(italic("s"), " -")),
+                        expression(paste(italic("s"), " +")))
 
 # Plots ------------------------------------------------------------------------
 
@@ -100,7 +100,7 @@ model_size <- ggplot(model_params_size, aes(x = value,
                      name = "Epidemic values",
                      labels = c("Mean size", "95% size")) +
   ylab("") +
-  xlab("Change in epidemic \nsize from baseline") +
+  xlab("% change from baseline") +
   scale_y_discrete(labels = model_params_names,
                  limits = rev) +
   geom_vline(xintercept = 0) +
@@ -120,7 +120,7 @@ model_duration <- ggplot(model_params_duration, aes(x = value,
                      name = "Epidemic values",
                      labels = c("Mean duration", "95% duration")) +
   ylab("") +
-  xlab("Change in epidemic \nduration from baseline") +
+  xlab("% change from baseline") +
   scale_y_discrete(labels = model_params_names,
                  limits = rev) +
   geom_vline(xintercept = 0) +
@@ -130,12 +130,21 @@ model_duration <- ggplot(model_params_duration, aes(x = value,
 # Arrange
 grid.arrange(model_size,
              model_duration,
-             ncol = 2)
+             ncol = 1)
 
 svg(here::here("plots",
                "fig_5.svg"),
-    width = 11, height = 4)
+    width = 6, height = 8)
 grid.arrange(model_size,
              model_duration,
-             ncol = 2)
+             ncol = 1)
 dev.off()
+
+png(here::here("plots",
+               "fig_5.png"),
+    width = 6, height = 8, units = "in", res = 180)
+grid.arrange(model_size,
+             model_duration,
+             ncol = 1)
+dev.off()
+
