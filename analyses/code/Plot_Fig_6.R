@@ -7,6 +7,7 @@ library(gridExtra)
 # Baseline data ----------------------------------------------------------------
 
 baseline_size <- read.csv(here::here("outputs",
+                                     "large_run_csvs",
                                      "epidemic_size_scenario_summary.csv"))
 baseline_size_mean <- baseline_size %>%
   dplyr::filter(scenario == "baseline") %>%
@@ -19,6 +20,7 @@ baseline_size_q95 <- baseline_size %>%
 
 # Duration
 baseline_duration <- read.csv(here::here("outputs",
+                                         "large_run_csvs",
                                          "epidemic_duration_scenario_summary.csv"))
 baseline_duration_mean <- baseline_duration %>%
   dplyr::filter(scenario == "baseline") %>%
@@ -33,12 +35,14 @@ baseline_duration_q95 <- baseline_duration %>%
 
 # Size
 sens_size <- read.csv(here::here("outputs",
+                                 "large_run_csvs",
                                  "epidemic_size_sensitivity.csv"))
 sens_size$mean_inf_diff <- (sens_size$mean_infections - baseline_size_mean)/baseline_size_mean * 100
 sens_size$q95_inf_diff <- (sens_size$q95_infections - baseline_size_q95)/baseline_size_q95 * 100
 
 # Duration
 sens_duration <- read.csv(here::here("outputs",
+                                     "large_run_csvs",
                                      "epidemic_duration_sensitivity.csv"))
 sens_duration$mean_dur_diff <- (sens_duration$mean_duration - baseline_duration_mean)/baseline_duration_mean * 100
 sens_duration$q95_dur_diff <- (sens_duration$q95_duration - baseline_duration_q95)/baseline_duration_q95 * 100
@@ -113,7 +117,7 @@ disease_size <- ggplot(disease_params_size, aes(x = value,
                      labels = c("Mean size", "95% size")) +
   ylab("") +
   xlab("% change from baseline") +
-  scale_y_discrete(labels = disease_params_names, 
+  scale_y_discrete(labels = disease_params_names,
                    limits = rev) +
   scale_x_continuous(breaks = seq(-20, 30, 10)) +
   geom_vline(xintercept = 0) +
@@ -142,6 +146,7 @@ disease_duration <- ggplot(disease_params_duration, aes(x = value,
   geom_vline(xintercept = 0) +
   theme_light() +
   labs(tag = "B")
+disease_duration
 
 # Arrange
 grid.arrange(disease_size,
