@@ -7,6 +7,7 @@ library(gridExtra)
 # Baseline data ----------------------------------------------------------------
 
 baseline_size <- read.csv(here::here("outputs",
+                                     "large_run_csvs",
                                      "epidemic_size_scenario_summary.csv"))
 baseline_size_mean <- baseline_size %>%
   dplyr::filter(scenario == "baseline") %>%
@@ -19,6 +20,7 @@ baseline_size_q95 <- baseline_size %>%
 
 # Duration
 baseline_duration <- read.csv(here::here("outputs",
+                                         "large_run_csvs",
                                          "epidemic_duration_scenario_summary.csv"))
 baseline_duration_mean <- baseline_duration %>%
   dplyr::filter(scenario == "baseline") %>%
@@ -33,12 +35,14 @@ baseline_duration_q95 <- baseline_duration %>%
 
 # Size
 sens_size <- read.csv(here::here("outputs",
+                                 "large_run_csvs",
                                  "epidemic_size_sensitivity.csv"))
 sens_size$mean_inf_diff <- (sens_size$mean_infections - baseline_size_mean)/baseline_size_mean * 100
 sens_size$q95_inf_diff <- (sens_size$q95_infections - baseline_size_q95)/baseline_size_q95 * 100
 
 # Duration
 sens_duration <- read.csv(here::here("outputs",
+                                     "large_run_csvs",
                                      "epidemic_duration_sensitivity.csv"))
 sens_duration$mean_dur_diff <- (sens_duration$mean_duration - baseline_duration_mean)/baseline_duration_mean * 100
 sens_duration$q95_dur_diff <- (sens_duration$q95_duration - baseline_duration_q95)/baseline_duration_q95 * 100
@@ -76,14 +80,22 @@ model_params_duration <- model_params_duration %>%
                         q95_dur_diff))
 
 # Set param names
-model_params_names <- c(expression(paste(alpha, " -")),
-                        expression(paste(alpha, " +")),
-                        expression(paste(beta, " -")),
+model_params_names <- c(expression(paste(alpha, " +")),
+                        expression(paste(alpha, " -")),
                         expression(paste(beta, " +")),
+                        expression(paste(beta, " -")),
+                        expression(paste(delta, " +")),
+                        expression(paste(delta, " -")),
+                        expression(paste(italic("s"), " +")),
+                        expression(paste(italic("s"), " -")))
+model_params_names <- c(expression(paste(italic("s"), " -")),
+                        expression(paste(italic("s"), " +")),
                         expression(paste(delta, " -")),
                         expression(paste(delta, " +")),
-                        expression(paste(italic("s"), " -")),
-                        expression(paste(italic("s"), " +")))
+                        expression(paste(beta, " -")),
+                        expression(paste(beta, " +")),
+                        expression(paste(alpha, " -")),
+                        expression(paste(alpha, " +")))
 
 # Plots ------------------------------------------------------------------------
 
@@ -101,11 +113,12 @@ model_size <- ggplot(model_params_size, aes(x = value,
                      labels = c("Mean size", "95% size")) +
   ylab("") +
   xlab("% change from baseline") +
-  scale_y_discrete(labels = model_params_names,
-                 limits = rev) +
+  scale_y_discrete(limits = rev,
+                   labels = model_params_names) +
   geom_vline(xintercept = 0) +
   theme_light()+
   labs(tag = "A")
+model_size
 
 # Duration
 model_duration <- ggplot(model_params_duration, aes(x = value,
@@ -126,6 +139,7 @@ model_duration <- ggplot(model_params_duration, aes(x = value,
   geom_vline(xintercept = 0) +
   theme_light() +
   labs(tag = "B")
+model_duration
 
 # Arrange
 grid.arrange(model_size,
