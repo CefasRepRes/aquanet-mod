@@ -75,11 +75,12 @@
       "RemoteHost": "api.github.com",
       "RemoteRepo": "aquanet",
       "RemoteUsername": "CefasRepRes",
-      "RemoteRef": "main",
-      "RemoteSha": "8c415930ef00e879e91ac2fa6a7cdf77ca806b69",
-      "Hash": "c32a44d6a9f26ba9093496f216fba485",
+      "RemoteRef": "dev_better_economics",
+      "RemoteSha": "82a824d4239501b1297561219c36463eb43f36ba",
+      "Hash": "6b1158ecbd9a427b1d85e65a71bf03e7",
       "Requirements": [
         "Matrix",
+        "arrow",
         "data.table",
         "doParallel",
         "doRNG",
@@ -89,7 +90,26 @@
         "igraph",
         "magrittr",
         "sf",
+        "tidyr",
         "units"
+      ]
+    },
+    "arrow": {
+      "Package": "arrow",
+      "Version": "10.0.0",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "05f9b803e1f6a5d47ff0a885ed04ebd2",
+      "Requirements": [
+        "R6",
+        "assertthat",
+        "bit64",
+        "cpp11",
+        "glue",
+        "purrr",
+        "rlang",
+        "tidyselect",
+        "vctrs"
       ]
     },
     "askpass": {
@@ -147,10 +167,10 @@
     },
     "bit": {
       "Package": "bit",
-      "Version": "4.0.4",
+      "Version": "4.0.5",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "f36715f14d94678eea9933af927bc15d",
+      "Hash": "d242abec29412ce988848d0294b208fd",
       "Requirements": []
     },
     "bit64": {
@@ -299,10 +319,10 @@
     },
     "cpp11": {
       "Package": "cpp11",
-      "Version": "0.4.2",
+      "Version": "0.4.3",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "fa53ce256cd280f468c080a58ea5ba8c",
+      "Hash": "ed588261931ee3be2c700d22e94a29ab",
       "Requirements": []
     },
     "crayon": {
@@ -323,10 +343,10 @@
     },
     "data.table": {
       "Package": "data.table",
-      "Version": "1.14.2",
+      "Version": "1.14.4",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "36b67b5adf57b292923f5659f5f0c853",
+      "Hash": "b9b912b41064aaa79270f24d123c887d",
       "Requirements": []
     },
     "dbplyr": {
@@ -424,10 +444,10 @@
     },
     "e1071": {
       "Package": "e1071",
-      "Version": "1.7-11",
+      "Version": "1.7-12",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "fc02aa712f8600f7da17f44989646a21",
+      "Hash": "0d776df7577206e100c2c4b508208b10",
       "Requirements": [
         "class",
         "proxy"
@@ -606,6 +626,16 @@
         "vctrs"
       ]
     },
+    "gridExtra": {
+      "Package": "gridExtra",
+      "Version": "2.3",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "7d7f283939f563670a697165b2cf5560",
+      "Requirements": [
+        "gtable"
+      ]
+    },
     "gtable": {
       "Package": "gtable",
       "Version": "0.3.1",
@@ -782,11 +812,12 @@
     },
     "lifecycle": {
       "Package": "lifecycle",
-      "Version": "1.0.2",
+      "Version": "1.0.3",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "25f74670fa7d3277fe3ad8c1712a699f",
+      "Hash": "001cecbeac1cff9301bdc3775ee46a86",
       "Requirements": [
+        "cli",
         "glue",
         "rlang"
       ]
@@ -1066,18 +1097,6 @@
         "withr"
       ]
     },
-    "reshape2": {
-      "Package": "reshape2",
-      "Version": "1.4.4",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Hash": "bb5996d0bd962d214a11140d77589917",
-      "Requirements": [
-        "Rcpp",
-        "plyr",
-        "stringr"
-      ]
-    },
     "rlang": {
       "Package": "rlang",
       "Version": "1.0.6",
@@ -1202,10 +1221,10 @@
     },
     "sf": {
       "Package": "sf",
-      "Version": "1.0-8",
+      "Version": "1.0-9",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "153da622b27630793858f24436bc0871",
+      "Hash": "8a348490fefb623e7935f405230900a7",
       "Requirements": [
         "DBI",
         "Rcpp",
@@ -1261,10 +1280,10 @@
     },
     "tidyr": {
       "Package": "tidyr",
-      "Version": "1.2.0",
+      "Version": "1.2.1",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "d8b95b7fee945d7da6888cf7eb71a49c",
+      "Hash": "cdb403db0de33ccd1b6f53b83736efa8",
       "Requirements": [
         "cpp11",
         "dplyr",
@@ -1281,16 +1300,17 @@
     },
     "tidyselect": {
       "Package": "tidyselect",
-      "Version": "1.1.2",
+      "Version": "1.2.0",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "17f6da8cfd7002760a859915ce7eef8f",
+      "Hash": "79540e5fcd9e0435af547d885f184fd5",
       "Requirements": [
-        "ellipsis",
+        "cli",
         "glue",
-        "purrr",
+        "lifecycle",
         "rlang",
-        "vctrs"
+        "vctrs",
+        "withr"
       ]
     },
     "tidyverse": {
@@ -1379,13 +1399,14 @@
     },
     "vctrs": {
       "Package": "vctrs",
-      "Version": "0.4.1",
+      "Version": "0.5.0",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "8b54f22e2a58c4f275479c92ce041a57",
+      "Hash": "001fd6a5ebfff8316baf9fb2b5516dc9",
       "Requirements": [
         "cli",
         "glue",
+        "lifecycle",
         "rlang"
       ]
     },
@@ -1430,10 +1451,10 @@
     },
     "wk": {
       "Package": "wk",
-      "Version": "0.6.0",
+      "Version": "0.7.0",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "d6bc0432436a0aefbf29d5de8588b876",
+      "Hash": "4801d436beeacde30e87f3485a042326",
       "Requirements": []
     },
     "xfun": {
