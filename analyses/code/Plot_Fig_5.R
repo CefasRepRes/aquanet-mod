@@ -80,14 +80,6 @@ model_params_duration <- model_params_duration %>%
                         q95_dur_diff))
 
 # Set param names
-model_params_names <- c(expression(paste(alpha, " +")),
-                        expression(paste(alpha, " -")),
-                        expression(paste(beta, " +")),
-                        expression(paste(beta, " -")),
-                        expression(paste(delta, " +")),
-                        expression(paste(delta, " -")),
-                        expression(paste(italic("s"), " +")),
-                        expression(paste(italic("s"), " -")))
 model_params_names <- c(expression(paste(italic("s"), " -")),
                         expression(paste(italic("s"), " +")),
                         expression(paste(delta, " -")),
