@@ -63,6 +63,12 @@ if(file.exists(paste0(economics_dir, "/", scenario_name, "-details-condensed.par
   time_summary <- aquanet::importAndCondense(scenario_name = scenario_name)
 }
 
+# Check mechanisms of transmission ---------------------------------------------
+
+trans_mech <- aquanet::transmissionRouteProportions(scenario_name)
+write.csv(trans_mech, paste0(economics_dir, "/", scenario_name, "_trans_mech.csv"),
+          row.names = F)
+
 # Load in economic costing -----------------------------------------------------
 
 cull_cost <- read.csv(here::here("data",
