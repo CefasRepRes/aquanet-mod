@@ -6,7 +6,52 @@ library(magrittr)
 library(aquanet)
 
 # define scenario name to analyse
-scenario_name <- "baseline"
+scenario_name <- "baseline_t"
+
+# Create economics folder ------------------------------------------------------
+
+economics_dir <- here::here("outputs", scenario_name, 
+                            "economics")
+if (!dir.exists(economics_dir)) {
+  dir.create(economics_dir)
+}
+
+# Epidemic size, duration and peak ---------------------------------------------
+
+## Load summary ================================================================
+
+# May get over allocation warning - you can ignore
+batch_res <- aquanet::loadResultsSummary(scenario_name)
+
+## Duration ====================================================================
+
+# Summary
+duration_summary <- aquanet::epidemicDuration(batch_res, summary = T)
+write.csv(duration_summary, paste0(economics_dir, "/", scenario_name, "_duration_summary.csv"),
+          row.names = F)
+
+# Full
+duration_full <- aquanet::epidemicDuration(batch_res, summary = F)
+write.csv(duration_full, paste0(economics_dir, "/", scenario_name, "_duration_full.csv"),
+          row.names = F)
+
+## Size ====================================================================
+
+# Summary
+size_summary <- aquanet::epidemicSize(batch_res, summary = T)
+write.csv(size_summary, paste0(economics_dir, "/", scenario_name, "_size_summary.csv"),
+          row.names = F)
+
+# Full
+size_full <- aquanet::epidemicSize(batch_res, summary = F)
+write.csv(size_full, paste0(economics_dir, "/", scenario_name, "_size_full.csv"),
+          row.names = F)
+
+## Peak ========================================================================
+
+peak <- aquanet::epidemicPeak(batch_res)
+write.csv(size_full, paste0(economics_dir, "/", scenario_name, "peak.csv"),
+          row.names = F)
 
 # Load and process outputs -----------------------------------------------------
 
