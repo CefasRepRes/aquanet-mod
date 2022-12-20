@@ -48,6 +48,7 @@ vignettes/*.pdf
 /code/aquanet_functions/
 /reports/
 /archive/
+/plots/
 
 # HTML files
 *.html
@@ -71,7 +72,8 @@ vignettes/*.pdf
 *.sub
 
 # Test scripts
-/analyses/code/scenario_checking.R
+/analyses/code/test_scripts/
+/analyses/econ_paralell_attempt.R
 
 # Modified script for POD
 /code/RunModelCommandLine_POD.R
