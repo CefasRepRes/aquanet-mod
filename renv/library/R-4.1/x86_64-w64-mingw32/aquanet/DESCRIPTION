@@ -1,0 +1,46 @@
+Package: aquanet
+Title: Functions to Execute AquaNet-Mod (The Aquaculture Disease
+        Network Model)
+Version: 0.0.0.9000
+Authors@R: 
+    c(person(given = "Rebecca",
+             family = "Millard",
+             email = "rebecca.millard@cefas.co.uk",
+             role = c("aut", "cre")),
+      person(given = "Sarah",
+             family = "Alewijnse",
+             email = "sarah.alewijnse@cefas.co.uk",
+             role = "aut"),
+      person(given = "David",
+             family = "Ryder",
+             email = "david.ryder@cefas.co.uk",
+             role = "aut"),
+      person(given = "James",
+             family = "Guilder",
+             role = "aut"))
+Description: A collection of functions required to process input data and run simulations for AquaNet-Mod (The Aquaculture Disease Network Model).
+License: `use_mit_license()`, `use_gpl3_license()` or friends to pick a
+        license
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.1.2
+Imports: data.table, doParallel, doRNG, dplyr, foreach, here, igraph,
+        magrittr, Matrix, methods, sf, units
+RemoteType: github
+RemoteHost: api.github.com
+RemoteRepo: aquanet
+RemoteUsername: CefasRepRes
+RemoteRef: main
+RemoteSha: f5eb28b2f527d44b89898c4f862e484e7013e6bf
+GithubRepo: aquanet
+GithubUsername: CefasRepRes
+GithubRef: main
+GithubSHA1: f5eb28b2f527d44b89898c4f862e484e7013e6bf
+NeedsCompilation: no
+Packaged: 2022-12-19 11:17:38 UTC; SA20
+Author: Rebecca Millard [aut, cre],
+  Sarah Alewijnse [aut],
+  David Ryder [aut],
+  James Guilder [aut]
+Maintainer: Rebecca Millard <rebecca.millard@cefas.co.uk>
+Built: R 4.1.2; ; 2022-12-19 11:17:39 UTC; windows
