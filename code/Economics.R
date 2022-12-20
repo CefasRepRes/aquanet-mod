@@ -4,6 +4,7 @@ library(here)
 library(dplyr)
 library(magrittr)
 library(aquanet)
+library(arrow)
 
 # define scenario name to analyse
 scenario_name <- "baseline_t"
@@ -50,13 +51,17 @@ write.csv(size_full, paste0(economics_dir, "/", scenario_name, "_size_full.csv")
 ## Peak ========================================================================
 
 peak <- aquanet::epidemicPeak(batch_res)
-write.csv(size_full, paste0(economics_dir, "/", scenario_name, "peak.csv"),
+write.csv(size_full, paste0(economics_dir, "/", scenario_name, "_peak.csv"),
           row.names = F)
 
 # Load and process outputs -----------------------------------------------------
 
 # # Load and process results
-time_summary <- aquanet::importAndCondense(scenario_name = scenario_name)
+if(file.exists(paste0(economics_dir, "/", scenario_name, "-details-condensed.parquet"))){
+  time_summary <- read_parquet(paste0(economics_dir, "/", scenario_name, "-details-condensed.parquet"))
+} else {
+  time_summary <- aquanet::importAndCondense(scenario_name = scenario_name)
+}
 
 # Load in economic costing -----------------------------------------------------
 
