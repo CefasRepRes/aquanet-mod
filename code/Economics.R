@@ -7,7 +7,7 @@ library(aquanet)
 library(arrow)
 
 # define scenario name to analyse
-scenario_name <- "no_catchment_controls_t"
+scenario_name <- "baseline_t"
 
 # Create economics folder ------------------------------------------------------
 
@@ -180,7 +180,8 @@ full_outbreak_costs <- simulation_daily_costs %>%
   dplyr::full_join(fhi_non_cull_costs, by = "sim_no")
 
 # Calculate total outbreak cost
-full_outbreak_costs$total_outbreak_cost <- rowSums(full_outbreak_costs[, -"sim_no"],
+full_outbreak_costs$total_outbreak_cost <- rowSums(full_outbreak_costs[, -c("sim_no",
+                                                                            "total_cull_cost")],
                                                    na.rm = T)
 # Replace NA with 0
 # Important to get correct stats
