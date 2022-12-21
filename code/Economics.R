@@ -5,6 +5,7 @@ library(dplyr)
 library(magrittr)
 library(aquanet)
 library(arrow)
+library(data.table)
 
 # define scenario name to analyse
 scenario_name <- "baseline_t"
@@ -117,10 +118,15 @@ catchment_controls <- aquanet::stateCosts(data = time_summary_farms,
                                           site_types = site_types)
 
 # Combine into single daily cost data frame
-simulation_daily_costs <- fallow_costs[["summary_state_costs"]] %>% 
+summary_simulation_daily_costs <- fallow_costs[["summary_state_costs"]] %>% 
   dplyr::full_join(no_manage_costs[["summary_state_costs"]], by = "sim_no") %>% 
   dplyr::full_join(contact_trace_cost[["summary_state_costs"]], by = "sim_no") %>%
   dplyr::full_join(catchment_controls[["summary_state_costs"]], by = "sim_no")
+
+full_simulation_daily_costs <- fallow_costs[["full_state_costs"]] %>% 
+  dplyr::full_join(no_manage_costs[["full_state_costs"]], by = c("sim_no", "site_types")) %>% 
+  dplyr::full_join(contact_trace_cost[["full_state_costs"]], by = c("sim_no", "site_types")) %>%
+  dplyr::full_join(catchment_controls[["full_state_costs"]], by = c("sim_no", "site_types"))
 
 # Add in cull costs ------------------------------------------------------------
 
@@ -128,6 +134,29 @@ full_cull_cost_sim <- aquanet::cullCost(farm_data = time_summary_farms,
                                         non_farm_data = time_summary_non_farms,
                                         cull_cost = cull_cost,
                                         site_types = site_types)
+
+cull_cost_farm_type <- full_cull_cost_sim[["cull_cost_farm_by_type"]]
+full_cull_cost_sim <- full_cull_cost_sim[["cull_cost_by_sim"]]
+
+# Combine cost breakdown by site type ------------------------------------------
+
+# Join together
+full_cost_by_type <- full_simulation_daily_costs %>%
+  dplyr::full_join(cull_cost_farm_type, by = c("sim_no", "site_types"))
+
+# Remove durations
+full_cost_by_type <- full_cost_by_type %>%
+  dplyr::select(-c("fallow_total_duration",
+                   "no_manage_total_duration",
+                   "contact_trace_total_duration",
+                   "catchment_control_total_duration"))
+
+# Replace NAs with 0s
+full_cost_by_type[is.na(full_cost_by_type)] <- 0
+
+# Save
+write.csv(full_cost_by_type, paste0(economics_dir, "/", scenario_name, "_cost_by_site_type.csv"),
+          row.names = F)
 
 # Add in FHI costs -------------------------------------------------------------
 
@@ -175,7 +204,7 @@ fhi_non_cull_costs <- contact_sampling_cost %>%
 # Combine all costs ------------------------------------------------------------
 
 # Make into single data frame
-full_outbreak_costs <- simulation_daily_costs %>% 
+full_outbreak_costs <- summary_simulation_daily_costs %>% 
   dplyr::full_join(full_cull_cost_sim, by = "sim_no") %>%
   dplyr::full_join(fhi_non_cull_costs, by = "sim_no")
 
