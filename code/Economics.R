@@ -7,7 +7,7 @@ library(aquanet)
 library(arrow)
 
 # define scenario name to analyse
-scenario_name <- "baseline_t"
+scenario_name <- "no_catchment_controls_t"
 
 # Create economics folder ------------------------------------------------------
 
@@ -79,14 +79,18 @@ daily_cost <- read.csv(here::here("data",
                                   "Economics",
                                   "daily_costs.csv"))
 
+ca_cost <- read.csv(here::here("data",
+                               "Economics",
+                               "ca_costs.csv"))
+
 # Calculate daily costs --------------------------------------------------------
 
 # Filter out non-farms
-  # We don't have any duration cost data for fisheries
+# We don't have any duration cost data for fisheries
 time_summary_farms <- dplyr::filter(time_summary, farm_vector == 1)
 
 # Filter out fisheries
-  # To do cull cost
+# To do cull cost
 time_summary_non_farms <- dplyr::filter(time_summary, farm_vector == 0)
 
 # Get a list of site types
@@ -112,7 +116,7 @@ catchment_controls <- aquanet::stateCosts(data = time_summary_farms,
                                           state = "catchment_control",
                                           site_types = site_types)
 
- # Combine into single daily cost data frame
+# Combine into single daily cost data frame
 simulation_daily_costs <- fallow_costs[["summary_state_costs"]] %>% 
   dplyr::full_join(no_manage_costs[["summary_state_costs"]], by = "sim_no") %>% 
   dplyr::full_join(contact_trace_cost[["summary_state_costs"]], by = "sim_no") %>%
@@ -125,15 +129,61 @@ full_cull_cost_sim <- aquanet::cullCost(farm_data = time_summary_farms,
                                         cull_cost = cull_cost,
                                         site_types = site_types)
 
+# Add in FHI costs -------------------------------------------------------------
+
+## Contact sampling ============================================================
+
+if(scenario_name %like% "baseline" | 
+   scenario_name %like% "no_catchment_controls"){
+  ca_cost <- data.table(ca_cost)
+  contact_sampling_cost <- count(time_summary[cull_state == TRUE],
+                                 by = sim_no) 
+  contact_sampling_cost$n <- contact_sampling_cost$n * ca_cost[cost_type == "site_contact_sampling"]$cost
+  data.table::setnames(contact_sampling_cost, old = "by", new = "sim_no")
+  data.table::setnames(contact_sampling_cost, old = "n", new = "fhi_contact_sampling")
+} else {
+  contact_sampling_cost <- data.frame(sim_no = 1:3000,
+                                      fhi_contact_sampling = 0)
+}
+
+## Catchment costs =============================================================
+
+if(scenario_name %like% "baseline" |
+   scenario_name %like% "no_contact_tracing"){
+  batch_res <- data.table(batch_res)
+  batch_res <- batch_res[sim_no != 0]
+  catchment_cost <- batch_res[, .(fhi_catchment = max(no_controlled_catchments)), 
+                              by = "sim_no"] 
+  catchment_cost$fhi_catchment <- catchment_cost$fhi_catchment * ca_cost[cost_type == "catchment"]$cost
+} else {
+  catchment_cost <- data.frame(sim_no = 1:3000,
+                               fhi_catchment = 0)
+}
+
+
+## Ancillary costs =============================================================
+
+ancillary_cost <- data.frame(sim_no = 1:3000,
+                             fhi_ancilliary = ca_cost[cost_type == "outbreak_ancillary"]$cost)
+
+## Join together ===============================================================
+
+fhi_non_cull_costs <- contact_sampling_cost %>%
+  dplyr::full_join(catchment_cost, by = "sim_no") %>%
+  dplyr::full_join(ancillary_cost, by = "sim_no")
+
+# Combine all costs ------------------------------------------------------------
+
 # Make into single data frame
-full_outbreak_costs <- simulation_daily_costs %>% dplyr::full_join(full_cull_cost_sim,
-                                                                   by = "sim_no")
+full_outbreak_costs <- simulation_daily_costs %>% 
+  dplyr::full_join(full_cull_cost_sim, by = "sim_no") %>%
+  dplyr::full_join(fhi_non_cull_costs, by = "sim_no")
 
 # Calculate total outbreak cost
-full_outbreak_costs$total_outbreak_cost <- rowSums(full_outbreak_costs[, -1],
+full_outbreak_costs$total_outbreak_cost <- rowSums(full_outbreak_costs[, -"sim_no"],
                                                    na.rm = T)
 # Replace NA with 0
-  # Important to get correct stats
+# Important to get correct stats
 all_sims <- data.frame(sim_no = 1:3000)
 full_outbreak_costs <- merge(all_sims,
                              full_outbreak_costs,
