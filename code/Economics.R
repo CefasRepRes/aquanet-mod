@@ -8,7 +8,7 @@ library(arrow)
 library(data.table)
 
 # define scenario name to analyse
-scenario_name <- "baseline_t"
+scenario_name <- "baseline"
 
 # Create economics folder ------------------------------------------------------
 
@@ -52,7 +52,7 @@ write.csv(size_full, paste0(economics_dir, "/", scenario_name, "_size_full.csv")
 ## Peak ========================================================================
 
 peak <- aquanet::epidemicPeak(batch_res)
-write.csv(size_full, paste0(economics_dir, "/", scenario_name, "_peak.csv"),
+write.csv(peak, paste0(economics_dir, "/", scenario_name, "_peak.csv"),
           row.names = F)
 
 # Load and process outputs -----------------------------------------------------
@@ -163,7 +163,8 @@ write.csv(full_cost_by_type, paste0(economics_dir, "/", scenario_name, "_cost_by
 ## Contact sampling ============================================================
 
 if(scenario_name %like% "baseline" | 
-   scenario_name %like% "no_catchment_controls"){
+   scenario_name %like% "no_catchment_controls" |
+   scenario_name %like% "fallow"){
   ca_cost <- data.table(ca_cost)
   contact_sampling_cost <- count(time_summary[cull_state == TRUE],
                                  by = sim_no) 
@@ -178,7 +179,8 @@ if(scenario_name %like% "baseline" |
 ## Catchment costs =============================================================
 
 if(scenario_name %like% "baseline" |
-   scenario_name %like% "no_contact_tracing"){
+   scenario_name %like% "no_contact_tracing" |
+   scenario_name %like% "fallow"){
   batch_res <- data.table(batch_res)
   batch_res <- batch_res[sim_no != 0]
   catchment_cost <- batch_res[, .(fhi_catchment = max(no_controlled_catchments)), 
@@ -259,4 +261,4 @@ write.csv(outbreak_summary,
                      scenario_name,
                      "economics",
                      "summary_outbreak_costs.csv"),
-          row.names = T)
+          row.names = T);beep()
