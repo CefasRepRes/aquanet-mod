@@ -8,7 +8,7 @@ library(arrow)
 library(data.table)
 
 # define scenario name to analyse
-scenario_name <- "baseline_t"
+scenario_name <- "fishery_cull_0"
 
 # Create economics folder ------------------------------------------------------
 
@@ -162,9 +162,8 @@ write.csv(full_cost_by_type, paste0(economics_dir, "/", scenario_name, "_cost_by
 
 ## Contact sampling ============================================================
 
-if(scenario_name %like% "baseline" | 
-   scenario_name %like% "no_catchment_controls" |
-   scenario_name %like% "fallow"){
+if(!(scenario_name %like% "no_controls" |
+     scenario_name %like% "no_contact_tracing")){
   ca_cost <- data.table(ca_cost)
   contact_sampling_cost <- count(time_summary[cull_state == TRUE],
                                  by = sim_no) 
@@ -178,10 +177,10 @@ if(scenario_name %like% "baseline" |
 
 ## Catchment costs =============================================================
 
-if(scenario_name %like% "baseline" |
-   scenario_name %like% "no_contact_tracing" |
-   scenario_name %like% "fallow"){
+if(!(scenario_name %like% "no_controls" |
+     scenario_name %like% "no_catchment_controls")){
   batch_res <- data.table(batch_res)
+  ca_cost <- data.table(ca_cost)
   batch_res <- batch_res[sim_no != 0]
   catchment_cost <- batch_res[, .(fhi_catchment = max(no_controlled_catchments)), 
                               by = "sim_no"] 
@@ -190,7 +189,6 @@ if(scenario_name %like% "baseline" |
   catchment_cost <- data.frame(sim_no = 1:3000,
                                fhi_catchment = 0)
 }
-
 
 ## Ancillary costs =============================================================
 
