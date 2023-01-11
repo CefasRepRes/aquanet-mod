@@ -8,7 +8,7 @@ library(arrow)
 library(data.table)
 
 # define scenario name to analyse
-scenario_name <- "baseline"
+scenario_name <- "baseline_t"
 
 # Create economics folder ------------------------------------------------------
 
@@ -241,16 +241,19 @@ write.csv(full_outbreak_costs,
 # Get summary statistics -------------------------------------------------------
 
 # Loop over functions
-functions <- c("mean", "sd", "min", "max")
-outbreak_summary <- data.frame()
-for(i in 1:length(functions)){
-  sum <- apply(full_outbreak_costs, 2, functions[i], na.rm = T)
-  outbreak_summary <- rbind(outbreak_summary, sum)
+functions <- function(x){
+  c(mean = mean(x, na.rm = T),
+    sd = sd(x, na.rm = T),
+    median = median(x, na.rm = T),
+    q05 = quantile(x, 0.05, na.rm = T),
+    q95 = quantile(x, 0.95, na.rm = T))
 }
+
+outbreak_summary <- sapply(full_outbreak_costs, functions)
 
 # Tidy up data frame
 outbreak_summary <- as.data.frame(t(outbreak_summary))
-colnames(outbreak_summary) <- functions
+colnames(outbreak_summary) <- c("mean", "sd", "median", "q05", "q95")
 rownames(outbreak_summary) <- 1:nrow(outbreak_summary)
 outbreak_summary$cost_component <- colnames(full_outbreak_costs)
 outbreak_summary <- outbreak_summary[-1, ] # Remove simNo
@@ -261,4 +264,4 @@ write.csv(outbreak_summary,
                      scenario_name,
                      "economics",
                      "summary_outbreak_costs.csv"),
-          row.names = T);beep()
+          row.names = T)
