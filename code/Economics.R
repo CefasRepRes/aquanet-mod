@@ -8,7 +8,7 @@ library(arrow)
 library(data.table)
 
 # define scenario name to analyse
-scenario_name <- "fishery_cull_0"
+scenario_name <- "no_controls_top_sites_removed_rerun"
 
 # Create economics folder ------------------------------------------------------
 
@@ -192,8 +192,13 @@ if(!(scenario_name %like% "no_controls" |
 
 ## Ancillary costs =============================================================
 
-ancillary_cost <- data.frame(sim_no = 1:3000,
-                             fhi_ancilliary = ca_cost[cost_type == "outbreak_ancillary"]$cost)
+if(!(scenario_name %like% "no_controls")){
+  ancillary_cost <- data.frame(sim_no = 1:3000,
+                               fhi_ancilliary = ca_cost[cost_type == "outbreak_ancillary"]$cost)
+} else {
+  ancillary_cost <- data.frame(sim_no = 1:3000,
+                                fhi_ancilliary = 0)
+}
 
 ## Join together ===============================================================
 
