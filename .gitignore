@@ -49,6 +49,7 @@ vignettes/*.pdf
 /reports/
 /archive/
 /plots/
+/analyses/reports/
 
 # HTML files
 *.html
