@@ -116,6 +116,6 @@ write.csv(type_vector, here::here(dirs[["results"]],
 site_distances_matrix <- aquanet::createDistanceMatrix(graph_full, 
                                                        site_locs_duplicates_removed_filename,
                                                        crs_epsg = BNG_crs,
-                                                       sdm_max_dist = model_parameters$Max_Distance_River_Transmission,
-                                                       sdm_rate_gamma = model_parameters$Probability_River_Transmission,
+                                                       sdm_max_dist = model_parameters$Max_Distance_SDM_Transmission,
+                                                       sdm_rate_gamma = model_parameters$Probability_SDM_Transmission,
                                                        sdm_scalar_lambda = model_parameters$Local_Scalar)
