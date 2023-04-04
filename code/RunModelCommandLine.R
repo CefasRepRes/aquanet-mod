@@ -43,7 +43,10 @@ noCores <- detectCores() / 2
 # Load in parameters -----------------------------------------------------------
 
 # Location of model parameters file
-model_parameter_filepath <- here::here("params.yaml")
+model_parameter_filepath <- here::here("data",
+                                       "Parameterisation",
+                                       "scenarios",
+                                       "test.yml")
 
 # Load input parameter file
 model_parameters <- yaml::yaml.load_file(model_parameter_filepath)
