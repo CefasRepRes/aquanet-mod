@@ -9,10 +9,10 @@ library(aquanet)
 baseline <- aquanet::loadResultsSummary("baseline")
 
 # Calculate epidemic duration
-baseline_duration <- aquanet::epidemicDuration(baseline)
+baseline_duration <- aquanet::epidemicDuration(baseline, summary = TRUE)
 
 # Calculate epidemic size
-baseline_size <- aquanet::epidemicSize(baseline)
+baseline_size <- aquanet::epidemicSize(baseline, summary = TRUE)
 
 # No catchment controls --------------------------------------------------------
 
