@@ -4,7 +4,7 @@
 
 # Import site locations
 site_locs_dupes_removed <- read.csv(site_locs_duplicates_removed_filename,
-                                    stringsAsFactors = FALSE)[,c('siteID','ID','NAME','TRUNK_CODE')]
+                                    stringsAsFactors = FALSE)[,c('siteID','S_ID','RIVER')]
 
 # Merge LFMs and site locations
 
@@ -42,17 +42,35 @@ farm_movements <- merge(x = farm_movements,
                         by.y = "siteID",
                         suffixes = c('.Source','.Receiving'))
 
-# Remove any records that have not been matched against a catchment
+# Remove any records that have not been matched against a catchment ------------
+
+# Retain record of those movements
+
+## Section 30 ==================================================================
+
+sec_30_no_catchment <- section_30_movements %>%
+  dplyr::filter(is.na(S_ID.Source)) %>%
+  dplyr::filter(is.na(S_ID.Receiving))
 
 section_30_movements <- section_30_movements %>%
-  dplyr::filter(!is.na(ID.Source)) %>%
-  dplyr::filter(!is.na(ID.Receiving))
+  dplyr::filter(!is.na(S_ID.Source)) %>%
+  dplyr::filter(!is.na(S_ID.Receiving))
+
+message(nrow(sec_30_no_catchment), " section 30 movements removed without catchment")
+
+## Farm ========================================================================
+
+farm_move_no_catchment <- farm_movements %>%
+  dplyr::filter(is.na(S_ID.Source)) %>%
+  dplyr::filter(is.na(S_ID.Receiving))
 
 farm_movements <- farm_movements %>%
-  dplyr::filter(!is.na(ID.Source)) %>%
-  dplyr::filter(!is.na(ID.Receiving))
+  dplyr::filter(!is.na(S_ID.Source)) %>%
+  dplyr::filter(!is.na(S_ID.Receiving))
 
-# Convert date to R compatible format for section 30 records
+message(nrow(farm_move_no_catchment), " farm movements removed without catchment")
+
+# Convert date to R compatible format for section 30 records -------------------
 
 section_30_movements$ConsentStart <- as.Date(section_30_movements$ConsentStart, 
                                              format = "%d/%m/%Y")
@@ -73,10 +91,10 @@ combined_movements <- data.frame(scrSiteID = c(section_30_movements$SourceSiteID
                                              farm_movements$Scr_Code),
                                  recCode = c(section_30_movements$ReceivingCode,
                                              farm_movements$Rec_Code),
-                                 scrCatchmentID = c(section_30_movements$TRUNK_CODE.Source,
-                                                    farm_movements$TRUNK_CODE.Source),
-                                 recCatchmentID = c(section_30_movements$TRUNK_CODE.Receiving,
-                                                    farm_movements$TRUNK_CODE.Receiving),
+                                 scrCatchmentID = c(section_30_movements$S_ID.Source,
+                                                    farm_movements$S_ID.Source),
+                                 recCatchmentID = c(section_30_movements$S_ID.Receiving,
+                                                    farm_movements$S_ID.Receiving),
                                  year = c(section_30_movements$ConsentStartYear,
                                           farm_movements$ProdYear),
                                  reference = c(section_30_movements$Refno,
@@ -162,7 +180,6 @@ if(length(sites_no_category) != 0) warning(paste(
   length(sites_no_category), "sites do not have a category assigned"))
 
 # Create a data frame of site categories
-
 site_categories_ordered <- data.frame(scrCode = igraph::E(combined_movements_graph)$scrCode,
                                       recCode = igraph::E(combined_movements_graph)$recCode,
                                       order = 1:igraph::ecount(combined_movements_graph),

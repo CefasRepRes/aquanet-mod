@@ -19,8 +19,8 @@ farm_to_farm_lfm_filename <- here::here("data",
 
 # Location of the EA Catchments
 catchment_layer_filename <- here::here("data",
-                                       "EA_Catchments",
-                                       "catchmnt_50k+TrunkCodes-Filtered-Merged_region.shp")
+                                       "IHU_Catchments",
+                                       "ihu_sections.shp")
 
 # Location of river routes downstream table
 river_downstream_filename <- here::here("data",

@@ -65,13 +65,13 @@ sites_within_catchment_id <- sf::st_join(x = sites_unique,
                                          remove = FALSE) # Keep entries which are outside of any catchment
 
 # Get sites without a catchment
-sites_without_catchment_id <- dplyr::filter(sites_within_catchment_id, is.na(FEATURE))
+sites_without_catchment_id <- dplyr::filter(sites_within_catchment_id, is.na(RIVER))
 
 print(c("Number of sites with no catchment: ",
         nrow(sites_without_catchment_id)))
 
 # Remove sites without a catchment
-sites_within_catchment_id <- dplyr::filter(sites_within_catchment_id, !is.na(FEATURE))
+sites_within_catchment_id <- dplyr::filter(sites_within_catchment_id, !is.na(RIVER))
 
 # Tidy the table of site to catchment relationships ----------------------------
 
@@ -86,9 +86,8 @@ sites_with_catchment <- sf::st_set_geometry(sites_with_catchment, NULL)
 # Select only those variables we are interested in
 sites_with_catchment <- dplyr::select(sites_with_catchment,
                                       siteID, noOccurances,
-                                      ID, FEATURE,
-                                      NAME, AREA_HA,
-                                      TRUNK_CODE,
+                                      S_ID, RIVER,
+                                      S_AREA_KM2, 
                                       easting, northing)
 
 # Incorporate information on whether site feeds river water into its facilities ----
@@ -135,27 +134,27 @@ for(i in 1:length(dupe_site_id)){
   
   # If in the same catchment, give easting/northing preference to 
   # the site with the highest number of occurrences
-  if(pair$NAME[1] == pair$NAME[2] && pair$noOccurances[1] >= pair$noOccurances[2]){
+  if(pair$RIVER[1] == pair$RIVER[2] && pair$noOccurances[1] >= pair$noOccurances[2]){
     pair_merged <- pair[1, ]
     pair_merged$noOccurances <- pair$noOccurances[1] + pair$noOccurances[2]
-  } else if(pair$NAME[1] == pair$NAME[2] && pair$noOccurances[2] > pair$noOccurances[1]){
+  } else if(pair$RIVER[1] == pair$RIVER[2] && pair$noOccurances[2] > pair$noOccurances[1]){
     pair_merged <- pair[2, ]
     pair_merged$noOccurances <- pair$noOccurances[1] + pair$noOccurances[2]
   } else {
     
-    # If the catchments don't match, prompt the user to enter the correct catchment name
+    # If the catchments don't match, prompt the user to enter the correct catchment RIVER
         # TODO: maybe configure this so it gives the user options
-    catchment <- readline(prompt = paste("Enter correct river catchment name for site", 
+    catchment <- readline(prompt = paste("Enter correct river catchment RIVER for site", 
                                          duplicates$siteID[i], 
                                          ": "))
     options <- duplicates %>% dplyr::filter(siteID == duplicates$siteID[i]) %>%
-      dplyr::select(NAME)
+      dplyr::select(RIVER)
     options <- as.list(options)
     if(!(catchment %in% options[[1]])){
       stop(paste("The catchment you entered is incorrect or may be misspelled. Your options are:"),
       options)
     }
-    pair_merged <- dplyr::filter(pair, NAME == catchment)
+    pair_merged <- dplyr::filter(pair, RIVER == catchment)
   }
   organised_dupes <- rbind(organised_dupes, pair_merged)
 }
