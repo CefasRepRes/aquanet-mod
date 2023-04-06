@@ -67,6 +67,9 @@ sites_within_catchment_id <- sf::st_join(x = sites_unique,
 # Get sites without a catchment
 sites_without_catchment_id <- dplyr::filter(sites_within_catchment_id, is.na(FEATURE))
 
+print(c("Number of sites with no catchment: ",
+        nrow(sites_without_catchment_id)))
+
 # Remove sites without a catchment
 sites_within_catchment_id <- dplyr::filter(sites_within_catchment_id, !is.na(FEATURE))
 
