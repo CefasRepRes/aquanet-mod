@@ -8,7 +8,7 @@ library(arrow)
 library(data.table)
 
 # define scenario name to analyse
-scenario_name <- "no_controls_top_sites_removed_rerun"
+scenario_name <- "baseline"
 
 # Create economics folder ------------------------------------------------------
 
@@ -158,21 +158,22 @@ full_cost_by_type[is.na(full_cost_by_type)] <- 0
 write.csv(full_cost_by_type, paste0(economics_dir, "/", scenario_name, "_cost_by_site_type.csv"),
           row.names = F)
 
-# Add in FHI costs -------------------------------------------------------------
+# Add in CA costs -------------------------------------------------------------
 
 ## Contact sampling ============================================================
 
 if(!(scenario_name %like% "no_controls" |
      scenario_name %like% "no_contact_tracing")){
   ca_cost <- data.table(ca_cost)
-  contact_sampling_cost <- count(time_summary[cull_state == TRUE],
+  contact_sampling_count <- 
+  contact_sampling_cost <- count(time_summary[trans_type == 6], # trans_type = 6 -> detection reporting disease
                                  by = sim_no) 
   contact_sampling_cost$n <- contact_sampling_cost$n * ca_cost[cost_type == "site_contact_sampling"]$cost
   data.table::setnames(contact_sampling_cost, old = "by", new = "sim_no")
-  data.table::setnames(contact_sampling_cost, old = "n", new = "fhi_contact_sampling")
+  data.table::setnames(contact_sampling_cost, old = "n", new = "ca_contact_sampling")
 } else {
   contact_sampling_cost <- data.frame(sim_no = 1:3000,
-                                      fhi_contact_sampling = 0)
+                                      ca_contact_sampling = 0)
 }
 
 ## Catchment costs =============================================================
@@ -182,27 +183,27 @@ if(!(scenario_name %like% "no_controls" |
   batch_res <- data.table(batch_res)
   ca_cost <- data.table(ca_cost)
   batch_res <- batch_res[sim_no != 0]
-  catchment_cost <- batch_res[, .(fhi_catchment = max(no_controlled_catchments)), 
+  catchment_cost <- batch_res[, .(ca_catchment = max(no_controlled_catchments)), 
                               by = "sim_no"] 
-  catchment_cost$fhi_catchment <- catchment_cost$fhi_catchment * ca_cost[cost_type == "catchment"]$cost
+  catchment_cost$ca_catchment <- catchment_cost$ca_catchment * ca_cost[cost_type == "catchment"]$cost
 } else {
   catchment_cost <- data.frame(sim_no = 1:3000,
-                               fhi_catchment = 0)
+                               ca_catchment = 0)
 }
 
 ## Ancillary costs =============================================================
 
 if(!(scenario_name %like% "no_controls")){
   ancillary_cost <- data.frame(sim_no = 1:3000,
-                               fhi_ancilliary = ca_cost[cost_type == "outbreak_ancillary"]$cost)
+                               ca_ancilliary = ca_cost[cost_type == "outbreak_ancillary"]$cost)
 } else {
   ancillary_cost <- data.frame(sim_no = 1:3000,
-                                fhi_ancilliary = 0)
+                                ca_ancilliary = 0)
 }
 
 ## Join together ===============================================================
 
-fhi_non_cull_costs <- contact_sampling_cost %>%
+ca_non_cull_costs <- contact_sampling_cost %>%
   dplyr::full_join(catchment_cost, by = "sim_no") %>%
   dplyr::full_join(ancillary_cost, by = "sim_no")
 
@@ -211,7 +212,7 @@ fhi_non_cull_costs <- contact_sampling_cost %>%
 # Make into single data frame
 full_outbreak_costs <- summary_simulation_daily_costs %>% 
   dplyr::full_join(full_cull_cost_sim, by = "sim_no") %>%
-  dplyr::full_join(fhi_non_cull_costs, by = "sim_no")
+  dplyr::full_join(ca_non_cull_costs, by = "sim_no")
 
 # Calculate total outbreak cost
 full_outbreak_costs$total_outbreak_cost <- rowSums(full_outbreak_costs[, -c("sim_no",
