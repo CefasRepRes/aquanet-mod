@@ -68,8 +68,6 @@ contact_probability_matrix_top_sites_removed <-
 
 
 # Get site categories ----------------------------------------------------------
-   # TODO: use to incorporate economic data
-   # TODO: figure out how to carry this forward to get useful economic outputs
    # Returns 1 for sites being that category, and 0 for site not being that category
 
 # Create list of all possible site types
