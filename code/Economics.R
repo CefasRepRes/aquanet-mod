@@ -8,7 +8,7 @@ library(data.table)
 library(dplyr)
 
 # define scenario name to analyse
-scenario_name <- "baseline_main"
+scenario_name <- "baseline"
 
 # Create economics folder ------------------------------------------------------
 
@@ -165,7 +165,7 @@ write.csv(full_cost_by_type, paste0(economics_dir, "/", scenario_name, "_cost_by
 if(!(scenario_name %like% "no_controls" |
      scenario_name %like% "no_contact_tracing")){
   ca_cost <- data.table(ca_cost)
-  contact_sampling_cost <- dplyr::count(time_summary[trans_type == 6], # trans_type = 6 -> detection reporting disease
+  contact_sampling_cost <- dplyr::count(time_summary[trans_type == 12], # trans_type = 12 -> contact detection
                                         by = sim_no) 
   contact_sampling_cost$n <- contact_sampling_cost$n * ca_cost[cost_type == "site_contact_sampling"]$cost
   data.table::setnames(contact_sampling_cost, old = "by", new = "sim_no")
