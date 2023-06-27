@@ -40,7 +40,8 @@ options(scipen = 999)
     )
   # }))
 
-# # Testing ----------------------------------------------------------------------
+# # Testing --------------------------------------------------------------------
+# Runs without paralell - useful for debugging
 #
 # # # # Set things to their original names
 # #

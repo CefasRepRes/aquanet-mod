@@ -29,7 +29,7 @@ site_data_frame <- data.frame(siteID,
 sites_unique <- plyr::ddply(site_data_frame,
                             ~siteID + easting + northing,
                             dplyr::summarise,
-                            noOccurances = length(siteID))
+                            noOccurrences = length(siteID))
 
 # Warn of and remove sites without location -----------------------------------
 
@@ -85,7 +85,7 @@ sites_with_catchment <- sf::st_set_geometry(sites_with_catchment, NULL)
 
 # Select only those variables we are interested in
 sites_with_catchment <- dplyr::select(sites_with_catchment,
-                                      siteID, noOccurances,
+                                      siteID, noOccurrences,
                                       S_ID, RIVER,
                                       S_AREA_KM2, 
                                       easting, northing)
@@ -134,17 +134,15 @@ for(i in 1:length(dupe_site_id)){
   
   # If in the same catchment, give easting/northing preference to 
   # the site with the highest number of occurrences
-  if(pair$RIVER[1] == pair$RIVER[2] && pair$noOccurances[1] >= pair$noOccurances[2]){
+  if(pair$RIVER[1] == pair$RIVER[2] && pair$noOccurrences[1] >= pair$noOccurrences[2]){
     pair_merged <- pair[1, ]
-    pair_merged$noOccurances <- pair$noOccurances[1] + pair$noOccurances[2]
-  } else if(pair$RIVER[1] == pair$RIVER[2] && pair$noOccurances[2] > pair$noOccurances[1]){
+    pair_merged$noOccurrences <- pair$noOccurrences[1] + pair$noOccurrences[2]
+  } else if(pair$RIVER[1] == pair$RIVER[2] && pair$noOccurrences[2] > pair$noOccurrences[1]){
     pair_merged <- pair[2, ]
-    pair_merged$noOccurances <- pair$noOccurances[1] + pair$noOccurances[2]
+    pair_merged$noOccurrences <- pair$noOccurrences[1] + pair$noOccurrences[2]
   } else {
-    
-    # If the catchments don't match, prompt the user to enter the correct catchment RIVER
-        # TODO: maybe configure this so it gives the user options
-    catchment <- readline(prompt = paste("Enter correct river catchment RIVER for site", 
+    # If the catchments don't match, prompt the user to enter the correct catchment name
+    catchment <- readline(prompt = paste("Enter correct river catchment name for site", 
                                          duplicates$siteID[i], 
                                          ": "))
     options <- duplicates %>% dplyr::filter(siteID == duplicates$siteID[i]) %>%
