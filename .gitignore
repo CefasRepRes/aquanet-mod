@@ -84,3 +84,6 @@ vignettes/*.pdf
 
 # Non-baseline yamls
 params_no_catchment.yaml
+
+# Zipped files
+*.zip
