@@ -48,9 +48,9 @@ sites_unique <- sf::st_as_sf(sites_unique,
 
 # Open the catchment layer shapefile
 catchment_outlines <- sf::read_sf(dsn = catchment_layer_filename,
-                               layer = sub(pattern = "(.*)\\..*$",
-                                           replacement = "\\1",
-                                           basename(catchment_layer_filename)))
+                                  layer = sub(pattern = "(.*)\\..*$",
+                                              replacement = "\\1",
+                                              basename(catchment_layer_filename)))
 
 # Transform to British National Grid
 catchment_outlines_BNG <- sf::st_transform(catchment_outlines, crs = BNG_crs)
@@ -124,44 +124,51 @@ sites_with_catchment <- merge(x = sites_with_catchment,
 duplicates <- rbind(filter(sites_with_catchment, duplicated(siteID, fromLast = T)),
                     filter(sites_with_catchment, duplicated(siteID, fromLast = F)))
 
-# Get list of duplicated ids
-dupe_site_id <- unique(duplicates$siteID)
-
-# Loop over, removing duplicates
-    
-organised_dupes <- data.frame()
-for(i in 1:length(dupe_site_id)){
-  pair <- dplyr::filter(duplicates, siteID == duplicates$siteID[i])
+# Only run if duplicates are present
+if(nrow(duplicates) > 0){
   
-  # If in the same catchment, give easting/northing preference to 
-  # the site with the highest number of occurrences
-  if(pair$NAME[1] == pair$NAME[2] && pair$noOccurrences[1] >= pair$noOccurrences[2]){
-    pair_merged <- pair[1, ]
-    pair_merged$noOccurrences <- pair$noOccurrences[1] + pair$noOccurrences[2]
-  } else if(pair$NAME[1] == pair$NAME[2] && pair$noOccurrences[2] > pair$noOccurrences[1]){
-    pair_merged <- pair[2, ]
-    pair_merged$noOccurrences <- pair$noOccurrences[1] + pair$noOccurrences[2]
-  } else {
+  # Get list of duplicated ids
+  dupe_site_id <- unique(duplicates$siteID)
+  
+  # Loop over, removing duplicates
+  
+  organised_dupes <- data.frame()
+  for(i in 1:length(dupe_site_id)){
+    pair <- dplyr::filter(duplicates, siteID == duplicates$siteID[i])
     
-    # If the catchments don't match, prompt the user to enter the correct catchment name
-    catchment <- readline(prompt = paste("Enter correct river catchment name for site", 
-                                         duplicates$siteID[i], 
-                                         ": "))
-    options <- duplicates %>% dplyr::filter(siteID == duplicates$siteID[i]) %>%
-      dplyr::select(NAME)
-    options <- as.list(options)
-    if(!(catchment %in% options[[1]])){
-      stop(paste("The catchment you entered is incorrect or may be misspelled. Your options are:"),
-      options)
+    # If in the same catchment, give easting/northing preference to 
+    # the site with the highest number of occurrences
+    if(pair$NAME[1] == pair$NAME[2] && pair$noOccurrences[1] >= pair$noOccurrences[2]){
+      pair_merged <- pair[1, ]
+      pair_merged$noOccurrences <- pair$noOccurrences[1] + pair$noOccurrences[2]
+    } else if(pair$NAME[1] == pair$NAME[2] && pair$noOccurrences[2] > pair$noOccurrences[1]){
+      pair_merged <- pair[2, ]
+      pair_merged$noOccurrences <- pair$noOccurrences[1] + pair$noOccurrences[2]
+    } else {
+      
+      # If the catchments don't match, prompt the user to enter the correct catchment name
+      catchment <- readline(prompt = paste("Enter correct river catchment name for site", 
+                                           duplicates$siteID[i], 
+                                           ": "))
+      options <- duplicates %>% dplyr::filter(siteID == duplicates$siteID[i]) %>%
+        dplyr::select(NAME)
+      options <- as.list(options)
+      if(!(catchment %in% options[[1]])){
+        stop(paste("The catchment you entered is incorrect or may be misspelled. Your options are:"),
+             options)
+      }
+      pair_merged <- dplyr::filter(pair, NAME == catchment)
     }
-    pair_merged <- dplyr::filter(pair, NAME == catchment)
+    organised_dupes <- rbind(organised_dupes, pair_merged)
   }
-  organised_dupes <- rbind(organised_dupes, pair_merged)
+  
+  # Combine with non-duplicate sites
+  sites_unique <- rbind(dplyr::filter(sites_with_catchment, !(siteID %in% dupe_site_id)),
+                        organised_dupes)
+} else {
+  # If no duplicates, same as with catchment
+  sites_unique <- sites_with_catchment
 }
-
-# Combine with non-duplicate sites
-sites_unique <- rbind(dplyr::filter(sites_with_catchment, !(siteID %in% dupe_site_id)),
-                      organised_dupes)
 
 # Save the catchment site relationships
 write.csv(sites_with_catchment, file = sites_with_catchment_filename)
