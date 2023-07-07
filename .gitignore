@@ -42,6 +42,9 @@ vignettes/*.pdf
 *.csv
 *.xml
 
+# Show example data (soon)
+/example_data/*
+
 # Directories
 /outputs/
 /data/
@@ -81,9 +84,6 @@ vignettes/*.pdf
 
 # Modified script for POD
 /code/RunModelCommandLine_POD.R
-
-# Non-baseline yamls
-params_no_catchment.yaml
 
 # Zipped files
 *.zip
