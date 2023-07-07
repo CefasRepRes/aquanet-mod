@@ -147,9 +147,7 @@ for (col in edge_columns) {
 # Add site category ------------------------------------------------------------
 
 # Load
-site_category <- read.csv(file = here::here("data",
-                                            "Check_License_Types",
-                                            "SummaryLicensesPerSitewithfarm.csv"), 
+site_category <- read.csv(site_licences_filename, 
                           header = TRUE, stringsAsFactors = FALSE)
 
 # Check if there are any sites without a category assigned 
