@@ -48,9 +48,9 @@ sites_unique <- sf::st_as_sf(sites_unique,
 
 # Open the catchment layer shapefile
 catchment_outlines <- sf::read_sf(dsn = catchment_layer_filename,
-                               layer = sub(pattern = "(.*)\\..*$",
-                                           replacement = "\\1",
-                                           basename(catchment_layer_filename)))
+                                  layer = sub(pattern = "(.*)\\..*$",
+                                              replacement = "\\1",
+                                              basename(catchment_layer_filename)))
 
 # Transform to British National Grid
 catchment_outlines_BNG <- sf::st_transform(catchment_outlines, crs = BNG_crs)
@@ -123,15 +123,8 @@ sites_with_catchment <- merge(x = sites_with_catchment,
 duplicates <- rbind(filter(sites_with_catchment, duplicated(siteID, fromLast = T)),
                     filter(sites_with_catchment, duplicated(siteID, fromLast = F)))
 
-# Get list of duplicated ids
-dupe_site_id <- unique(duplicates$siteID)
-
-# Loop over, removing duplicates
-    
-organised_dupes <- data.frame()
-for(i in 1:length(dupe_site_id)){
-  pair <- dplyr::filter(duplicates, siteID == duplicates$siteID[i])
-  
+# Only run if duplicates are present
+if(nrow(duplicates) > 0){
   # If in the same catchment, give easting/northing preference to 
   # the site with the highest number of occurrences
   if(pair$RIVER[1] == pair$RIVER[2] && pair$noOccurrences[1] >= pair$noOccurrences[2]){
@@ -154,12 +147,14 @@ for(i in 1:length(dupe_site_id)){
     }
     pair_merged <- dplyr::filter(pair, RIVER == catchment)
   }
-  organised_dupes <- rbind(organised_dupes, pair_merged)
+  
+  # Combine with non-duplicate sites
+  sites_unique <- rbind(dplyr::filter(sites_with_catchment, !(siteID %in% dupe_site_id)),
+                        organised_dupes)
+} else {
+  # If no duplicates, same as with catchment
+  sites_unique <- sites_with_catchment
 }
-
-# Combine with non-duplicate sites
-sites_unique <- rbind(dplyr::filter(sites_with_catchment, !(siteID %in% dupe_site_id)),
-                      organised_dupes)
 
 # Save the catchment site relationships
 write.csv(sites_with_catchment, file = sites_with_catchment_filename)

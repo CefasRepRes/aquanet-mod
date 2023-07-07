@@ -6,27 +6,25 @@
 # Import data ------------------------------------------------------------------
 
 # Location of the Section 30 Records
-section_30_lfm_filename <- here::here("data",
-                                      "SQL_Files",
-                                      "Salmon - V3",
-                                      "S30LFM11-14.csv")
+section_30_lfm_filename <- here::here("example_data",
+                                      "sec_30_movements.csv")
 
 # Location of the Farm to Farm Records
-farm_to_farm_lfm_filename <- here::here("data",
-                                        "SQL_Files",
-                                        "Salmon - V3",
-                                        "Farm-FarmLFM11-14.csv")
+farm_to_farm_lfm_filename <- here::here("example_data",
+                                        "farm_movements.csv")
 
-# Location of the EA Catchments
-catchment_layer_filename <- here::here("data",
+# Site licence types
+site_licences_filename <-  here::here("example_data",
+                                      "licence_types.csv")
+
+# Location of the CEH catchments
+catchment_layer_filename <- here::here("example_data",
                                        "IHU_Catchments",
                                        "ihu_sections.shp")
 
 # Location of river routes downstream table
-river_downstream_filename <- here::here("data",
-                                        "CalcRiverDistance",
-                                        "Salmon - V3",
-                                        "RoutesDownstreamTable.csv")
+river_downstream_filename <- here::here("example_data",
+                                        "river_network.csv")
 
 # Outputs ----------------------------------------------------------------------
 

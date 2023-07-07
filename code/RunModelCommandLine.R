@@ -43,10 +43,8 @@ noCores <- detectCores() / 2
 # Load in parameters -----------------------------------------------------------
 
 # Location of model parameters file
-model_parameter_filepath <- here::here("data",
-                                       "Parameterisation",
-                                       "scenarios",
-                                       "test.yml")
+model_parameter_filepath <- here::here("example_data",
+                                       "params.yml")
 
 # Load input parameter file
 model_parameters <- yaml::yaml.load_file(model_parameter_filepath)
@@ -67,6 +65,11 @@ dirs <- c("outputs" = here::here("outputs"),
           "results_batch" = here::here("outputs", model_parameters$scenario_name, "batch_results"),
           "results_full" = here::here("outputs", model_parameters$scenario_name, "full_results"),
           "results_code" = here::here("outputs", model_parameters$scenario_name, "code"))
+
+# Delete directory if it already exists
+if(dir.exists(dirs["results"])){
+  unlink(dirs["results"], recursive = T)
+}
 
 lapply(dirs, dir.create, showWarnings = F)
 
