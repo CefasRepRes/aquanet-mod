@@ -71,7 +71,7 @@ if(dir.exists(dirs["results"])){
   unlink(dirs["results"], recursive = T)
 }
 
-lapply(dirs, dir.create, showWarnings = F)
+lapply(dirs, dir.create, showWarnings = F, recursive = T)
 
 # Save code and data for reproducibility ---------------------------------------
 
@@ -106,7 +106,6 @@ farm_to_farm_movements <- read.csv(farm_to_farm_lfm_filename,
 # Load and run components of AquaNet model --------------------------------
 
 source('code/02_CheckCatchmentSiteRelationships.R') # Don't need to run this if you have no duplicates file already
-Sawdde
 source('code/03_CreateContactNetwork.R')
 source('code/04_PrepareModelObjects.R')
 source('code/05_CreateRiverContactMatrices.R', local = TRUE)
