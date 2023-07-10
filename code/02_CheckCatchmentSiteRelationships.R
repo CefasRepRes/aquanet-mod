@@ -123,6 +123,12 @@ sites_with_catchment <- merge(x = sites_with_catchment,
 duplicates <- rbind(filter(sites_with_catchment, duplicated(siteID, fromLast = T)),
                     filter(sites_with_catchment, duplicated(siteID, fromLast = F)))
 
+# Get list of duplicated ids
+dupe_site_id <- unique(duplicates$siteID)
+
+# Loop over, removing duplicates
+organised_dupes <- data.frame()
+
 # Only run if duplicates are present
 if(nrow(duplicates) > 0){
   organised_dupes <- data.frame()
