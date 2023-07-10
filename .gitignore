@@ -43,7 +43,7 @@ vignettes/*.pdf
 *.xml
 
 # Show example data (soon)
-/example_data/*
+!/example_data/*
 
 # Directories
 /outputs/
@@ -53,7 +53,8 @@ vignettes/*.pdf
 /archive/
 /plots/
 /analyses/reports/
-/IHU_Catchments/
+/example_data/IHU_Catchments/*
+
 
 # HTML files
 *.html
