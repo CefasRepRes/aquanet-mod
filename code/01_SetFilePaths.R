@@ -17,9 +17,10 @@ farm_to_farm_lfm_filename <- here::here("example_data",
 site_licences_filename <-  here::here("example_data",
                                       "licence_types.csv")
 
-# Location of the EA Catchments
+# Location of the CEH catchments
 catchment_layer_filename <- here::here("example_data",
-                                       "catchmnt_50k+TrunkCodes-Filtered-Merged_region.shp")
+                                       "IHU_Catchments",
+                                       "ihu_sections.shp")
 
 # Location of river routes downstream table
 river_downstream_filename <- here::here("example_data",
