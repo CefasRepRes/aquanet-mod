@@ -37,14 +37,16 @@ library(aquanet) # Functions for aquanet model
 # User settings ----------------------------------------------------------------
 
 # Number of cores to be assigned
-  # We recommend using half the number of cores available on your device
+# We recommend using half the number of cores available on your device
 noCores <- detectCores() / 2
 
 # Load in parameters -----------------------------------------------------------
 
 # Location of model parameters file
-model_parameter_filepath <- here::here("example_data",
-                                       "params.yml")
+model_parameter_filepath <- here::here("data",
+                                       "Parameterisation",
+                                       "contact_trace_tests",
+                                       "params_baseline_06_days.yml")
 
 # Load input parameter file
 model_parameters <- yaml::yaml.load_file(model_parameter_filepath)
@@ -106,6 +108,7 @@ farm_to_farm_movements <- read.csv(farm_to_farm_lfm_filename,
 # Load and run components of AquaNet model --------------------------------
 
 source('code/02_CheckCatchmentSiteRelationships.R') # Don't need to run this if you have no duplicates file already
+Sawdde
 source('code/03_CreateContactNetwork.R')
 source('code/04_PrepareModelObjects.R')
 source('code/05_CreateRiverContactMatrices.R', local = TRUE)
