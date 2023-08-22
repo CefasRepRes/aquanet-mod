@@ -52,7 +52,7 @@ vignettes/*.pdf
 /reports/
 /archive/
 /plots/
-/analyses/reports/
+/analyses/
 /example_data/IHU_Catchments/*
 
 # HTML files
