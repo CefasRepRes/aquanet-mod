@@ -5,22 +5,11 @@
 
 # Import data ------------------------------------------------------------------
 
-# Location of the Section 30 Records
-section_30_lfm_filename <- here::here("data",
-                                      "SQL_Files",
-                                      "Salmon - V3",
-                                      "S30LFM11-14.csv")
-
-# Location of the Farm to Farm Records
-farm_to_farm_lfm_filename <- here::here("data",
-                                        "SQL_Files",
-                                        "Salmon - V3",
-                                        "Farm-FarmLFM11-14.csv")
-
-# Site licence types
-site_licences_filename <-  here::here("data",
-                                      "Check_License_Types",
-                                      "SummaryLicensesPerSitewithfarm.csv")
+# Location of the LFM data
+lfm_filename <- here::here("data",
+                           "LFMs",
+                           "modified",
+                           "salmonid_LFMs_2023.csv")
 
 # Location of the CEH catchments
 catchment_layer_filename <- here::here("data",

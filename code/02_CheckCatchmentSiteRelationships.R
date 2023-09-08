@@ -3,40 +3,58 @@
 # Create a data frame of all sites, including duplicates -----------------------
 
 # Site ID
-siteID <- c(section_30_movements$SourceSiteID,
-            farm_to_farm_movements$ScrSiteID,
-            section_30_movements$ReceivingSiteID,
-            farm_to_farm_movements$RecSiteID)
+siteID <- c(lfm_data$Src_Code,
+            lfm_data$Dest_Code)
 
-# Eastings
-easting <- as.integer(c(section_30_movements$SourceEasting,
-                        farm_to_farm_movements$ScrEasting,
-                        section_30_movements$RecEasting,
-                        farm_to_farm_movements$RecEasting))
+## Get eastings and northings ==================================================
 
-# Northings
-northing <- as.integer(c(section_30_movements$SourceNorthing,
-                         farm_to_farm_movements$ScrNorthing,
-                         section_30_movements$RecNorthing,
-                         farm_to_farm_movements$RecNorthing))
+# Get unique NGR site combinations
+site_locations <- data.frame(siteID = siteID,
+                             NGR = c(lfm_data$Src_NGR, lfm_data$Dest_NGR)) %>%
+  unique() %>%
+  data.table()
+
+# Remove and warn of sites with no location
+print(paste0("Number of sites with no location: ",
+        nrow(site_locations[NGR %in% c("", " ")])))
+
+site_locations <- site_locations[NGR != ""][NGR != " "]
+
+# Get eastings and northings
+site_coords <- rnrfa::osg_parse(site_locations$NGR)
 
 # Get site data frame
-site_data_frame <- data.frame(siteID,
-                              easting,
-                              northing,
+site_data_frame <- data.frame(siteID = site_locations$siteID,
+                              easting = site_coords$easting,
+                              northing = site_coords$northing,
                               stringsAsFactors = FALSE)
 
-sites_unique <- plyr::ddply(site_data_frame,
-                            ~siteID + easting + northing,
-                            dplyr::summarise,
-                            noOccurrences = length(siteID))
+# Temporary save
+fwrite(site_data_frame, here::here("data",
+                                   "LFMs",
+                                   "modified",
+                                   "salmonid_sites.csv"))
 
-# Warn of and remove sites without location -----------------------------------
+## Tally number of occurrences =================================================
 
-print(c("Number of sites with no location: ",
-        nrow(sites_unique %>% filter(is.na(easting)))))
+lfm_data <- data.table(lfm_data)
+src_tally <- lfm_data[, .N, by = Src_Code]
+dest_tally <- lfm_data[, .N, by = Dest_Code]
+lfm_tally <- merge(src_tally,
+                   dest_tally,
+                   by.x = "Src_Code",
+                   by.y = "Dest_Code",
+                   all = T)
+lfm_tally[is.na(lfm_tally)] <- 0
+lfm_tally$noOccurrences <- lfm_tally$N.x + lfm_tally$N.y
 
-sites_unique <- sites_unique %>% filter(!is.na(easting))
+## Combine all =================================================================
+
+sites_unique <- merge(site_data_frame,
+                      lfm_tally,
+                      by.x = "siteID",
+                      by.y = "Src_Code",
+                      all.x = T)
 
 # Assign the correct spatial projection to the table ---------------------------
 
@@ -92,30 +110,30 @@ sites_with_catchment <- dplyr::select(sites_with_catchment,
 
 # Incorporate information on whether site feeds river water into its facilities ----
 
-# Get river sources
-river_source <- cbind(farm_to_farm_movements[,c('ScrSiteID','Scr_RiverSourceUsedSince2010')],
-                      farm_to_farm_movements[,c('RecSiteID','Rec_RiverSourceUsedSince2010')])
-colnames(river_source) <- c("SiteID.Source",
-                            "RiverSourceUsedSince2010.Source",
-                            "SiteID.Dest",
-                            "RiverSourceUsedSince2010.Dest")
-
-# Get table of sites and if they've used a river since 2010
-river_source_long <- data.frame(RiverSourceUsedSince2010 = unlist(river_source[,c("RiverSourceUsedSince2010.Source",
-                                                                                  "RiverSourceUsedSince2010.Dest")]),
-                                siteID = unlist(river_source[,c("SiteID.Source","SiteID.Dest")]),
-                                stringsAsFactors = FALSE,
-                                row.names = NULL)
-# Get unique values
-river_source_unique <- unique(river_source_long)
-
-# Save the catchment site relationships -----------------------------------
-
-# Join to river source data       
-sites_with_catchment <- merge(x = sites_with_catchment,
-                              y = river_source_unique,
-                              by = c("siteID"),
-                              all.x = TRUE)
+# # Get river sources
+# river_source <- cbind(farm_to_farm_movements[,c('ScrSiteID','Scr_RiverSourceUsedSince2010')],
+#                       farm_to_farm_movements[,c('RecSiteID','Rec_RiverSourceUsedSince2010')])
+# colnames(river_source) <- c("SiteID.Source",
+#                             "RiverSourceUsedSince2010.Source",
+#                             "SiteID.Dest",
+#                             "RiverSourceUsedSince2010.Dest")
+# 
+# # Get table of sites and if they've used a river since 2010
+# river_source_long <- data.frame(RiverSourceUsedSince2010 = unlist(river_source[,c("RiverSourceUsedSince2010.Source",
+#                                                                                   "RiverSourceUsedSince2010.Dest")]),
+#                                 siteID = unlist(river_source[,c("SiteID.Source","SiteID.Dest")]),
+#                                 stringsAsFactors = FALSE,
+#                                 row.names = NULL)
+# # Get unique values
+# river_source_unique <- unique(river_source_long)
+# 
+# # Save the catchment site relationships -----------------------------------
+# 
+# # Join to river source data       
+# sites_with_catchment <- merge(x = sites_with_catchment,
+#                               y = river_source_unique,
+#                               by = c("siteID"),
+#                               all.x = TRUE)
 
 # Deal with duplicates ---------------------------------------------------------
 

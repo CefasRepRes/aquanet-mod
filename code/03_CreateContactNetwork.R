@@ -8,39 +8,22 @@ site_locs_dupes_removed <- read.csv(site_locs_duplicates_removed_filename,
 
 # Merge LFMs and site locations
 
-# Section 30 movements - source
-section_30_movements <- merge(x = section_30_movements,
-                              y = site_locs_dupes_removed,
-                              all.x = TRUE,
-                              sort = TRUE,
-                              by.x = "SourceSiteID",
-                              by.y = "siteID")
-
-# Section 30 movements - receiving
-section_30_movements <- merge(x = section_30_movements,
-                              y = site_locs_dupes_removed,
-                              all.x = TRUE,
-                              sort = TRUE,
-                              by.x = "ReceivingSiteID",
-                              by.y = "siteID",
-                              suffixes = c('.Source','.Receiving'))
-
 # Farm to farm movements - source
-farm_movements <- merge(x = farm_to_farm_movements,
-                        y = site_locs_dupes_removed,
-                        all.x = TRUE,
-                        sort = TRUE,
-                        by.x = "ScrSiteID",
-                        by.y = "siteID")
+lfms <- merge(x = lfm_data,
+              y = site_locs_dupes_removed,
+              all.x = TRUE,
+              sort = TRUE,
+              by.x = "Src_Code",
+              by.y = "siteID")
 
 # Farm to farm movements - receiving
-farm_movements <- merge(x = farm_movements,
-                        y = site_locs_dupes_removed,
-                        all.x = TRUE,
-                        sort = TRUE,
-                        by.x = "RecSiteID",
-                        by.y = "siteID",
-                        suffixes = c('.Source','.Receiving'))
+lfms <- merge(x = lfms,
+              y = site_locs_dupes_removed,
+              all.x = TRUE,
+              sort = TRUE,
+              by.x = "Dest_Code",
+              by.y = "siteID",
+              suffixes = c('.Source','.Receiving'))
 
 # Remove any records that have not been matched against a catchment ------------
 
@@ -48,63 +31,39 @@ farm_movements <- merge(x = farm_movements,
 
 ## Section 30 ==================================================================
 
-sec_30_no_catchment <- section_30_movements %>%
-  dplyr::filter(is.na(S_ID.Source)) %>%
-  dplyr::filter(is.na(S_ID.Receiving))
+lfms_no_catchment <- lfms[is.na(S_ID.Source) |
+                            is.na(S_ID.Receiving)]
 
-section_30_movements <- section_30_movements %>%
-  dplyr::filter(!is.na(S_ID.Source)) %>%
-  dplyr::filter(!is.na(S_ID.Receiving))
+lfms <- lfms[!is.na(S_ID.Source)][!is.na(S_ID.Receiving)]
 
-message(nrow(sec_30_no_catchment), " section 30 movements removed without catchment")
+message(paste("There are", nrow(lfms_no_catchment), "LFMs with no catchment assigned."))
 
-## Farm ========================================================================
+# Convert date to R compatible format ------------------------------------------
 
-farm_move_no_catchment <- farm_movements %>%
-  dplyr::filter(is.na(S_ID.Source)) %>%
-  dplyr::filter(is.na(S_ID.Receiving))
-
-farm_movements <- farm_movements %>%
-  dplyr::filter(!is.na(S_ID.Source)) %>%
-  dplyr::filter(!is.na(S_ID.Receiving))
-
-message(nrow(farm_move_no_catchment), " farm movements removed without catchment")
-
-# Convert date to R compatible format for section 30 records -------------------
-
-section_30_movements$ConsentStart <- as.Date(section_30_movements$ConsentStart, 
-                                             format = "%d/%m/%Y")
-section_30_movements$ConsentStartYear <- as.character(section_30_movements$ConsentStart, 
-                                                      format = "%Y")
+lfms$MovementDate <- as.Date(lfms$MovementDate, 
+                             format = "%d/%m/%Y")
+lfms$MovementYear <- as.character(lfms$MovementDate, 
+                                  format = "%Y")
 
 # Combine section 30 and farm LFMs into a single data frame --------------------
 
-combined_movements <- data.frame(scrSiteID = c(section_30_movements$SourceSiteID,
-                                               farm_movements$ScrSiteID),
-                                 recSiteID = c(section_30_movements$ReceivingSiteID,
-                                               farm_movements$RecSiteID),
-                                 scrPersonID = c(section_30_movements$SourcePersonID,
-                                                 farm_movements$ScrPersonID),
-                                 recPersonID = c(section_30_movements$ReceivingPersonID,
-                                                 farm_movements$DestFarmPersonID),
-                                 scrCode = c(section_30_movements$SourceCode,
-                                             farm_movements$Scr_Code),
-                                 recCode = c(section_30_movements$ReceivingCode,
-                                             farm_movements$Rec_Code),
-                                 scrCatchmentID = c(section_30_movements$S_ID.Source,
-                                                    farm_movements$S_ID.Source),
-                                 recCatchmentID = c(section_30_movements$S_ID.Receiving,
-                                                    farm_movements$S_ID.Receiving),
-                                 year = c(section_30_movements$ConsentStartYear,
-                                          farm_movements$ProdYear),
-                                 reference = c(section_30_movements$Refno,
-                                               farm_movements$ProductionID))
+combined_movements <- lfms[, .(Src_Code,
+                               Dest_Code,
+                               S_ID.Source,
+                               S_ID.Receiving,
+                               MovementYear,
+                               ConsignmentID)]
+colnames(combined_movements) <- c("scrSiteID",
+                                  "recSiteID",
+                                  "scrCatchmentID",
+                                  "recCatchmentID",
+                                  "year",
+                                  "reference")
 
 # Generate igraph of all LFMs --------------------------------------------------
 
 # Combine section 30 and farm LFMs
-combined_movement_ids <- combined_movements %>% dplyr::select(scrSiteID,
-                                                              recSiteID)
+combined_movement_ids <- combined_movements[, .(scrSiteID, recSiteID)]
 combined_movement_ids <- as.matrix(combined_movement_ids)
 
 # Create igraph
@@ -126,11 +85,8 @@ igraph::E(combined_movements_graph)$withinCatchment <-
   igraph::E(combined_movements_graph)$scrCatchmentID == igraph::E(combined_movements_graph)$recCatchmentID
 
 # Number of movements
-   # Farm to farm = take from database
-   # Section 30 = always counts as one
-igraph::E(combined_movements_graph)$movements <- as.numeric(c(rep(1, dim(section_30_movements)[1]),
-                                                              farm_movements[,c('NumberOfMovementsSource')]))
-igraph::E(combined_movements_graph)$movements[E(combined_movements_graph)$movements == -1] <- 1
+  # TODO: decide whether to do this by consignment or by number of fish
+igraph::E(combined_movements_graph)$movements <- 1
 
 # Transfer attributes from edge to vertices ------------------------------------
 
@@ -139,11 +95,11 @@ vertex_matrix <- igraph::get.edges(graph = combined_movements_graph,
                                    es = igraph::E(combined_movements_graph))
 
 # Define names of vertices to add
-edge_columns <- c("siteID", "PersonID", "code", "CatchmentID")
+edge_columns <- c("siteID", "CatchmentID")
 
 for (col in edge_columns) {
   # Make two names title case as per original code
-  if (col == "siteID" | col == "code") {
+  if (col == "siteID") {
     edgeName <- gsub("(^[[:alpha:]])", "\\U\\1", col, perl=TRUE)
   } else {
     edgeName <- col
@@ -162,70 +118,60 @@ for (col in edge_columns) {
     combined_movements[[paste0("rec", edgeName)]]
 }
 
-# Add site category ------------------------------------------------------------
+# Add site country -------------------------------------------------------------
 
-# Load
-site_category <- read.csv(site_licences_filename, 
-                          header = TRUE, stringsAsFactors = FALSE)
+# Get country
+site_countries <- data.frame(siteID = c(lfms$Src_Code, lfms$Dest_Code),
+                             country = c(lfms$Src_Country, lfms$Dest_Country)) %>%
+  unique() 
 
-# Check if there are any sites without a category assigned 
-unique_code_ids <- unique(x = c(igraph::E(combined_movements_graph)$scrCode,
-                              igraph::E(combined_movements_graph)$recCode))
+# Correct GBE
+site_countries$country <- gsub("GBE", "England", site_countries$country)
 
-sites_no_category <- unique_code_ids[!unique_code_ids %in% site_category$Code]
+# Correct those missing countries
+for(i in 1:nrow(site_countries)){
+  if(!(site_countries$country[i] %in% c("England", "Wales", "Scotland"))){
+    site_countries$country[i] <- readline(prompt = paste("Enter the correct country for site", site_countries$siteID[i], ": "))
+  }
+}
 
-if(length(sites_no_category) != 0) warning(paste(
-  length(sites_no_category), "sites do not have a category assigned"))
-
-# Create a data frame of site categories
-site_categories_ordered <- data.frame(scrCode = igraph::E(combined_movements_graph)$scrCode,
-                                      recCode = igraph::E(combined_movements_graph)$recCode,
-                                      order = 1:igraph::ecount(combined_movements_graph),
-                                      stringsAsFactors = FALSE)
+# Create a data frame of site IDs
+site_countries_ordered <- data.frame(scrCode = igraph::E(combined_movements_graph)$scrSiteID,
+                                     recCode = igraph::E(combined_movements_graph)$recSiteID,
+                                     order = 1:igraph::ecount(combined_movements_graph),
+                                     stringsAsFactors = FALSE)
 
 # Merge with site categories
    # Do twice for source and receiving
-site_categories_ordered <- merge(x = site_categories_ordered,
-                                 y = site_category,
+site_countries_ordered <- merge(x = site_countries_ordered,
+                                 y = site_countries,
                                  by.x = c('scrCode'),
-                                 by.y = c('Code'))
+                                 by.y = c('siteID'))
 
-site_categories_ordered <- merge(x = site_categories_ordered,
-                                 y = site_category,
+site_countries_ordered <- merge(x = site_countries_ordered,
+                                 y = site_countries,
                                  by.x = c('recCode'),
-                                 by.y = c('Code'),
+                                 by.y = c('siteID'),
                                  suffixes = c('.scr','.rec'))
 
-site_categories_ordered <- site_categories_ordered[order(site_categories_ordered$order),]
+site_countries_ordered <- site_countries_ordered[order(site_countries_ordered$order),]
 
-# Add site type to igraph edge -------------------------------------------------
+# TODO: classify sites
+
+# Add site country to igraph edge ----------------------------------------------
 
 # Add as categorical
-igraph::E(combined_movements_graph)$scrType <- site_categories_ordered$Category.scr
-igraph::E(combined_movements_graph)$recType <- site_categories_ordered$Category.rec
-
-# Get site types
-type_columns <- colnames(site_categories_ordered)
-
-# Filter those that start with small medium or large
-type_columns <- sort(type_columns[grepl("^Small.|^Medium.|^Large.", type_columns)])
-
-# Add site type to edges of igraph
-for (type in type_columns) {
-  combined_movements_graph <- igraph::set_edge_attr(graph = combined_movements_graph,
-                                                    name = tolower(type), #lowercase name
-                                                    value = site_categories_ordered[[type]])
-}
-
+igraph::E(combined_movements_graph)$scrCountry <- site_countries_ordered$country.scr
+igraph::E(combined_movements_graph)$recCountry <- site_countries_ordered$country.rec
 
 # Transfer information on the site's category from edges to vertices -----------
 
 # As categorical
-igraph::V(combined_movements_graph)[vertex_matrix[,1]]$type <- igraph::E(combined_movements_graph)$scrType
-igraph::V(combined_movements_graph)[vertex_matrix[,2]]$type <- igraph::E(combined_movements_graph)$recType
+igraph::V(combined_movements_graph)[vertex_matrix[,1]]$country <- igraph::E(combined_movements_graph)$scrCountry
+igraph::V(combined_movements_graph)[vertex_matrix[,2]]$country <- igraph::E(combined_movements_graph)$recCountry
 
 # Define names of vertices to add
-type_columns_uniq <- unique(gsub("*.rec|.scr", "", type_columns))
+type_columns_uniq <- data.frame(col = "country")
 
 for (col in type_columns_uniq) {
 
@@ -233,24 +179,24 @@ for (col in type_columns_uniq) {
   igraph::vertex_attr(combined_movements_graph,
                       name = paste0(tolower(col)),
                       index = igraph::V(combined_movements_graph)[vertex_matrix[ , 1]]) <-
-    site_categories_ordered[[paste0(col, ".scr")]]
+    site_countries_ordered[[paste0(col, ".scr")]]
 
   # Receivers - set vertex attribute
   igraph::vertex_attr(combined_movements_graph,
                       name = paste0(tolower(col)),
                       index = igraph::V(combined_movements_graph)[vertex_matrix[ , 2]]) <-
-    site_categories_ordered[[paste0(col, ".rec")]]
+    site_countries_ordered[[paste0(col, ".rec")]]
 }
 
 
-# Remove any foreign sites -----------------------------------------------------
+# Remove any Scottish sites ----------------------------------------------------
 
-foreign_sites <- igraph::V(combined_movements_graph)[igraph::V(combined_movements_graph)$type == "Foreign"]
+scottish_sites <- igraph::V(combined_movements_graph)[igraph::V(combined_movements_graph)$country == "Scotland"]
 
 combined_movements_graph <- igraph::delete.vertices(graph = combined_movements_graph, 
-                                                    v = foreign_sites)
-if(length(foreign_sites) != 0) message(paste("Removed", length(foreign_sites),
-                                             "foreign sites from contact network"))
+                                                    v = scottish_sites)
+if(length(scottish_sites) != 0) message(paste("Removed", length(scottish_sites),
+                                             "Scottish sites from contact network"))
 
 # Tidy igraph ------------------------------------------------------------------
 
