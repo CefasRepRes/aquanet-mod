@@ -86,5 +86,8 @@ vignettes/*.pdf
 # Modified script for POD
 /code/RunModelCommandLine_POD.R
 
+# File path script
+/code/01_SetFilePaths.R
+
 # Zipped files
 *.zip
