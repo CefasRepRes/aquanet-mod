@@ -3,40 +3,52 @@
 # Create a data frame of all sites, including duplicates -----------------------
 
 # Site ID
-siteID <- c(section_30_movements$SourceSiteID,
-            farm_to_farm_movements$ScrSiteID,
-            section_30_movements$ReceivingSiteID,
-            farm_to_farm_movements$RecSiteID)
+siteID <- c(lfm_data$Src_Code,
+            lfm_data$Dest_Code)
 
-# Eastings
-easting <- as.integer(c(section_30_movements$SourceEasting,
-                        farm_to_farm_movements$ScrEasting,
-                        section_30_movements$RecEasting,
-                        farm_to_farm_movements$RecEasting))
+## Get eastings and northings ==================================================
 
-# Northings
-northing <- as.integer(c(section_30_movements$SourceNorthing,
-                         farm_to_farm_movements$ScrNorthing,
-                         section_30_movements$RecNorthing,
-                         farm_to_farm_movements$RecNorthing))
+# Get unique NGR site combinations
+site_locations <- data.frame(siteID = siteID,
+                             NGR = c(lfm_data$Src_NGR, lfm_data$Dest_NGR)) %>%
+  unique() %>%
+  data.table()
+
+# Remove and warn of sites with no location
+print(paste0("Number of sites with no location: ",
+        nrow(site_locations[NGR %in% c("", " ")])))
+
+site_locations <- site_locations[NGR != ""][NGR != " "]
+
+# Get eastings and northings
+site_coords <- rnrfa::osg_parse(site_locations$NGR)
 
 # Get site data frame
-site_data_frame <- data.frame(siteID,
-                              easting,
-                              northing,
+site_data_frame <- data.frame(siteID = site_locations$siteID,
+                              easting = site_coords$easting,
+                              northing = site_coords$northing,
                               stringsAsFactors = FALSE)
 
-sites_unique <- plyr::ddply(site_data_frame,
-                            ~siteID + easting + northing,
-                            dplyr::summarise,
-                            noOccurrences = length(siteID))
+## Tally number of occurrences =================================================
 
-# Warn of and remove sites without location -----------------------------------
+lfm_data <- data.table(lfm_data)
+src_tally <- lfm_data[, .N, by = Src_Code]
+dest_tally <- lfm_data[, .N, by = Dest_Code]
+lfm_tally <- merge(src_tally,
+                   dest_tally,
+                   by.x = "Src_Code",
+                   by.y = "Dest_Code",
+                   all = T)
+lfm_tally[is.na(lfm_tally)] <- 0
+lfm_tally$noOccurrences <- lfm_tally$N.x + lfm_tally$N.y
 
-print(c("Number of sites with no location: ",
-        nrow(sites_unique %>% filter(is.na(easting)))))
+## Combine all =================================================================
 
-sites_unique <- sites_unique %>% filter(!is.na(easting))
+sites_unique <- merge(site_data_frame,
+                      lfm_tally,
+                      by.x = "siteID",
+                      by.y = "Src_Code",
+                      all.x = T)
 
 # Assign the correct spatial projection to the table ---------------------------
 
@@ -62,66 +74,75 @@ sites_within_catchment_id <- sf::st_join(x = sites_unique,
                                          y = catchment_outlines_BNG,
                                          join = st_within,
                                          sparse = TRUE, # Returns a sparse matrix (data frame in this case)
-                                         remove = FALSE) # Keep entries which are outside of any catchment
+                                         remove = FALSE) %>% # Keep entries which are outside of any catchment
+  data.table()
 
 # Get sites without a catchment
-sites_without_catchment_id <- dplyr::filter(sites_within_catchment_id, is.na(RIVER))
+sites_without_catchment_id <- sites_within_catchment_id[is.na(RIVER)]
 
-print(c("Number of sites with no catchment: ",
-        nrow(sites_without_catchment_id)))
+print(paste("There are", nrow(sites_without_catchment_id), "sites without a catchment"))
 
 # Remove sites without a catchment
-sites_within_catchment_id <- dplyr::filter(sites_within_catchment_id, !is.na(RIVER))
+sites_within_catchment_id <- sites_within_catchment_id[!is.na(RIVER)]
 
 # Tidy the table of site to catchment relationships ----------------------------
 
 # Parse out the geometry (eastings and northings)
-sites_with_catchment <- sites_within_catchment_id %>% 
-  dplyr::mutate(easting = sf::st_coordinates(.)[, 1],
-                northing = sf::st_coordinates(.)[, 2])
-
-# Return to a data frame format
-sites_with_catchment <- sf::st_set_geometry(sites_with_catchment, NULL)
+sites_within_catchment_id[, easting := sf::st_coordinates(geometry)[, 1]][, northing := sf::st_coordinates(geometry)[, 2]]
 
 # Select only those variables we are interested in
-sites_with_catchment <- dplyr::select(sites_with_catchment,
-                                      siteID, noOccurrences,
-                                      S_ID, RIVER,
-                                      S_AREA_KM2, 
-                                      easting, northing)
+cols <- c("siteID", "noOccurrences",
+          "S_ID", "RIVER",
+          "S_AREA_KM2", 
+          "easting", "northing")
+sites_within_catchment_id <- sites_within_catchment_id[, ..cols]
 
 # Incorporate information on whether site feeds river water into its facilities ----
 
-# Get river sources
-river_source <- cbind(farm_to_farm_movements[,c('ScrSiteID','Scr_RiverSourceUsedSince2010')],
-                      farm_to_farm_movements[,c('RecSiteID','Rec_RiverSourceUsedSince2010')])
-colnames(river_source) <- c("SiteID.Source",
-                            "RiverSourceUsedSince2010.Source",
-                            "SiteID.Dest",
-                            "RiverSourceUsedSince2010.Dest")
+# # Get river sources
+# river_source <- cbind(farm_to_farm_movements[,c('ScrSiteID','Scr_RiverSourceUsedSince2010')],
+#                       farm_to_farm_movements[,c('RecSiteID','Rec_RiverSourceUsedSince2010')])
+# colnames(river_source) <- c("SiteID.Source",
+#                             "RiverSourceUsedSince2010.Source",
+#                             "SiteID.Dest",
+#                             "RiverSourceUsedSince2010.Dest")
+# 
+# # Get table of sites and if they've used a river since 2010
+# river_source_long <- data.frame(RiverSourceUsedSince2010 = unlist(river_source[,c("RiverSourceUsedSince2010.Source",
+#                                                                                   "RiverSourceUsedSince2010.Dest")]),
+#                                 siteID = unlist(river_source[,c("SiteID.Source","SiteID.Dest")]),
+#                                 stringsAsFactors = FALSE,
+#                                 row.names = NULL)
+# # Get unique values
+# river_source_unique <- unique(river_source_long)
+# 
+# # Save the catchment site relationships -----------------------------------
+# 
+# # Join to river source data       
+# sites_with_catchment <- merge(x = sites_with_catchment,
+#                               y = river_source_unique,
+#                               by = c("siteID"),
+#                               all.x = TRUE)
 
-# Get table of sites and if they've used a river since 2010
-river_source_long <- data.frame(RiverSourceUsedSince2010 = unlist(river_source[,c("RiverSourceUsedSince2010.Source",
-                                                                                  "RiverSourceUsedSince2010.Dest")]),
-                                siteID = unlist(river_source[,c("SiteID.Source","SiteID.Dest")]),
-                                stringsAsFactors = FALSE,
-                                row.names = NULL)
-# Get unique values
-river_source_unique <- unique(river_source_long)
+# Incorporate information on whether or not a site is in a tidal location ------
 
-# Save the catchment site relationships -----------------------------------
+sites_with_catchment <- sites_within_catchment_id
 
-# Join to river source data       
-sites_with_catchment <- merge(x = sites_with_catchment,
-                              y = river_source_unique,
-                              by = c("siteID"),
-                              all.x = TRUE)
+# Load list of tidal sites
+tidal_sites <- fread(tidal_filename)
+
+# Mark whether or not sites are tidal (logical)
+sites_with_catchment$tidal <- ifelse(sites_with_catchment$siteID %in% tidal_sites$siteID,
+                                     TRUE, FALSE)
 
 # Deal with duplicates ---------------------------------------------------------
 
 # Extract duplicated sites - used T and F to get both occurrences of duplication
 duplicates <- rbind(filter(sites_with_catchment, duplicated(siteID, fromLast = T)),
                     filter(sites_with_catchment, duplicated(siteID, fromLast = F)))
+
+duplicates <- rbind(sites_with_catchment[duplicated(siteID, fromLast = T)],
+                    sites_with_catchment[duplicated(siteID, fromLast = F)])
 
 # Get list of duplicated ids
 dupe_site_id <- unique(duplicates$siteID)
@@ -133,9 +154,6 @@ organised_dupes <- data.frame()
 if(nrow(duplicates) > 0){
   organised_dupes <- data.frame()
   for(i in 1:length(dupe_site_id)){
-    pair <- dplyr::filter(duplicates, siteID == duplicates$siteID[i])
-    # Only run if duplicates are present
-    
     pair <- dplyr::filter(duplicates, siteID == duplicates$siteID[i])
     # If in the same catchment, give easting/northing preference to 
     # the site with the highest number of occurrences

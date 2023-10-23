@@ -45,8 +45,8 @@ noCores <- detectCores() / 2
 # Location of model parameters file
 model_parameter_filepath <- here::here("data",
                                        "Parameterisation",
-                                       "contact_trace_tests",
-                                       "params_baseline_06_days.yml")
+                                       "scenarios",
+                                       "params_baseline.yml")
 
 # Load input parameter file
 model_parameters <- yaml::yaml.load_file(model_parameter_filepath)
@@ -95,21 +95,16 @@ message(paste("Results are saved in:", dirs[["results"]]))
 
 # Load in live fish movement (LFM) data ----------------------------------------
 
-# Section 30
-
-section_30_movements <- read.csv(section_30_lfm_filename, 
-                                 colClasses = "character") 
-
-# Farm-to-farm
-
-farm_to_farm_movements <- read.csv(farm_to_farm_lfm_filename, 
-                                   colClasses = "character") 
+lfm_data <- read.csv(lfm_filename, 
+                     colClasses = "character") 
 
 # Load and run components of AquaNet model --------------------------------
 
 source('code/02_CheckCatchmentSiteRelationships.R') # Don't need to run this if you have no duplicates file already
-Sawdde
 source('code/03_CreateContactNetwork.R')
+England
+England
+England
 source('code/04_PrepareModelObjects.R')
 source('code/05_CreateRiverContactMatrices.R', local = TRUE)
 source('code/06_RunCoreSimulationLoop-Parallel.R', local = TRUE);beep()
