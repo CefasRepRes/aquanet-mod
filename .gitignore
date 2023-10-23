@@ -87,7 +87,7 @@ vignettes/*.pdf
 /code/RunModelCommandLine_POD.R
 
 # File path script
-/code/01_SetFilePaths.R
+/code/01_SetFilePaths_working.R
 
 # Zipped files
 *.zip
