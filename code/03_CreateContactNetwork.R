@@ -4,7 +4,10 @@
 
 # Import site locations
 site_locs_dupes_removed <- read.csv(site_locs_duplicates_removed_filename,
-                                    stringsAsFactors = FALSE)[,c('siteID','S_ID','RIVER')]
+                                    stringsAsFactors = FALSE)[,c("siteID",
+                                                                 "S_ID",
+                                                                 "RIVER", 
+                                                                 "tidal")]
 
 # Merge LFMs and site locations
 
@@ -26,10 +29,7 @@ lfms <- merge(x = lfms,
               suffixes = c('.Source','.Receiving'))
 
 # Remove any records that have not been matched against a catchment ------------
-
-# Retain record of those movements
-
-## Section 30 ==================================================================
+  # Retain record of those movements
 
 lfms_no_catchment <- lfms[is.na(S_ID.Source) |
                             is.na(S_ID.Receiving)]
@@ -45,24 +45,28 @@ lfms$MovementDate <- as.Date(lfms$MovementDate,
 lfms$MovementYear <- as.character(lfms$MovementDate, 
                                   format = "%Y")
 
-# Combine section 30 and farm LFMs into a single data frame --------------------
+# Organise data frame ----------------------------------------------------------
 
 combined_movements <- lfms[, .(Src_Code,
                                Dest_Code,
                                S_ID.Source,
                                S_ID.Receiving,
                                MovementYear,
-                               ConsignmentID)]
+                               ConsignmentID,
+                               tidal.Source,
+                               tidal.Receiving)]
 colnames(combined_movements) <- c("scrSiteID",
                                   "recSiteID",
                                   "scrCatchmentID",
                                   "recCatchmentID",
                                   "year",
-                                  "reference")
+                                  "reference",
+                                  "scrTidal",
+                                  "recTidal")
 
 # Generate igraph of all LFMs --------------------------------------------------
 
-# Combine section 30 and farm LFMs
+# Combine source and receiving LFMs
 combined_movement_ids <- combined_movements[, .(scrSiteID, recSiteID)]
 combined_movement_ids <- as.matrix(combined_movement_ids)
 
@@ -95,7 +99,7 @@ vertex_matrix <- igraph::get.edges(graph = combined_movements_graph,
                                    es = igraph::E(combined_movements_graph))
 
 # Define names of vertices to add
-edge_columns <- c("siteID", "CatchmentID")
+edge_columns <- c("siteID", "CatchmentID", "tidal")
 
 for (col in edge_columns) {
   # Make two names title case as per original code
@@ -200,7 +204,7 @@ if(length(scottish_sites) != 0) message(paste("Removed", length(scottish_sites),
 
 # Tidy igraph ------------------------------------------------------------------
 
-# Remove the self loops and multiple edges from the 2010 to 2012 graph
+# Remove any self loops and multiple edges 
 combined_movements_simplified <- igraph::simplify(combined_movements_graph, 
                                           remove.multiple = TRUE, 
                                           remove.loops = TRUE,
@@ -214,10 +218,11 @@ combined_movements_simplified <- igraph::simplify(combined_movements_graph,
                                                                 reference = "concat",
                                                                 type = "first",
                                                                 movements = "sum",
+                                                                scrTidal = "first",
+                                                                recTidal = "first",
                                                                 "ignore"))
 
 # Remove any vertices with a node degree of zero (i.e. unconnected vertices)
-
 node_degree <- igraph::degree(combined_movements_simplified)
 unconnected_nodes <- node_degree[node_degree == 0]
 
@@ -229,7 +234,6 @@ combined_movements_simplified <- igraph::delete_vertices(graph = combined_moveme
                                                          v = names(unconnected_nodes))
 
 # Save graph 
-
 write.graph(combined_movements_simplified, 
             file = contact_network_filename, 
             format = "graphml")

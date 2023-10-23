@@ -29,12 +29,6 @@ site_data_frame <- data.frame(siteID = site_locations$siteID,
                               northing = site_coords$northing,
                               stringsAsFactors = FALSE)
 
-# Temporary save
-fwrite(site_data_frame, here::here("data",
-                                   "LFMs",
-                                   "modified",
-                                   "salmonid_sites.csv"))
-
 ## Tally number of occurrences =================================================
 
 lfm_data <- data.table(lfm_data)
@@ -80,33 +74,28 @@ sites_within_catchment_id <- sf::st_join(x = sites_unique,
                                          y = catchment_outlines_BNG,
                                          join = st_within,
                                          sparse = TRUE, # Returns a sparse matrix (data frame in this case)
-                                         remove = FALSE) # Keep entries which are outside of any catchment
+                                         remove = FALSE) %>% # Keep entries which are outside of any catchment
+  data.table()
 
 # Get sites without a catchment
-sites_without_catchment_id <- dplyr::filter(sites_within_catchment_id, is.na(RIVER))
+sites_without_catchment_id <- sites_within_catchment_id[is.na(RIVER)]
 
-print(c("Number of sites with no catchment: ",
-        nrow(sites_without_catchment_id)))
+print(paste("There are", nrow(sites_without_catchment_id), "sites without a catchment"))
 
 # Remove sites without a catchment
-sites_within_catchment_id <- dplyr::filter(sites_within_catchment_id, !is.na(RIVER))
+sites_within_catchment_id <- sites_within_catchment_id[!is.na(RIVER)]
 
 # Tidy the table of site to catchment relationships ----------------------------
 
 # Parse out the geometry (eastings and northings)
-sites_with_catchment <- sites_within_catchment_id %>% 
-  dplyr::mutate(easting = sf::st_coordinates(.)[, 1],
-                northing = sf::st_coordinates(.)[, 2])
-
-# Return to a data frame format
-sites_with_catchment <- sf::st_set_geometry(sites_with_catchment, NULL)
+sites_within_catchment_id[, easting := sf::st_coordinates(geometry)[, 1]][, northing := sf::st_coordinates(geometry)[, 2]]
 
 # Select only those variables we are interested in
-sites_with_catchment <- dplyr::select(sites_with_catchment,
-                                      siteID, noOccurrences,
-                                      S_ID, RIVER,
-                                      S_AREA_KM2, 
-                                      easting, northing)
+cols <- c("siteID", "noOccurrences",
+          "S_ID", "RIVER",
+          "S_AREA_KM2", 
+          "easting", "northing")
+sites_within_catchment_id <- sites_within_catchment_id[, ..cols]
 
 # Incorporate information on whether site feeds river water into its facilities ----
 
@@ -135,11 +124,25 @@ sites_with_catchment <- dplyr::select(sites_with_catchment,
 #                               by = c("siteID"),
 #                               all.x = TRUE)
 
+# Incorporate information on whether or not a site is in a tidal location ------
+
+sites_with_catchment <- sites_within_catchment_id
+
+# Load list of tidal sites
+tidal_sites <- fread(tidal_filename)
+
+# Mark whether or not sites are tidal (logical)
+sites_with_catchment$tidal <- ifelse(sites_with_catchment$siteID %in% tidal_sites$siteID,
+                                     TRUE, FALSE)
+
 # Deal with duplicates ---------------------------------------------------------
 
 # Extract duplicated sites - used T and F to get both occurrences of duplication
 duplicates <- rbind(filter(sites_with_catchment, duplicated(siteID, fromLast = T)),
                     filter(sites_with_catchment, duplicated(siteID, fromLast = F)))
+
+duplicates <- rbind(sites_with_catchment[duplicated(siteID, fromLast = T)],
+                    sites_with_catchment[duplicated(siteID, fromLast = F)])
 
 # Get list of duplicated ids
 dupe_site_id <- unique(duplicates$siteID)
@@ -151,9 +154,6 @@ organised_dupes <- data.frame()
 if(nrow(duplicates) > 0){
   organised_dupes <- data.frame()
   for(i in 1:length(dupe_site_id)){
-    pair <- dplyr::filter(duplicates, siteID == duplicates$siteID[i])
-    # Only run if duplicates are present
-    
     pair <- dplyr::filter(duplicates, siteID == duplicates$siteID[i])
     # If in the same catchment, give easting/northing preference to 
     # the site with the highest number of occurrences
