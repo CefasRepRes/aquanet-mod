@@ -70,44 +70,44 @@ contact_probability_matrix_top_sites_removed <-
 # Get site categories ----------------------------------------------------------
    # Returns 1 for sites being that category, and 0 for site not being that category
 
-# Create list of all possible site types
-type_list <- c("smallhatch", "largehatch",
-               "smallrestock", "mediumrestock", "largerestock",
-               "smalltable", "mediumtable", "largetable",
-               "smallongrow", "mediumongrow", "largeongrow",
-               "smallfish", "mediumfish", "largefish")
-
-# Save site ID
-type_vector <- igraph::vertex_attr(graph_full, "siteID")
-type_vector <- as.numeric(type_vector)
-
-# Get site type vectors
-for(i in 1:length(type_list)){
-   t_vector <- aquanet::createSiteTypeVector(graph_full,
-                                             type_list[i])
-   type_vector <- rbind(type_vector, t_vector)
-}
-
-# Format type vector
-type_vector <- t(type_vector)
-colnames(type_vector) <- c("site_code", type_list)
-
-# Add farm vector
-farm_vector <- aquanet::createFarmVector(graph_full)
-type_vector <- cbind(type_vector, farm_vector)
-
-# Check for uncategorised sites
-row_sums <- rowSums(type_vector[, 2:16])
-type_vector <- cbind(type_vector, row_sums)
-
-uncategorised_sites <- dplyr::filter(as.data.frame(type_vector), row_sums == 0)
-if(nrow(uncategorised_sites) > 0) message(paste("There are", nrow(uncategorised_sites), "sites with no type designated"))
-
-# Save the type vector
-
-write.csv(type_vector, here::here(dirs[["results"]],
-                                  "site_types.csv"),
-          row.names = F)
+# # Create list of all possible site types
+# type_list <- c("smallhatch", "largehatch",
+#                "smallrestock", "mediumrestock", "largerestock",
+#                "smalltable", "mediumtable", "largetable",
+#                "smallongrow", "mediumongrow", "largeongrow",
+#                "smallfish", "mediumfish", "largefish")
+# 
+# # Save site ID
+# type_vector <- igraph::vertex_attr(graph_full, "siteID")
+# type_vector <- as.numeric(type_vector)
+# 
+# # Get site type vectors
+# for(i in 1:length(type_list)){
+#    t_vector <- aquanet::createSiteTypeVector(graph_full,
+#                                              type_list[i])
+#    type_vector <- rbind(type_vector, t_vector)
+# }
+# 
+# # Format type vector
+# type_vector <- t(type_vector)
+# colnames(type_vector) <- c("site_code", type_list)
+# 
+# # Add farm vector
+# farm_vector <- aquanet::createFarmVector(graph_full)
+# type_vector <- cbind(type_vector, farm_vector)
+# 
+# # Check for uncategorised sites
+# row_sums <- rowSums(type_vector[, 2:16])
+# type_vector <- cbind(type_vector, row_sums)
+# 
+# uncategorised_sites <- dplyr::filter(as.data.frame(type_vector), row_sums == 0)
+# if(nrow(uncategorised_sites) > 0) message(paste("There are", nrow(uncategorised_sites), "sites with no type designated"))
+# 
+# # Save the type vector
+# 
+# write.csv(type_vector, here::here(dirs[["results"]],
+#                                   "site_types.csv"),
+#           row.names = F)
 
 # Get site to site distances ---------------------------------------------------
 

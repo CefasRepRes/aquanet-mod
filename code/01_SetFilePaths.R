@@ -11,6 +11,12 @@ lfm_filename <- here::here("data",
                            "modified",
                            "salmonid_LFMs_2023.csv")
 
+# Location of tidal site information
+tidal_filename <- here::here("data",
+                             "LFMs",
+                             "modified",
+                             "salmonid_sites_tidal.csv")
+
 # Location of the CEH catchments
 catchment_layer_filename <- here::here("data",
                                        "IHU_Catchments",
