@@ -122,6 +122,12 @@ for (col in edge_columns) {
     combined_movements[[paste0("rec", edgeName)]]
 }
 
+# Create a data frame of site IDs
+sites_ordered <- data.frame(scrCode = igraph::E(combined_movements_graph)$scrSiteID,
+                           recCode = igraph::E(combined_movements_graph)$recSiteID,
+                           order = 1:igraph::ecount(combined_movements_graph),
+                           stringsAsFactors = FALSE)
+
 # Add site country -------------------------------------------------------------
 
 # Get country
@@ -139,15 +145,9 @@ for(i in 1:nrow(site_countries)){
   }
 }
 
-# Create a data frame of site IDs
-site_countries_ordered <- data.frame(scrCode = igraph::E(combined_movements_graph)$scrSiteID,
-                                     recCode = igraph::E(combined_movements_graph)$recSiteID,
-                                     order = 1:igraph::ecount(combined_movements_graph),
-                                     stringsAsFactors = FALSE)
-
 # Merge with site categories
    # Do twice for source and receiving
-site_countries_ordered <- merge(x = site_countries_ordered,
+site_countries_ordered <- merge(x = sites_ordered,
                                  y = site_countries,
                                  by.x = c('scrCode'),
                                  by.y = c('siteID'))
@@ -160,22 +160,56 @@ site_countries_ordered <- merge(x = site_countries_ordered,
 
 site_countries_ordered <- site_countries_ordered[order(site_countries_ordered$order),]
 
-# TODO: classify sites
-
-# Add site country to igraph edge ----------------------------------------------
-
-# Add as categorical
+# Add site country to igraph edge 
 igraph::E(combined_movements_graph)$scrCountry <- site_countries_ordered$country.scr
 igraph::E(combined_movements_graph)$recCountry <- site_countries_ordered$country.rec
 
-# Transfer information on the site's category from edges to vertices -----------
-
-# As categorical
+# Move to vertices
 igraph::V(combined_movements_graph)[vertex_matrix[,1]]$country <- igraph::E(combined_movements_graph)$scrCountry
 igraph::V(combined_movements_graph)[vertex_matrix[,2]]$country <- igraph::E(combined_movements_graph)$recCountry
 
-# Define names of vertices to add
-type_columns_uniq <- data.frame(col = "country")
+# Get farm vector --------------------------------------------------------------
+
+# Get site registerations
+# Do twice for source and destination
+lfm_registers_source <- lfm_data[, .(Src_Code, Scr_AutRegStatus)] %>% unique()
+lfm_registers_dest <- lfm_data[, .(Dest_Code, Dest_AutRegStatus)] %>% unique()
+
+# Mark those registered as farms
+# Do twice for source and destination
+lfm_registers_source$site_type <- ifelse(grepl("FARM", lfm_registers_source$Scr_AutRegStatus) == TRUE,
+                                         "Farm",
+                                         "Other")
+lfm_registers_dest$site_type <- ifelse(grepl("FARM", lfm_registers_dest$Dest_AutRegStatus) == TRUE,
+                                       "Farm",
+                                       "Other")
+
+# Merge with site categories
+# Do twice for source and receiving
+site_types_ordered <- merge(x = sites_ordered,
+                                y = lfm_registers_source,
+                                by.x = c('scrCode'),
+                                by.y = c('Src_Code'))
+
+site_types_ordered <- merge(x = site_types_ordered,
+                            y = lfm_registers_dest,
+                            by.x = c('recCode'),
+                            by.y = c('Dest_Code'),
+                            suffixes = c('.scr','.rec'))
+
+site_types_ordered <- site_types_ordered[order(site_types_ordered$order),]
+
+# Add site type to igraph edge 
+igraph::E(combined_movements_graph)$scrType <- site_types_ordered$site_type.scr
+igraph::E(combined_movements_graph)$recType <- site_types_ordered$site_type.rec
+
+# Move to vertices
+igraph::V(combined_movements_graph)[vertex_matrix[,1]]$type <- igraph::E(combined_movements_graph)$scrType
+igraph::V(combined_movements_graph)[vertex_matrix[,2]]$type <- igraph::E(combined_movements_graph)$recType
+
+
+# Define names of vertices to add ----------------------------------------------
+type_columns_uniq <- c("country", "type")
 
 for (col in type_columns_uniq) {
 
@@ -191,7 +225,6 @@ for (col in type_columns_uniq) {
                       index = igraph::V(combined_movements_graph)[vertex_matrix[ , 2]]) <-
     site_countries_ordered[[paste0(col, ".rec")]]
 }
-
 
 # Remove any Scottish sites ----------------------------------------------------
 
