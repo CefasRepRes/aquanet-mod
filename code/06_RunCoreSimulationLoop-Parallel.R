@@ -37,7 +37,8 @@ options(scipen = 999)
       disease_controls = model_parameters$disease_controls,
       proportion_cullable = model_parameters$proportion_cullable,
       days_before_catchment_restock = model_parameters$days_before_catchment_restock,
-      river_distances_df = river_distances_df
+      river_distances_df = river_distances_df,
+      site_details = site_details_with_model_id
     )
   # }))
 
