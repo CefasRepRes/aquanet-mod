@@ -86,13 +86,8 @@ vignettes/*.pdf
 # Modified script for POD
 /code/RunModelCommandLine_POD.R
 
-<<<<<<< HEAD
 # File path script
 /code/01_SetFilePaths_working.R
-=======
-# Ignore file paths
-/code/01_SetFilePaths.R
->>>>>>> dev_new_lfms_tidal
 
 # Zipped files
 *.zip
