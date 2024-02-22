@@ -185,9 +185,9 @@ lfm_registers_dest$site_type <- ifelse(grepl("FARM", lfm_registers_dest$Dest_Aut
                                        "Other")
 
 # Merge with site categories
-# Do twice for source and receiving
-site_types_ordered <- merge(x = sites_ordered,
-                                y = lfm_registers_source,
+  # Do twice: source and receiving
+site_types_ordered <- merge(x = site_countries_ordered,
+                                y = categorised_sites,
                                 by.x = c('scrCode'),
                                 by.y = c('Src_Code'))
 
