@@ -46,14 +46,14 @@ noCores <- detectCores() / 2
 model_parameter_filepath <- here::here("data",
                                        "Parameterisation",
                                        "scenarios",
-                                       "params_baseline.yml")
+                                       "test.yml")
 
 # Load input parameter file
 model_parameters <- yaml::yaml.load_file(model_parameter_filepath)
 
 # Set file paths
 source(here::here("code",
-                  "01_SetFilePaths.R"))
+                  "01_SetFilePaths_working.R"))
 
 
 # Coordinate reference system (CGS)

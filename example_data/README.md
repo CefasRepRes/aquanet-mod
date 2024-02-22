@@ -24,7 +24,7 @@ You will need to select a catchment shapefile. We currently use the Centre for E
 
 **NB:** these data are randomly generated, and therefore entirely synthetic. Any resemblance to actual aquaculture sites are entirely coincidental.
 
-1.  **sec_30_movements.csv** - live fish movements between registered non-farm (fishery) sites.
-2.  **farm_movements.csv** - live fish movements between farms.
-3.  **licence_types.csv** - farm site types.
-4.  **river_network.csv** - river network via associated site types.
+1.  **lfm_data.csv** - live fish movements between sites.
+2.  **production_data.csv** - data on production type (used to assign table producers).
+3.  **river_network.csv** - river network via associated site types.
+4.  **tidal_sites.csv** - sites within range of a tidal river flow.

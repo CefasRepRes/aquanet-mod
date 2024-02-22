@@ -5,17 +5,17 @@
 
 # Import data ------------------------------------------------------------------
 
-# Location of the Section 30 Records
-section_30_lfm_filename <- here::here("example_data",
-                                      "sec_30_movements.csv")
+# Location of the LFM data
+lfm_filename <- here::here("example_data",
+                           "lfm_data.csv")
 
-# Location of the Farm to Farm Records
-farm_to_farm_lfm_filename <- here::here("example_data",
-                                        "farm_movements.csv")
+# Location of the production data
+production_filename <- here::here("example_data",
+                                  "production_data.csv")
 
-# Site licence types
-site_licences_filename <-  here::here("example_data",
-                                      "licence_types.csv")
+# Location of tidal site information
+tidal_filename <- here::here("example_data",
+                             "tidal_sites.csv")
 
 # Location of the CEH catchments
 catchment_layer_filename <- here::here("example_data",
@@ -30,6 +30,11 @@ river_downstream_filename <- here::here("example_data",
 
 # Outputs folder
 outputs_filepath <- here::here("outputs")
+
+# Location of the categorised sites 
+site_categories_fiename <- here::here("outputs",
+                                      model_parameters$scenario_name,
+                                      "categorisedSites.csv")
 
 # Contact network
 contact_network_filename <- here::here("outputs",
