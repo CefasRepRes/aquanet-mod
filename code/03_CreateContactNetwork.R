@@ -170,38 +170,34 @@ igraph::V(combined_movements_graph)[vertex_matrix[,2]]$country <- igraph::E(comb
 
 # Get farm vector --------------------------------------------------------------
 
-# Get site registerations
-# Do twice for source and destination
-lfm_registers_source <- lfm_data[, .(Src_Code, Scr_AutRegStatus)] %>% unique()
-lfm_registers_dest <- lfm_data[, .(Dest_Code, Dest_AutRegStatus)] %>% unique()
+# Get production data
+production_data <- read.csv(production_filename) %>% data.table()
 
-# Mark those registered as farms
-# Do twice for source and destination
-lfm_registers_source$site_type <- ifelse(grepl("FARM", lfm_registers_source$Scr_AutRegStatus) == TRUE,
-                                         "Farm",
-                                         "Other")
-lfm_registers_dest$site_type <- ifelse(grepl("FARM", lfm_registers_dest$Dest_AutRegStatus) == TRUE,
-                                       "Farm",
-                                       "Other")
+# Get site categories
+categorisedSites(lfm_data = lfm_data,
+                 production_data = production_data,
+                 scenario_name = model_parameters$scenario_name)
+categorised_sites <- read.csv(here::here("outputs",
+                                         model_parameters$scenario_name,
+                                         "categorisedSites.csv"))
 
 # Merge with site categories
   # Do twice: source and receiving
 site_types_ordered <- merge(x = site_countries_ordered,
                                 y = categorised_sites,
                                 by.x = c('scrCode'),
-                                by.y = c('Src_Code'))
-
+                                by.y = c('Code'))
 site_types_ordered <- merge(x = site_types_ordered,
-                            y = lfm_registers_dest,
+                            y = categorised_sites,
                             by.x = c('recCode'),
-                            by.y = c('Dest_Code'),
-                            suffixes = c('.scr','.rec'))
+                            by.y = c('Code'),
+                            suffixes = c(".scr", ".rec"))
 
 site_types_ordered <- site_types_ordered[order(site_types_ordered$order),]
 
 # Add site type to igraph edge 
-igraph::E(combined_movements_graph)$scrType <- site_types_ordered$site_type.scr
-igraph::E(combined_movements_graph)$recType <- site_types_ordered$site_type.rec
+igraph::E(combined_movements_graph)$scrType <- site_types_ordered$Category.scr
+igraph::E(combined_movements_graph)$recType <- site_types_ordered$Category.rec
 
 # Move to vertices
 igraph::V(combined_movements_graph)[vertex_matrix[,1]]$type <- igraph::E(combined_movements_graph)$scrType
