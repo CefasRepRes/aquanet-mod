@@ -183,7 +183,7 @@ categorised_sites <- read.csv(here::here("outputs",
 
 # Merge with site categories
   # Do twice: source and receiving
-site_types_ordered <- merge(x = sites_ordered,
+site_types_ordered <- merge(x = site_countries_ordered,
                                 y = categorised_sites,
                                 by.x = c('scrCode'),
                                 by.y = c('Code'))

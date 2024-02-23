@@ -17,7 +17,8 @@ options(width = 1000)
 
 # List required packages
 pkgs <- c("igraph", "sf", "here", "Matrix", "yaml",
-          "doParallel", "doRNG", "data.table", "dplyr")
+          "doParallel", "doRNG", "data.table", "dplyr",
+          "rnrfa")
 
 # Check whether installed and if not install from CRAN
 for (i in pkgs){
@@ -43,10 +44,8 @@ noCores <- detectCores() / 2
 # Load in parameters -----------------------------------------------------------
 
 # Location of model parameters file
-model_parameter_filepath <- here::here("data",
-                                       "Parameterisation",
-                                       "scenarios",
-                                       "params_baseline.yml")
+model_parameter_filepath <- here::here("example_data",
+                                       "test.yaml")
 
 # Load input parameter file
 model_parameters <- yaml::yaml.load_file(model_parameter_filepath)
@@ -102,9 +101,6 @@ lfm_data <- read.csv(lfm_filename,
 
 source('code/02_CheckCatchmentSiteRelationships.R') # Don't need to run this if you have no duplicates file already
 source('code/03_CreateContactNetwork.R')
-England
-England
-England
 source('code/04_PrepareModelObjects.R')
 source('code/05_CreateRiverContactMatrices.R', local = TRUE)
 source('code/06_RunCoreSimulationLoop-Parallel.R', local = TRUE);beep()
