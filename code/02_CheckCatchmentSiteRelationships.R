@@ -59,13 +59,13 @@ sites_unique <- sf::st_as_sf(sites_unique,
 # Open the polygon file defining each catchment in England and Wales -----------
 
 # Open the catchment layer shapefile
-catchment_outlines <- sf::read_sf(dsn = catchment_layer_filename,
+catchment_outlines_BNG <- sf::read_sf(dsn = catchment_layer_filename,
                                   layer = sub(pattern = "(.*)\\..*$",
                                               replacement = "\\1",
                                               basename(catchment_layer_filename)))
 
 # Transform to British National Grid
-catchment_outlines_BNG <- sf::st_transform(catchment_outlines, crs = BNG_crs)
+#catchment_outlines_BNG <- sf::st_transform(catchment_outlines, crs = BNG_crs) #commented out as already has a crs of BNG
 
 # Match sites to catchments -----------------------------------------------
 
@@ -78,12 +78,12 @@ sites_within_catchment_id <- sf::st_join(x = sites_unique,
   data.table()
 
 # Get sites without a catchment
-sites_without_catchment_id <- sites_within_catchment_id[is.na(RIVER)]
+sites_without_catchment_id <- sites_within_catchment_id[is.na(ESW_CNAM)]
 
 print(paste("There are", nrow(sites_without_catchment_id), "sites without a catchment"))
 
 # Remove sites without a catchment
-sites_within_catchment_id <- sites_within_catchment_id[!is.na(RIVER)]
+sites_within_catchment_id <- sites_within_catchment_id[!is.na(ESW_CNAM)]
 
 # Tidy the table of site to catchment relationships ----------------------------
 
@@ -92,8 +92,8 @@ sites_within_catchment_id[, easting := sf::st_coordinates(geometry)[, 1]][, nort
 
 # Select only those variables we are interested in
 cols <- c("siteID", "noOccurrences",
-          "S_ID", "RIVER",
-          "S_AREA_KM2", 
+          "ESW_CatID", "ESW_CNAM",
+          "Area_km2", 
           "easting", "northing")
 sites_within_catchment_id <- sites_within_catchment_id[, ..cols]
 
@@ -157,25 +157,25 @@ if(nrow(duplicates) > 0){
     pair <- dplyr::filter(duplicates, siteID == duplicates$siteID[i])
     # If in the same catchment, give easting/northing preference to 
     # the site with the highest number of occurrences
-    if(pair$RIVER[1] == pair$RIVER[2] && pair$noOccurrences[1] >= pair$noOccurrences[2]){
+    if(pair$ESW_CNAM[1] == pair$ESW_CNAM[2] && pair$noOccurrences[1] >= pair$noOccurrences[2]){
       pair_merged <- pair[1, ]
       pair_merged$noOccurrences <- pair$noOccurrences[1] + pair$noOccurrences[2]
-    } else if(pair$RIVER[1] == pair$RIVER[2] && pair$noOccurrences[2] > pair$noOccurrences[1]){
+    } else if(pair$ESW_CNAM[1] == pair$ESW_CNAM[2] && pair$noOccurrences[2] > pair$noOccurrences[1]){
       pair_merged <- pair[2, ]
       pair_merged$noOccurrences <- pair$noOccurrences[1] + pair$noOccurrences[2]
     } else {
       # If the catchments don't match, prompt the user to enter the correct catchment name
-      catchment <- readline(prompt = paste("Enter correct river catchment name for site", 
+      catchment <- readline(prompt = paste("Enter correct ESW_CNAM catchment name for site", 
                                            duplicates$siteID[i], 
                                            ": "))
       options <- duplicates %>% dplyr::filter(siteID == duplicates$siteID[i]) %>%
-        dplyr::select(RIVER)
+        dplyr::select(ESW_CNAM)
       options <- as.list(options)
       if(!(catchment %in% options[[1]])){
         stop(paste("The catchment you entered is incorrect or may be misspelled. Your options are:"),
              options)
       }
-      pair_merged <- dplyr::filter(pair, RIVER == catchment)
+      pair_merged <- dplyr::filter(pair, ESW_CNAM == catchment)
     }
     
     # Combine with non-duplicate sites

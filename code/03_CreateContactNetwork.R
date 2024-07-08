@@ -5,8 +5,8 @@
 # Import site locations
 site_locs_dupes_removed <- read.csv(site_locs_duplicates_removed_filename,
                                     stringsAsFactors = FALSE)[,c("siteID",
-                                                                 "S_ID",
-                                                                 "RIVER", 
+                                                                 "ESW_CatID",
+                                                                 "ESW_CNAM", 
                                                                  "tidal")]
 
 # Merge LFMs and site locations
@@ -28,13 +28,14 @@ lfms <- merge(x = lfms,
               by.y = "siteID",
               suffixes = c('.Source','.Receiving'))
 
+
 # Remove any records that have not been matched against a catchment ------------
   # Retain record of those movements
 
-lfms_no_catchment <- lfms[is.na(S_ID.Source) |
-                            is.na(S_ID.Receiving)]
+lfms_no_catchment <- lfms[is.na(ESW_CatID.Source) |
+                            is.na(ESW_CatID.Receiving)]
 
-lfms <- lfms[!is.na(S_ID.Source)][!is.na(S_ID.Receiving)]
+lfms <- lfms[!is.na(ESW_CatID.Source)][!is.na(ESW_CatID.Receiving)]
 
 message(paste("There are", nrow(lfms_no_catchment), "LFMs with no catchment assigned."))
 
@@ -49,8 +50,8 @@ lfms$MovementYear <- as.character(lfms$MovementDate,
 
 combined_movements <- lfms[, .(Src_Code,
                                Dest_Code,
-                               S_ID.Source,
-                               S_ID.Receiving,
+                               ESW_CatID.Source,
+                               ESW_CatID.Receiving,
                                MovementYear,
                                ConsignmentID,
                                tidal.Source,
@@ -177,6 +178,7 @@ production_data <- read.csv(production_filename) %>% data.table()
 categorisedSites(lfm_data = lfm_data,
                  production_data = production_data,
                  scenario_name = model_parameters$scenario_name)
+
 categorised_sites <- read.csv(here::here("outputs",
                                          model_parameters$scenario_name,
                                          "categorisedSites.csv"))
@@ -263,6 +265,6 @@ combined_movements_simplified <- igraph::delete_vertices(graph = combined_moveme
                                                          v = names(unconnected_nodes))
 
 # Save graph 
-write.graph(combined_movements_simplified, 
+write_graph(combined_movements_simplified, 
             file = contact_network_filename, 
             format = "graphml")
