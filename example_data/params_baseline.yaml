@@ -1,6 +1,6 @@
 # Scenario name 
 # This is the name that will appear as your output directory. Make it descriptive
-scenario_name: "test_data_results/baseline"
+scenario_name: "baseline"
 
 # Data collection period
 # This is the period of time (in days) over which your LFM data was collected
