@@ -19,6 +19,7 @@ lfms <- merge(x = lfm_data,
               by.x = "Src_Code",
               by.y = "siteID")
 
+
 # Farm to farm movements - receiving
 lfms <- merge(x = lfms,
               y = site_locs_dupes_removed,
@@ -28,6 +29,8 @@ lfms <- merge(x = lfms,
               by.y = "siteID",
               suffixes = c('.Source','.Receiving'))
 
+setDT(lfms) 
+
 
 # Remove any records that have not been matched against a catchment ------------
   # Retain record of those movements
@@ -35,7 +38,10 @@ lfms <- merge(x = lfms,
 lfms_no_catchment <- lfms[is.na(ESW_CatID.Source) |
                             is.na(ESW_CatID.Receiving)]
 
-lfms <- lfms[!is.na(ESW_CatID.Source)][!is.na(ESW_CatID.Receiving)]
+lfms <- lfms[!is.na(ESW_CatID.Source)][!is.na(ESW_CatID.Receiving)]#not working
+
+lfms <- lfms[!is.na(lfms$`ESW_CatID.Source`) & !is.na(lfms$`ESW_CatID.Receiving`),]
+
 
 message(paste("There are", nrow(lfms_no_catchment), "LFMs with no catchment assigned."))
 
@@ -72,7 +78,7 @@ combined_movement_ids <- combined_movements[, .(scrSiteID, recSiteID)]
 combined_movement_ids <- as.matrix(combined_movement_ids)
 
 # Create igraph
-combined_movements_graph <- igraph::graph.edgelist(combined_movement_ids)
+combined_movements_graph <- igraph::graph_from_edgelist(combined_movement_ids)
 
 # Add information to network edges ---------------------------------------------
 
@@ -228,7 +234,7 @@ for (col in type_columns_uniq) {
 
 scottish_sites <- igraph::V(combined_movements_graph)[igraph::V(combined_movements_graph)$country == "Scotland"]
 
-combined_movements_graph <- igraph::delete.vertices(graph = combined_movements_graph, 
+combined_movements_graph <- igraph::delete_vertices(graph = combined_movements_graph, 
                                                     v = scottish_sites)
 if(length(scottish_sites) != 0) message(paste("Removed", length(scottish_sites),
                                              "Scottish sites from contact network"))
