@@ -29,7 +29,7 @@ rm(list = objects_to_clear)
 # Load contact network ---------------------------------------------------------
 
 # Load contact network
-graph_full <- read.graph(file = contact_network_filename, format = "graphml")
+graph_full <- read_graph(file = contact_network_filename, format = "graphml")
 
 # Save site information --------------------------------------------------------
 # Including enough information to make it possible to infect specific sites within the model
