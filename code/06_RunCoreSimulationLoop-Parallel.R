@@ -38,7 +38,9 @@ options(scipen = 999)
       proportion_cullable = model_parameters$proportion_cullable,
       days_before_catchment_restock = model_parameters$days_before_catchment_restock,
       river_distances_df = river_distances_df,
-      site_details = site_details_with_model_id
+      site_details = site_details_with_model_id,
+      stochastic_run = model_parameters$stochastic_run,
+      seed_farm_choice = model_parameters$seed_farm_choice 
     )
   # }))
 
