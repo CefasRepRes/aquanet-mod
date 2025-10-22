@@ -276,6 +276,19 @@ if(length(unconnected_nodes) != 0) message(paste("Removed", length(unconnected_n
 combined_movements_simplified <- igraph::delete_vertices(graph = combined_movements_simplified, 
                                                          v = names(unconnected_nodes))
 
+# Remove desired sites from contact network to mimic compartments (epidemiological isolated)
+compartment_sites <- model_parameters$compartment_sites
+
+valid_compartment_sites <- compartment_sites[compartment_sites %in% V(combined_movements_simplified)$name]
+
+combined_movements_simplified <- igraph::delete_vertices(
+  graph = combined_movements_simplified,
+  v = valid_compartment_sites
+)
+
+if(length(valid_compartment_sites) != 0) message(paste("Removed", length(valid_compartment_sites),
+                                                 "comparment sites from contact network"))
+
 # Save graph 
 write_graph(combined_movements_simplified, 
             file = contact_network_filename, 
