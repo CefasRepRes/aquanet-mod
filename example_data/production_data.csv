@@ -1,45 +1,45 @@
-"Code","CodeDescription2"
-"AA109","Ongrowing"
-"AA83","Table"
-"AA68","Own eggs laid down"
-"AA72","Table"
-"AA89","Table"
-"AA94","Ongrowing"
-"AA65","Restocking"
-"AA69","Eggs moved ON"
-"AA95","Eggs moved OFF"
-"AA100","Eggs moved ON"
-"AA80","Fishing/Sport"
-"AA96","Fishing/Sport"
-"AA74","Restocking"
-"AA117","Fishing/Sport"
-"AA70","Table"
-"AA76","Own eggs laid down"
-"AA101","Fishing/Sport"
-"AA111","Fishing/Sport"
-"AA79","Eggs moved OFF"
-"AA82","Restocking"
-"AA88","Eggs moved ON"
-"AA77","Fishing/Sport"
-"AA105","Eggs moved ON"
-"AA113","Own eggs laid down"
-"AA99","Fishing/Sport"
-"AA115","Restocking"
-"AA91","Own eggs laid down"
-"AA114","Eggs moved ON"
-"AA116","Ongrowing"
-"AA78","Own eggs laid down"
-"AA84","Eggs moved OFF"
-"AA97","Eggs moved ON"
-"AA85","Table"
-"AA104","Own eggs laid down"
-"AA118","Ongrowing"
-"AA98","Fishing/Sport"
-"AA102","Ongrowing"
-"AA108","Table"
-"AA110","Eggs moved ON"
-"AA112","Table"
-"AA62","Ongrowing"
-"AA75","Own eggs laid down"
-"AA81","Own eggs laid down"
-"AA86","Own eggs laid down"
+Code,CodeDescription2,AuthorisationAndRegistrationStatusCode,AmountIntonnes,AmountInUnits,Units,Year
+AA109,Ongrowing,REGFISH,10,10,T,2020
+AA83,Table,AUTFARM,100,100,T,2020
+AA68,Restocking,REGFISH,50,50,T,2020
+AA72,Table,AUTFARM,10,10,T,2020
+AA89,Table,REGFISH,1000,1000,T,2020
+AA94,Ongrowing,REGFISH,30,30,T,2020
+AA65,Restocking,REGFISH,1000,1000,T,2020
+AA69,Eggs moved ON,REGFISH,0,100,K,2020
+AA95,Eggs moved OFF,AUTFARM,0,2000,K,2020
+AA100,Eggs moved ON,REGFISH,0,3000,K,2020
+AA80,Fishing/Sport,REGFISH,100,100,T,2020
+AA96,Fishing/Sport,AUTFARM,10,10,T,2020
+AA74,Restocking,REGFISH,10,10,T,2020
+AA117,Fishing/Sport,AUTFARM,1000,1000,T,2020
+AA70,Table,AUTFARM,10,10,T,2020
+AA76,Own eggs laid down,AUTFARM,0,200,K,2020
+AA101,Fishing/Sport,REGFISH,100,100,T,2020
+AA111,Fishing/Sport,AUTFARM,10,10,T,2020
+AA79,Eggs moved OFF,AUTFARM,0,300,K,2020
+AA82,Restocking,REGFISH,50,50,T,2020
+AA88,Eggs moved ON,REGFISH,0,400,K,2020
+AA77,Fishing/Sport,REGFISH,1000,1000,T,2020
+AA105,Eggs moved ON,AUTFARM,0,1000,K,2020
+AA113,Own eggs laid down,AUTFARM,0,2000,K,2020
+AA99,Fishing/Sport,AUTFARM,10,10,T,2020
+AA115,Restocking,REGFISH,100,100,T,2020
+AA91,Own eggs laid down,REGFISH,0,300,K,2020
+AA114,Eggs moved ON,AUTFARM,0,400,K,2020
+AA116,Ongrowing,REGFISH,50,50,T,2020
+AA78,Own eggs laid down,REGFISH,0,1000,K,2020
+AA84,Eggs moved OFF,REGFISH,0,1000,K,2020
+AA97,Eggs moved ON,AUTFARM,0,1000,K,2020
+AA85,Table,AUTFARM,100,100,T,2020
+AA104,Own eggs laid down,REGFISH,0,100,K,2020
+AA118,Ongrowing,AUTFARM,5,5,T,2020
+AA98,Fishing/Sport,REGFISH,100,100,T,2020
+AA102,Ongrowing,REGFISH,15,15,T,2020
+AA108,Table,REGFISH,1000,1000,T,2020
+AA110,Eggs moved ON,REGFISH,0,200,K,2020
+AA112,Table,REGFISH,1,1,T,2020
+AA62,Ongrowing,REGFISH,60,60,T,2020
+AA75,Own eggs laid down,REGFISH,0,300,K,2020
+AA81,Own eggs laid down,AUTFARM,0,1000,K,2020
+AA86,Own eggs laid down,AUTFARM,0,2000,K,2020
