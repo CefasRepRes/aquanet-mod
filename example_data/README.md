@@ -16,9 +16,9 @@ If you use either the baseline or no catchment controls parameter values in your
 
 ## Catchment shapefile
 
-You will need to select a catchment shapefile. We currently use the Centre for Ecology and Hydrology (CEH) Integrated Hydrological Units (IHU) sections.
+You will need to select a catchment shapefile. We currently use Catchment boundaries for England and Wales based on existing Fish Health Inspectorate (FHI) catchments 2023 in British National Grid (BNG)
 
-> Kral, F.; Fry, M.; Dixon, H. (2015). Integrated Hydrological Units of the United Kingdom: Sections. NERC Environmental Information Data Centre. (Dataset). <https://doi.org/10.5285/a6e37e39-9e10-4647-a110-12d902403095>
+> Heal, R. (2024). Catchment boundaries for England and Wales based on existing Fish Health Inspectorate (FHI) catchments 2023 - British National Grid (BNG). <https://mdr.cefas.co.uk/view/21966>
 
 ## Farm and fishery data
 
