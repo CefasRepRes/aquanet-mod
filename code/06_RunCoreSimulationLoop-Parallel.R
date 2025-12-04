@@ -3,7 +3,7 @@
 # Setup -------------------------------------------------------------------
 
 # Clear the startup screen
-cat("\014")
+#cat("\014")
 
 # Display without scientific notation
 options(scipen = 999)

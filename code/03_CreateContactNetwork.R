@@ -38,7 +38,7 @@ setDT(lfms)
 lfms_no_catchment <- lfms[is.na(ESW_CatID.Source) |
                             is.na(ESW_CatID.Receiving)]
 
-lfms <- lfms[!is.na(ESW_CatID.Source)][!is.na(ESW_CatID.Receiving)]#not working
+#lfms <- lfms[!is.na(ESW_CatID.Source)][!is.na(ESW_CatID.Receiving)]#not working
 
 lfms <- lfms[!is.na(lfms$`ESW_CatID.Source`) & !is.na(lfms$`ESW_CatID.Receiving`),]
 
@@ -189,19 +189,25 @@ categorised_sites <- read.csv(here::here("outputs",
                                          model_parameters$scenario_name,
                                          "categorisedSites.csv"))
 
+categorised_sites <- categorised_sites[!duplicated(categorised_sites$Code), ]
+
 # Merge with site categories
   # Do twice: source and receiving
 site_types_ordered <- merge(x = site_countries_ordered,
-                                y = categorised_sites,
-                                by.x = c('scrCode'),
-                                by.y = c('Code'))
+                            y = categorised_sites,
+                            all.x = TRUE,
+                            by.x = c('scrCode'),
+                            by.y = c('Code'))
+
 site_types_ordered <- merge(x = site_types_ordered,
                             y = categorised_sites,
                             by.x = c('recCode'),
                             by.y = c('Code'),
+                            all.x = TRUE,
                             suffixes = c(".scr", ".rec"))
 
 site_types_ordered <- site_types_ordered[order(site_types_ordered$order),]
+
 
 # Add site type to igraph edge 
 igraph::E(combined_movements_graph)$scrType <- site_types_ordered$Category.scr

@@ -5,26 +5,26 @@
 # Clear the workspace and console
    # Do this to prevent R getting too slow
 
-objects_to_keep <- c("gis_filepath",
-                     "farm_to_farm_lmf_filename",
-                     "run_time_parameters",
-                     "run_time_parameters_list",
-                     "river_transmission_parameters", 
-                     "parameterIndex", 
-                     "dirs",
-                     "site_locs_duplicates_removed_filename",
-                     "site_details_with_model_id_filename",
-                     "model_parameters",
-                     "contact_network_filename",
-                     "catchment_layer_filename",
-                     "river_downstream_filename",
-                     "noCores",
-                     "BNG_crs")
+#objects_to_keep <- c("gis_filepath",
+                    # "farm_to_farm_lmf_filename",
+                     #"run_time_parameters",
+                     #"run_time_parameters_list",
+                     #"river_transmission_parameters", 
+                     #"parameterIndex", 
+                     #"dirs",
+                     #"site_locs_duplicates_removed_filename",
+                     #"site_details_with_model_id_filename",
+                     #"model_parameters",
+                     #"contact_network_filename",
+                     #"catchment_layer_filename",
+                     #"river_downstream_filename",
+                     #"noCores",
+                     #"BNG_crs")
 
-objects_in_workspace <- ls()
-objects_to_clear <- objects_in_workspace[!objects_in_workspace %in% objects_to_keep]
+#objects_in_workspace <- ls()
+#objects_to_clear <- objects_in_workspace[!objects_in_workspace %in% objects_to_keep]
 
-rm(list = objects_to_clear)
+#rm(list = objects_to_clear)
 
 # Load contact network ---------------------------------------------------------
 

@@ -20,7 +20,7 @@ tidal_filename <- here::here("example_data",
 # Location of the CEH catchments
 catchment_layer_filename <- here::here("example_data",
                                        "IHU_Catchments",
-                                       "ihu_sections.shp")
+                                       "IHUCatchments_FHI_WFD_GB_BNG.shp")
 
 # Location of river routes downstream table
 river_downstream_filename <- here::here("example_data",

@@ -43,8 +43,8 @@ epsg: 27700
 ## SIMULATION SETTINGS --------
 
 # Choose random or selected ssed farm
-stochastic_run: TRUE # TRUE to randomly seed farm, FALSE to pick seed farm manually
-seed_farm_choice: "" # (siteID) choice if selecting seed farm
+stochastic_run: FALSE # TRUE to randomly seed farm, FALSE to pick seed farm manually
+seed_farm_choice: "AA100" # (siteID) choice if selecting seed farm
 
 # Logical whether to clear results in results directory before runs
 clear_results: TRUE
