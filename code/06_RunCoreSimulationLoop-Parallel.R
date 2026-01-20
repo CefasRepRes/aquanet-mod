@@ -40,7 +40,8 @@ options(scipen = 999)
       river_distances_df = river_distances_df,
       site_details = site_details_with_model_id,
       stochastic_run = model_parameters$stochastic_run,
-      seed_farm_choice = model_parameters$seed_farm_choice
+      seed_farm_choice = model_parameters$seed_farm_choice,
+      compartments_sites = valid_compartment_sites
     )
   # }))
 
